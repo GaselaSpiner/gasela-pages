@@ -67,14 +67,14 @@
   </style>
 </head>
 <body>
-  <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
+  <img src="Gasela Spiner LOGO.png" alt="Logo Gasela Spiner" class="logo" />
   <h1>Zaloguj się do Gasela Spiner</h1>
 
   <div id="supabase-status">⏳ Ładowanie...</div>
 
   <form id="login-form">
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Hasło" required />
+    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
+    <input type="password" id="password" placeholder="Hasło" autocomplete="current-password" required />
     <button type="submit">Zaloguj się</button>
   </form>
 
@@ -85,6 +85,8 @@
     const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     const statusDiv = document.getElementById('supabase-status');
+
+    // Obsługa formularza logowania
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       statusDiv.textContent = '⏳ Logowanie...';
