@@ -18,33 +18,13 @@
   <!-- 🔹 Ładowanie biblioteki Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 🔹 Tworzenie klienta Supabase i logika logowania -->
+  <!-- 🔹 Logika -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // skrócone
     const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-    // Sprawdzanie aktywnej sesji
-    document.getElementById('supabase-status').textContent = '⏳ Sprawdzanie połączenia z Supabase...';
-    supabase.auth.getUser().then(({ data, error }) => {
-      const statusDiv = document.getElementById('supabase-status');
-
-      if (error) {
-        console.error('❌ Błąd połączenia:', error);
-        statusDiv.textContent = '❌ Brak połączenia z Supabase lub błąd sesji.';
-        return;
-      }
-
-      if (data.user) {
-        console.log('✅ Zalogowany użytkownik:', data.user);
-        statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
-        // Przekierowanie po zalogowaniu
-        const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
-        window.location.href = `/kup-plan.html?plan=${plan}`;
-      } else {
-        statusDiv.textContent = 'ℹ️ Nie jesteś zalogowany.';
-      }
-    });
+    const statusDiv = document.getElementById('supabase-status');
 
     // Obsługa formularza logowania
     const form = document.getElementById('login-form');
@@ -53,13 +33,36 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
+      statusDiv.textContent = '⏳ Logowanie...';
+
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        alert('❌ Błąd logowania: ' + error.message);
+        console.error('❌ Błąd logowania:', error.message);
+        statusDiv.textContent = '❌ Błąd: ' + error.message;
       } else {
+        statusDiv.textContent = '✅ Zalogowano pomyślnie. Przekierowanie...';
         const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
-        window.location.href = `/kup-plan.html?plan=${plan}`;
+        setTimeout(() => {
+          window.location.href = `/kup-plan.html?plan=${plan}`;
+        }, 1500); // opóźnienie dla użytkownika
+      }
+    });
+
+    // Sprawdzenie sesji po załadowaniu
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        statusDiv.textContent = '❌ Błąd połączenia z Supabase.';
+      } else if (data.user) {
+        statusDiv.textContent = `✅ Już zalogowany jako: ${data.user.email}`;
+        const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
+        setTimeout(() => {
+          window.location.href = `/kup-plan.html?plan=${plan}`;
+        }, 1000);
+      } else {
+        statusDiv.textContent = 'ℹ️ Nie jesteś zalogowany.';
       }
     });
   </script>
