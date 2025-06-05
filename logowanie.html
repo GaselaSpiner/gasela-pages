@@ -1,11 +1,48 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Logowanie</title>
+  <title>Logowanie – Gasela Spiner</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
-  <h1>Witaj na stronie logowania!</h1>
-  <p>To wersja testowa. Jeśli widzisz ten tekst, strona działa 👍</p>
+  <h1>Zaloguj się, aby kupić plan</h1>
+
+  <div id="form">
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Hasło" />
+    <button onclick="login()">Zaloguj</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
+    const redirectUrl = `kup-plan.html?plan=${plan}`;
+
+    const supabase = supabase.createClient(
+      'https://TWOJ_PROJEKT.supabase.co', 
+      'TWÓJ_PUBLICZNY_ANON_KEY'
+    );
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const status = document.getElementById('status');
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        status.textContent = 'Błąd logowania: ' + error.message;
+      } else {
+        status.textContent = 'Zalogowano! Przekierowanie...';
+        localStorage.setItem('sb-token', data.session.access_token);
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 1000);
+      }
+    }
+  </script>
 </body>
 </html>
