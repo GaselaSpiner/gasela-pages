@@ -2,17 +2,20 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Test połączenia z Supabase</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Supabase</title>
 </head>
 <body>
-  <h1>Test Supabase</h1>
-  <div id="supabase-status" style="font-weight: bold; margin-top: 20px;"></div>
+  <h1 style="text-align: center;">TEST SUPABASE</h1>
+  <div id="supabase-status" style="font-weight: bold; margin-top: 20px; text-align: center;"></div>
 
+  <!-- Dodaj bibliotekę Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
-    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     document.getElementById('supabase-status').textContent = '⏳ Sprawdzanie połączenia z Supabase...';
 
