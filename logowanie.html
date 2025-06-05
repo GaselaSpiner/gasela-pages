@@ -1,70 +1,65 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logowanie - Gasela Spiner</title>
+  <meta charset="UTF-8">
+  <title>Logowanie – Gasela Spiner</title>
 </head>
 <body>
   <h1 style="text-align: center;">TEST SUPABASE</h1>
 
-  <form id="login-form" style="max-width: 400px; margin: 40px auto;">
-    <label for="email">Email:</label><br />
-    <input type="email" id="email" name="email" required /><br /><br />
-    
-    <label for="password">Hasło:</label><br />
-    <input type="password" id="password" name="password" required /><br /><br />
-    
-    <button type="submit">Zaloguj się</button>
+  <div id="supabase-status" style="font-weight: bold; margin: 20px; text-align: center;"></div>
+
+  <form id="login-form" style="display: flex; flex-direction: column; align-items: center;">
+    <input type="email" id="email" placeholder="Email" required style="margin: 5px; padding: 10px;" />
+    <input type="password" id="password" placeholder="Hasło" required style="margin: 5px; padding: 10px;" />
+    <button type="submit" style="padding: 10px 20px; margin-top: 10px;">Zaloguj się</button>
   </form>
 
-  <div id="supabase-status" style="font-weight: bold; text-align: center; margin-top: 20px;"></div>
-
-  <!-- Biblioteka Supabase -->
+  <!-- 🔹 Ładowanie biblioteki Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Skrypt logowania i statusu -->
+  <!-- 🔹 Tworzenie klienta Supabase i logika logowania -->
   <script>
-    console.log("✅ Skrypt załadowany");
-
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
     const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
-    const statusDiv = document.getElementById('supabase-status');
 
-    // Sprawdzenie czy jest aktywna sesja
+    // Sprawdzanie aktywnej sesji
+    document.getElementById('supabase-status').textContent = '⏳ Sprawdzanie połączenia z Supabase...';
     supabase.auth.getUser().then(({ data, error }) => {
+      const statusDiv = document.getElementById('supabase-status');
+
       if (error) {
-        console.error("🔴 Błąd sesji:", error);
-        statusDiv.textContent = "❌ Błąd sesji: " + error.message;
+        console.error('❌ Błąd połączenia:', error);
+        statusDiv.textContent = '❌ Brak połączenia z Supabase lub błąd sesji.';
         return;
       }
-      if (data?.user) {
-        console.log("✅ Sesja istnieje:", data.user);
+
+      if (data.user) {
+        console.log('✅ Zalogowany użytkownik:', data.user);
         statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
+        // Przekierowanie po zalogowaniu
+        const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
+        window.location.href = `/kup-plan.html?plan=${plan}`;
       } else {
-        console.log("ℹ️ Brak aktywnej sesji");
-        statusDiv.textContent = "ℹ️ Nie jesteś zalogowany.";
+        statusDiv.textContent = 'ℹ️ Nie jesteś zalogowany.';
       }
     });
 
     // Obsługa formularza logowania
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    const form = document.getElementById('login-form');
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      console.log("🟡 Przycisk logowania kliknięty");
-
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        console.error("❌ Błąd logowania:", error);
-        statusDiv.textContent = `❌ Błąd logowania: ${error.message}`;
+        alert('❌ Błąd logowania: ' + error.message);
       } else {
-        const { data } = await supabase.auth.getUser();
-        console.log("✅ Logowanie udane:", data.user);
-        statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
+        const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
+        window.location.href = `/kup-plan.html?plan=${plan}`;
       }
     });
   </script>
