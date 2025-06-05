@@ -82,8 +82,8 @@
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
-    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -93,17 +93,23 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) {
-        console.error('❌ Błąd logowania:', error.message);
-        statusDiv.textContent = '❌ ' + error.message;
-      } else {
-        statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
-        const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
-        setTimeout(() => {
-          window.location.href = `/kup-plan.html?plan=${plan}`;
-        }, 1000);
+        if (error) {
+          console.error('❌ Błąd logowania:', error.message);
+          statusDiv.textContent = '❌ ' + error.message;
+        } else {
+          console.log('✅ Zalogowano jako:', data.user.email);
+          statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
+          const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
+          setTimeout(() => {
+            window.location.href = `/kup-plan.html?plan=${plan}`;
+          }, 1000);
+        }
+      } catch (err) {
+        console.error('❌ Wyjątek:', err);
+        statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
   </script>
