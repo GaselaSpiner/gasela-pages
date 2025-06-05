@@ -115,7 +115,7 @@
 
         if (error) {
           console.error('❌ Błąd logowania:', error.message);
-          statusDiv.textContent = '❌ ' + Nieprawidłowy email lub hasło;
+          statusDiv.textContent = '❌ Nieprawidłowy email lub hasło';
         } else {
           console.log('✅ Zalogowano jako:', data.user.email);
           statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
