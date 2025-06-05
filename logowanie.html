@@ -64,6 +64,19 @@
       margin-bottom: 20px;
       color: #444;
     }
+    .register-link {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .register-link a {
+      color: #f6b500;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .register-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -77,6 +90,10 @@
     <input type="password" id="password" placeholder="Hasło" autocomplete="current-password" required />
     <button type="submit">Zaloguj się</button>
   </form>
+
+  <div class="register-link">
+    Nie masz konta? <a href="rejestracja.html">Zarejestruj się</a>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
