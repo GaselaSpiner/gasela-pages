@@ -80,10 +80,18 @@
   </style>
 </head>
 <body>
+  <script>
+    // 🔒 Tylko wejścia z Softr są dozwolone
+    const allowedReferrer = 'https://gaselaspiner.softr.app/';
+    if (document.referrer && !document.referrer.startsWith(allowedReferrer)) {
+      window.location.href = 'https://gaselaspiner.softr.app/';
+    }
+  </script>
+
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
   <h1>Zaloguj się do Gasela Spiner</h1>
 
-  <div id="supabase-status">? Ładowanie...</div>
+  <div id="supabase-status">⏳ Ładowanie...</div>
 
   <form id="login-form">
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
@@ -105,7 +113,7 @@
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      statusDiv.textContent = '? Logowanie...';
+      statusDiv.textContent = '⏳ Logowanie...';
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -114,19 +122,19 @@
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) {
-          console.error('? Błąd logowania:', error.message);
-          statusDiv.textContent = '? ' + error.message;
+          console.error('❌ Błąd logowania:', error.message);
+          statusDiv.textContent = '❌ Nieprawidłowy email lub hasło';
         } else {
-          console.log('? Zalogowano jako:', data.user.email);
-          statusDiv.textContent = `? Zalogowano jako: ${data.user.email}`;
+          console.log('✅ Zalogowano jako:', data.user.email);
+          statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
           const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
           setTimeout(() => {
             window.location.href = `/kup-plan.html?plan=${plan}`;
           }, 1000);
         }
       } catch (err) {
-        console.error('? Wyjątek:', err);
-        statusDiv.textContent = '? Błąd wewnętrzny: ' + err.message;
+        console.error('❌ Wyjątek:', err);
+        statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
   </script>
