@@ -2,43 +2,56 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Logowanie Supabase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logowanie - Gasela Spiner</title>
 </head>
 <body>
-  <h1>TEST SUPABASE</h1>
+  <h1 style="text-align: center;">TEST SUPABASE</h1>
 
-  <form id="login-form">
-    <label for="email">Email:</label>
-    <input type="email" id="email" required />
-    <br />
-    <label for="password">Hasło:</label>
-    <input type="password" id="password" required />
-    <br />
+  <form id="login-form" style="max-width: 400px; margin: 40px auto;">
+    <label for="email">Email:</label><br />
+    <input type="email" id="email" name="email" required /><br /><br />
+    
+    <label for="password">Hasło:</label><br />
+    <input type="password" id="password" name="password" required /><br /><br />
+    
     <button type="submit">Zaloguj się</button>
   </form>
 
-  <div id="supabase-status" style="font-weight: bold; margin-top: 20px;"></div>
+  <div id="supabase-status" style="font-weight: bold; text-align: center; margin-top: 20px;"></div>
 
+  <!-- Biblioteka Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Skrypt logowania i statusu -->
   <script>
+    console.log("✅ Skrypt załadowany");
+
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
-
     const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
 
-    // Sprawdź sesję po załadowaniu strony
+    // Sprawdzenie czy jest aktywna sesja
     supabase.auth.getUser().then(({ data, error }) => {
+      if (error) {
+        console.error("🔴 Błąd sesji:", error);
+        statusDiv.textContent = "❌ Błąd sesji: " + error.message;
+        return;
+      }
       if (data?.user) {
+        console.log("✅ Sesja istnieje:", data.user);
         statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
       } else {
-        statusDiv.textContent = 'ℹ️ Nie jesteś zalogowany.';
+        console.log("ℹ️ Brak aktywnej sesji");
+        statusDiv.textContent = "ℹ️ Nie jesteś zalogowany.";
       }
     });
 
-    // Obsługa logowania z formularza
+    // Obsługa formularza logowania
     document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault(); // 👈 Zatrzymaj domyślne przeładowanie
+      e.preventDefault();
+      console.log("🟡 Przycisk logowania kliknięty");
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -46,9 +59,11 @@
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
+        console.error("❌ Błąd logowania:", error);
         statusDiv.textContent = `❌ Błąd logowania: ${error.message}`;
       } else {
         const { data } = await supabase.auth.getUser();
+        console.log("✅ Logowanie udane:", data.user);
         statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
       }
     });
