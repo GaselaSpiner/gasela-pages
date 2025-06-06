@@ -18,6 +18,7 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      text-align: center;
     }
     img.logo {
       max-width: 120px;
@@ -61,14 +62,21 @@
     }
     #supabase-status {
       font-weight: bold;
-      text-align: center;
-      margin-bottom: 20px;
+      margin: 20px 0;
       color: #444;
     }
-    .login-link {
-      margin-top: 15px;
+    .note {
       font-size: 0.9rem;
-      text-align: center;
+      color: #666;
+      margin: -5px 0 15px 0;
+    }
+    #go-to-login-btn {
+      display: none;
+      margin-top: 20px;
+    }
+    .login-link {
+      margin-top: 20px;
+      font-size: 0.9rem;
     }
     .login-link a {
       color: #f6b500;
@@ -77,17 +85,6 @@
     }
     .login-link a:hover {
       text-decoration: underline;
-    }
-    #go-to-login-btn {
-      display: none;
-      margin-top: 20px;
-    }
-    .note {
-      font-size: 0.9rem;
-      text-align: center;
-      color: #666;
-      margin-top: -10px;
-      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -100,14 +97,14 @@
   <form id="register-form">
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
     <input type="password" id="password" placeholder="Hasło" autocomplete="new-password" required />
-    <p class="note">📌 Zapamiętaj swoje hasło – nie będzie przesłane e-mailem.</p>
+    <div class="note">📌 Zapamiętaj swoje hasło – nie będzie przesłane e-mailem.</div>
     <button type="submit">Zarejestruj się</button>
   </form>
 
   <button id="go-to-login-btn" onclick="goToLogin()">Przejdź do logowania</button>
 
   <div class="login-link">
-    Masz już konto? <a id="login-link">Zaloguj się</a>
+    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
   <!-- Supabase SDK -->
@@ -124,13 +121,12 @@
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
     const isPreviewMode = window.location.hostname === "preview.softr.app";
     const isManualDirectAccess = ref === "" && !isPreviewMode;
-
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
 
-  <!-- Przenoszenie parametru plan -->
+  <!-- Przenoszenie parametru `plan` -->
   <script>
     const currentParams = new URLSearchParams(window.location.search);
     const plan = currentParams.get('plan');
@@ -138,7 +134,6 @@
       const loginLink = document.getElementById('login-link');
       loginLink.href = `logowanie.html?plan=${plan}`;
     }
-
     function goToLogin() {
       const destination = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
       window.location.href = destination;
@@ -148,12 +143,13 @@
   <!-- Rejestracja konta -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // skrócone
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const goToLoginBtn = document.getElementById('go-to-login-btn');
+    const registerForm = document.getElementById('register-form');
 
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       statusDiv.textContent = '⏳ Rejestracja...';
 
@@ -169,7 +165,7 @@
         } else {
           console.log('✅ Rejestracja zakończona:', data);
           statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
-          document.getElementById('register-form').reset();
+          registerForm.reset();
           goToLoginBtn.style.display = 'block';
         }
       } catch (err) {
