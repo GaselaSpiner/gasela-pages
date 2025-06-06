@@ -18,6 +18,7 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 20px;
     }
     img.logo {
       max-width: 120px;
@@ -35,7 +36,7 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 90%;
+      width: 100%;
       max-width: 400px;
     }
     input {
@@ -78,6 +79,20 @@
     .login-link a:hover {
       text-decoration: underline;
     }
+    #go-to-login {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #f6b500;
+      color: black;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #go-to-login:hover {
+      background-color: #e3a700;
+    }
   </style>
 </head>
 <body>
@@ -92,11 +107,12 @@
     <button type="submit">Zarejestruj się</button>
   </form>
 
+  <button id="go-to-login">Przejdź do logowania</button>
+
   <div class="login-link">
-    Masz już konto? <a href="logowanie.html">Zaloguj się</a>
+    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Ochrona referrera -->
@@ -122,6 +138,7 @@
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
+    const goToLoginBtn = document.getElementById('go-to-login');
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -138,16 +155,29 @@
           statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
           console.log('✅ Rejestracja zakończona:', data);
-          statusDiv.textContent = '✅ Konto utworzone! Przekierowanie do logowania...';
-          setTimeout(() => {
-            window.location.href = 'logowanie.html';
-          }, 1500);
+          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+          goToLoginBtn.style.display = 'block';
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
         statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
+
+    // Obsługa zachowania parametru `plan` w linku do logowania
+    const currentParams = new URLSearchParams(window.location.search);
+    const plan = currentParams.get('plan');
+    if (plan) {
+      const loginLink = document.getElementById('login-link');
+      loginLink.href = `logowanie.html?plan=${plan}`;
+      goToLoginBtn.addEventListener('click', () => {
+        window.location.href = `logowanie.html?plan=${plan}`;
+      });
+    } else {
+      goToLoginBtn.addEventListener('click', () => {
+        window.location.href = 'logowanie.html';
+      });
+    }
   </script>
 </body>
 </html>
