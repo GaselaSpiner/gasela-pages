@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rejestracja – Gasela Spiner</title>
-  <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <meta name="robots" content="noindex, nofollow" />
   <style>
     body {
       margin: 0;
@@ -25,6 +25,7 @@
     }
     h1 {
       font-size: 1.5rem;
+      color: #000000;
       margin-bottom: 10px;
     }
     form {
@@ -77,66 +78,86 @@
     .login-link a:hover {
       text-decoration: underline;
     }
-    #go-to-login-btn {
-      display: none;
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #000;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #go-to-login-btn:hover {
-      background-color: #333;
-    }
   </style>
 </head>
 <body>
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
   <h1>Załóż konto w Gasela Spiner</h1>
 
-  <div id="supabase-status">⏳ Ładowanie...</div>
+  <div id="supabase-status">🔐 Hasło musi mieć co najmniej 5 znaków. Zapamiętaj je, nie będzie możliwości jego odzyskania.</div>
 
   <form id="register-form">
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Hasło" required />
+    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
+    <input type="password" id="password" placeholder="Hasło (min. 5 znaków)" autocomplete="new-password" required />
     <button type="submit">Zarejestruj się</button>
   </form>
 
   <div class="login-link">
-    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
+    Masz już konto? <a href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <button id="go-to-login-btn" onclick="window.location.href='logowanie.html'">Przejdź do logowania</button>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Ochrona referrera -->
   <script>
-    // Symulacja działania przy braku połączenia z Supabase
+    const allowedReferrers = [
+      "https://gaselaspiner.softr.app",
+      "https://preview.softr.app",
+      "https://app.gaselaspiner.pl/logowanie.html"
+    ];
+    const ref = document.referrer || "";
+    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const isPreviewMode = window.location.hostname === "preview.softr.app";
+    const isManualDirectAccess = ref === "" && !isPreviewMode;
+
+    if (!isReferrerAllowed && isManualDirectAccess) {
+      window.location.href = "https://gaselaspiner.softr.app";
+    }
+  </script>
+
+  <!-- Rejestracja konta -->
+  <script>
+    const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const statusDiv = document.getElementById('supabase-status');
+
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const statusDiv = document.getElementById('supabase-status');
+      statusDiv.textContent = '⏳ Rejestracja...';
+
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
-      // symulacja sukcesu rejestracji
-      statusDiv.innerHTML = `
-        ✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.<br>
-        ℹ️ <strong>Zapamiętaj hasło!</strong> Nie będzie możliwości jego odzyskania.
-      `;
+      if (password.length < 5) {
+        statusDiv.textContent = '❌ Hasło musi mieć co najmniej 5 znaków.';
+        return;
+      }
 
-      // wyczyszczenie formularza
-      document.getElementById('register-form').reset();
+      try {
+        const { data, error } = await supabase.auth.signUp({ email, password });
 
-      // pokazanie przycisku przejścia do logowania
-      document.getElementById('go-to-login-btn').style.display = 'block';
+        if (error) {
+          console.error('❌ Błąd rejestracji:', error.message);
+          statusDiv.textContent = '❌ Nie udało się założyć konta';
+        } else {
+          console.log('✅ Rejestracja zakończona:', data);
+          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+          document.getElementById('register-form').reset();
+
+          // Dodaj przycisk do logowania
+          const loginBtn = document.createElement('button');
+          loginBtn.textContent = 'Przejdź do logowania';
+          loginBtn.style.marginTop = '15px';
+          loginBtn.onclick = () => window.location.href = 'logowanie.html';
+          document.body.appendChild(loginBtn);
+        }
+      } catch (err) {
+        console.error('❌ Wyjątek:', err);
+        statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
+      }
     });
-
-    // Zachowanie parametru plan=... w linku „Zaloguj się”
-    const plan = new URLSearchParams(window.location.search).get('plan');
-    if (plan) {
-      document.getElementById('login-link').href = `logowanie.html?plan=${plan}`;
-    }
   </script>
 </body>
 </html>
