@@ -103,7 +103,7 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Referrer ochrona – poprawiona -->
+  <!-- Referrer ochrona -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -126,7 +126,7 @@
     const plan = params.get('plan');
     const loginLink = document.getElementById('login-link');
     if (plan) {
-      loginLink.href = logowanie.html?plan=${plan};
+      loginLink.href = `logowanie.html?plan=${plan}`;
     }
   </script>
 
@@ -168,7 +168,7 @@
             loginBtn.textContent = 'Przejdź do logowania';
             loginBtn.style.marginTop = '20px';
             loginBtn.onclick = () => {
-              const redirect = plan ? logowanie.html?plan=${plan} : 'logowanie.html';
+              const redirect = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
               window.location.href = redirect;
             };
             document.body.appendChild(loginBtn);
