@@ -1,5 +1,3 @@
-<!-- Wklej do pliku rejestracja.html -->
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -27,13 +25,8 @@
     }
     h1 {
       font-size: 1.5rem;
+      color: #000000;
       margin-bottom: 10px;
-    }
-    #password-info {
-      margin-bottom: 15px;
-      font-size: 0.9rem;
-      color: #555;
-      text-align: center;
     }
     form {
       display: flex;
@@ -90,8 +83,8 @@
 <body>
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
   <h1>Załóż konto w Gasela Spiner</h1>
-  <div id="password-info">🔐 Hasło musi mieć co najmniej 5 znaków. Zapamiętaj je, nie będzie możliwości jego odzyskania.</div>
-  <div id="supabase-status">⏳ Ładowanie...</div>
+
+  <div id="supabase-status">🔐 Hasło musi mieć co najmniej 5 znaków. Zapamiętaj je, nie będzie możliwości jego odzyskania.</div>
 
   <form id="register-form">
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
@@ -100,13 +93,13 @@
   </form>
 
   <div class="login-link">
-    Masz już konto? <a id="login-link" href="#">Zaloguj się</a>
+    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Referrer Check -->
+  <!-- Ochrona referrera -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -117,62 +110,64 @@
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
     const isPreviewMode = window.location.hostname === "preview.softr.app";
     const isManualDirectAccess = ref === "" && !isPreviewMode;
+
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
 
-  <!-- Logic -->
+  <!-- Obsługa parametru `plan` w linku logowania -->
   <script>
-    const supabase = window.supabase.createClient(
-      'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
-    );
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
 
-    const statusDiv = document.getElementById('supabase-status');
-    const registerForm = document.getElementById('register-form');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
     const loginLink = document.getElementById('login-link');
+    if (plan) {
+      loginLink.href = `logowanie.html?plan=${plan}`;
+    }
+  </script>
 
-    // Przeniesienie parametru `plan` do logowania
-    const currentParams = new URLSearchParams(window.location.search);
-    const plan = currentParams.get('plan') || 'start';
-    loginLink.href = `logowanie.html?plan=${plan}`;
+  <!-- Rejestracja konta -->
+  <script>
+    const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const statusDiv = document.getElementById('supabase-status');
 
-    registerForm.addEventListener('submit', async (e) => {
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = emailInput.value;
-      const password = passwordInput.value;
+      statusDiv.textContent = '⏳ Rejestracja...';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
       if (password.length < 5) {
         statusDiv.textContent = '❌ Hasło musi mieć co najmniej 5 znaków.';
         return;
       }
 
-      statusDiv.textContent = '⏳ Rejestracja...';
-
       try {
         const { data, error } = await supabase.auth.signUp({ email, password });
 
         if (error) {
+          console.error('❌ Błąd rejestracji:', error.message);
           statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
+          console.log('✅ Rejestracja zakończona:', data);
           statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+          document.getElementById('register-form').reset();
 
-          // Ukrycie formularza po rejestracji
-          registerForm.style.display = 'none';
-
-          // Dodanie przycisku przejścia do logowania
-          const goToLogin = document.createElement('div');
-          goToLogin.innerHTML = `
-            <div class="login-link">
-              <a href="logowanie.html?plan=${plan}">➡️ Przejdź do logowania</a>
-            </div>
-          `;
-          statusDiv.after(goToLogin);
+          const loginBtn = document.createElement('button');
+          loginBtn.textContent = 'Przejdź do logowania';
+          loginBtn.style.marginTop = '15px';
+          loginBtn.onclick = () => {
+            const redirect = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
+            window.location.href = redirect;
+          };
+          document.body.appendChild(loginBtn);
         }
       } catch (err) {
+        console.error('❌ Wyjątek:', err);
         statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
