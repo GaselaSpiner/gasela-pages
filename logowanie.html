@@ -99,16 +99,17 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Ochrona referrera -->
+  <!-- Ochrona referrera – z uwzględnieniem rejestracji i logowania -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
-      "https://preview.softr.app"
+      "https://preview.softr.app",
+      "https://app.gaselaspiner.pl/rejestracja.html"
     ];
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isPreviewMode = window.location.hostname === "preview.softr.app";
-    const isManualDirectAccess = ref === "" && !isPreviewMode;
+    const isLogowaniePage = window.location.pathname.includes("logowanie.html");
+    const isManualDirectAccess = ref === "" && !isLogowaniePage;
 
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
@@ -149,7 +150,7 @@
       }
     });
 
-    // Dodanie planu do linku rejestracji
+    // Obsługa linku do rejestracji z zachowaniem planu
     const currentParams = new URLSearchParams(window.location.search);
     const plan = currentParams.get('plan');
     if (plan) {
