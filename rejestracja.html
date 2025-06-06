@@ -18,7 +18,6 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 20px;
     }
     img.logo {
       max-width: 120px;
@@ -36,7 +35,7 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 100%;
+      width: 90%;
       max-width: 400px;
     }
     input {
@@ -79,19 +78,16 @@
     .login-link a:hover {
       text-decoration: underline;
     }
-    #go-to-login {
+    #go-to-login-btn {
       display: none;
-      margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #f6b500;
-      color: black;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
+      margin-top: 20px;
     }
-    #go-to-login:hover {
-      background-color: #e3a700;
+    .note {
+      font-size: 0.9rem;
+      text-align: center;
+      color: #666;
+      margin-top: -10px;
+      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -104,18 +100,20 @@
   <form id="register-form">
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
     <input type="password" id="password" placeholder="Hasło" autocomplete="new-password" required />
+    <p class="note">📌 Zapamiętaj swoje hasło – nie będzie przesłane e-mailem.</p>
     <button type="submit">Zarejestruj się</button>
   </form>
 
-  <button id="go-to-login">Przejdź do logowania</button>
+  <button id="go-to-login-btn" onclick="goToLogin()">Przejdź do logowania</button>
 
   <div class="login-link">
-    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
+    Masz już konto? <a id="login-link">Zaloguj się</a>
   </div>
 
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Ochrona referrera -->
+  <!-- Referrer check -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -132,13 +130,28 @@
     }
   </script>
 
+  <!-- Przenoszenie parametru plan -->
+  <script>
+    const currentParams = new URLSearchParams(window.location.search);
+    const plan = currentParams.get('plan');
+    if (plan) {
+      const loginLink = document.getElementById('login-link');
+      loginLink.href = `logowanie.html?plan=${plan}`;
+    }
+
+    function goToLogin() {
+      const destination = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
+      window.location.href = destination;
+    }
+  </script>
+
   <!-- Rejestracja konta -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
-    const goToLoginBtn = document.getElementById('go-to-login');
+    const goToLoginBtn = document.getElementById('go-to-login-btn');
 
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -156,6 +169,7 @@
         } else {
           console.log('✅ Rejestracja zakończona:', data);
           statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+          document.getElementById('register-form').reset();
           goToLoginBtn.style.display = 'block';
         }
       } catch (err) {
@@ -163,21 +177,6 @@
         statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
-
-    // Obsługa zachowania parametru `plan` w linku do logowania
-    const currentParams = new URLSearchParams(window.location.search);
-    const plan = currentParams.get('plan');
-    if (plan) {
-      const loginLink = document.getElementById('login-link');
-      loginLink.href = `logowanie.html?plan=${plan}`;
-      goToLoginBtn.addEventListener('click', () => {
-        window.location.href = `logowanie.html?plan=${plan}`;
-      });
-    } else {
-      goToLoginBtn.addEventListener('click', () => {
-        window.location.href = 'logowanie.html';
-      });
-    }
   </script>
 </body>
 </html>
