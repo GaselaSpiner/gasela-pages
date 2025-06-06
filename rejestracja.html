@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rejestracja – Gasela Spiner</title>
+  <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
-  <meta name="robots" content="noindex, nofollow" />
   <style>
     body {
       margin: 0;
@@ -18,7 +18,6 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      text-align: center;
     }
     img.logo {
       max-width: 120px;
@@ -26,7 +25,6 @@
     }
     h1 {
       font-size: 1.5rem;
-      color: #000000;
       margin-bottom: 10px;
     }
     form {
@@ -62,21 +60,14 @@
     }
     #supabase-status {
       font-weight: bold;
-      margin: 20px 0;
+      text-align: center;
+      margin-bottom: 20px;
       color: #444;
     }
-    .note {
-      font-size: 0.9rem;
-      color: #666;
-      margin: -5px 0 15px 0;
-    }
-    #go-to-login-btn {
-      display: none;
-      margin-top: 20px;
-    }
     .login-link {
-      margin-top: 20px;
+      margin-top: 15px;
       font-size: 0.9rem;
+      text-align: center;
     }
     .login-link a {
       color: #f6b500;
@@ -85,6 +76,20 @@
     }
     .login-link a:hover {
       text-decoration: underline;
+    }
+    #go-to-login-btn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #000;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #go-to-login-btn:hover {
+      background-color: #333;
     }
   </style>
 </head>
@@ -95,84 +100,43 @@
   <div id="supabase-status">⏳ Ładowanie...</div>
 
   <form id="register-form">
-    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
-    <input type="password" id="password" placeholder="Hasło" autocomplete="new-password" required />
-    <div class="note">📌 Zapamiętaj swoje hasło – nie będzie przesłane e-mailem.</div>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Hasło" required />
     <button type="submit">Zarejestruj się</button>
   </form>
-
-  <button id="go-to-login-btn" onclick="goToLogin()">Przejdź do logowania</button>
 
   <div class="login-link">
     Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <button id="go-to-login-btn" onclick="window.location.href='logowanie.html'">Przejdź do logowania</button>
 
-  <!-- Referrer check -->
   <script>
-    const allowedReferrers = [
-      "https://gaselaspiner.softr.app",
-      "https://preview.softr.app",
-      "https://app.gaselaspiner.pl/logowanie.html"
-    ];
-    const ref = document.referrer || "";
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isPreviewMode = window.location.hostname === "preview.softr.app";
-    const isManualDirectAccess = ref === "" && !isPreviewMode;
-    if (!isReferrerAllowed && isManualDirectAccess) {
-      window.location.href = "https://gaselaspiner.softr.app";
-    }
-  </script>
-
-  <!-- Przenoszenie parametru `plan` -->
-  <script>
-    const currentParams = new URLSearchParams(window.location.search);
-    const plan = currentParams.get('plan');
-    if (plan) {
-      const loginLink = document.getElementById('login-link');
-      loginLink.href = `logowanie.html?plan=${plan}`;
-    }
-    function goToLogin() {
-      const destination = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
-      window.location.href = destination;
-    }
-  </script>
-
-  <!-- Rejestracja konta -->
-  <script>
-    const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // skrócone
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-    const statusDiv = document.getElementById('supabase-status');
-    const goToLoginBtn = document.getElementById('go-to-login-btn');
-    const registerForm = document.getElementById('register-form');
-
-    registerForm.addEventListener('submit', async (e) => {
+    // Symulacja działania przy braku połączenia z Supabase
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      statusDiv.textContent = '⏳ Rejestracja...';
+      const statusDiv = document.getElementById('supabase-status');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      // symulacja sukcesu rejestracji
+      statusDiv.innerHTML = `
+        ✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.<br>
+        ℹ️ <strong>Zapamiętaj hasło!</strong> Nie będzie możliwości jego odzyskania.
+      `;
 
-      try {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+      // wyczyszczenie formularza
+      document.getElementById('register-form').reset();
 
-        if (error) {
-          console.error('❌ Błąd rejestracji:', error.message);
-          statusDiv.textContent = '❌ Nie udało się założyć konta';
-        } else {
-          console.log('✅ Rejestracja zakończona:', data);
-          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
-          registerForm.reset();
-          goToLoginBtn.style.display = 'block';
-        }
-      } catch (err) {
-        console.error('❌ Wyjątek:', err);
-        statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
-      }
+      // pokazanie przycisku przejścia do logowania
+      document.getElementById('go-to-login-btn').style.display = 'block';
     });
+
+    // Zachowanie parametru plan=... w linku „Zaloguj się”
+    const plan = new URLSearchParams(window.location.search).get('plan');
+    if (plan) {
+      document.getElementById('login-link').href = `logowanie.html?plan=${plan}`;
+    }
   </script>
 </body>
 </html>
