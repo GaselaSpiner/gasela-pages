@@ -78,6 +78,18 @@
       text-decoration: underline;
     }
   </style>
+
+  <!-- 🔒 Ochrona przed bezpośrednim wejściem -->
+  <script>
+    const ref = document.referrer;
+    const isAllowed =
+      ref.startsWith("https://gaselaspiner.softr.app") ||
+      ref.startsWith("https://preview.softr.app");
+
+    if (!ref || !isAllowed) {
+      window.location.href = "https://gaselaspiner.softr.app";
+    }
+  </script>
 </head>
 <body>
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
