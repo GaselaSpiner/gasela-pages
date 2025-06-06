@@ -93,7 +93,7 @@
   </form>
 
   <div class="register-link">
-    Nie masz konta? <a id="register-link">Zarejestruj się</a>
+    Nie masz konta? <a id="register-link" href="#">Zarejestruj się</a>
   </div>
 
   <!-- Supabase SDK -->
@@ -112,16 +112,6 @@
 
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
-    }
-  </script>
-
-  <!-- Dynamiczne przekazanie parametru plan do rejestracji -->
-  <script>
-    const currentParams = new URLSearchParams(window.location.search);
-    const plan = currentParams.get('plan');
-    if (plan) {
-      const registerLink = document.getElementById('register-link');
-      registerLink.href = `rejestracja.html?plan=${plan}`;
     }
   </script>
 
@@ -158,6 +148,14 @@
         statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
+
+    // Dodanie planu do linku rejestracji
+    const currentParams = new URLSearchParams(window.location.search);
+    const plan = currentParams.get('plan');
+    if (plan) {
+      const registerLink = document.getElementById('register-link');
+      registerLink.href = `rejestracja.html?plan=${plan}`;
+    }
   </script>
 </body>
 </html>
