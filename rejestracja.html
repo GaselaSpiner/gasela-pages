@@ -93,7 +93,7 @@
   </form>
 
   <div class="login-link">
-    Masz już konto? <a href="logowanie.html">Zaloguj się</a>
+    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
   <!-- Supabase SDK -->
@@ -113,6 +113,17 @@
 
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
+    }
+  </script>
+
+  <!-- Obsługa parametru `plan` w linku logowania -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+
+    const loginLink = document.getElementById('login-link');
+    if (plan) {
+      loginLink.href = `logowanie.html?plan=${plan}`;
     }
   </script>
 
@@ -146,11 +157,13 @@
           statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
           document.getElementById('register-form').reset();
 
-          // Dodaj przycisk do logowania
           const loginBtn = document.createElement('button');
           loginBtn.textContent = 'Przejdź do logowania';
           loginBtn.style.marginTop = '15px';
-          loginBtn.onclick = () => window.location.href = 'logowanie.html';
+          loginBtn.onclick = () => {
+            const redirect = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
+            window.location.href = redirect;
+          };
           document.body.appendChild(loginBtn);
         }
       } catch (err) {
