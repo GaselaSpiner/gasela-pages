@@ -103,7 +103,7 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Referrer ochrona -->
+  <!-- Referrer ochrona – poprawiona -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -112,8 +112,8 @@
     ];
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isPreviewMode = window.location.hostname === "preview.softr.app";
-    const isManualDirectAccess = ref === "" && !isPreviewMode;
+    const isRejestracjaPage = window.location.pathname.includes("rejestracja.html");
+    const isManualDirectAccess = ref === "" && !isRejestracjaPage;
 
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
@@ -133,7 +133,7 @@
   <!-- Logika rejestracji -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'; // ← użyj pełnego klucza
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const form = document.getElementById('register-form');
