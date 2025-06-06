@@ -96,11 +96,30 @@
     Masz już konto? <a href="logowanie.html">Zaloguj się</a>
   </div>
 
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Ochrona referrera -->
+  <script>
+    const allowedReferrers = [
+      "https://gaselaspiner.softr.app",
+      "https://preview.softr.app",
+      "https://app.gaselaspiner.pl/logowanie.html"
+    ];
+    const ref = document.referrer || "";
+    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const isPreviewMode = window.location.hostname === "preview.softr.app";
+    const isManualDirectAccess = ref === "" && !isPreviewMode;
+
+    if (!isReferrerAllowed && isManualDirectAccess) {
+      window.location.href = "https://gaselaspiner.softr.app";
+    }
+  </script>
+
+  <!-- Rejestracja konta -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
-
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
 
