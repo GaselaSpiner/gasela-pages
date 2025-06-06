@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Logowanie – Gasela Spiner</title>
+  <title>Rejestracja – Gasela Spiner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <style>
@@ -65,97 +65,84 @@
       margin-bottom: 20px;
       color: #444;
     }
-    .register-link {
+    .login-link {
       margin-top: 15px;
       font-size: 0.9rem;
       text-align: center;
     }
-    .register-link a {
+    .login-link a {
       color: #f6b500;
       text-decoration: none;
       font-weight: bold;
     }
-    .register-link a:hover {
+    .login-link a:hover {
       text-decoration: underline;
+    }
+    #go-to-login {
+      display: none;
+      margin-top: 15px;
+      background-color: #f6b500;
+      color: #000000;
+      font-weight: bold;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
-  <h1>Zaloguj się do Gasela Spiner</h1>
+  <h1>Załóż konto w Gasela Spiner</h1>
 
   <div id="supabase-status">⏳ Ładowanie...</div>
 
-  <form id="login-form">
+  <form id="register-form">
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
-    <input type="password" id="password" placeholder="Hasło" autocomplete="current-password" required />
-    <button type="submit">Zaloguj się</button>
+    <input type="password" id="password" placeholder="Hasło" autocomplete="new-password" required />
+    <button type="submit">Zarejestruj się</button>
   </form>
 
-  <div class="register-link">
-    Nie masz konta? <a id="register-link" href="#">Zarejestruj się</a>
+  <button id="go-to-login" onclick="window.location.href='logowanie.html'">Przejdź do logowania</button>
+
+  <div class="login-link">
+    Masz już konto? <a href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Ochrona referrera -->
-  <script>
-    const allowedReferrers = [
-      "https://gaselaspiner.softr.app",
-      "https://preview.softr.app"
-    ];
-    const ref = document.referrer || "";
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isPreviewMode = window.location.hostname === "preview.softr.app";
-    const isManualDirectAccess = ref === "" && !isPreviewMode;
-
-    if (!isReferrerAllowed && isManualDirectAccess) {
-      window.location.href = "https://gaselaspiner.softr.app";
-    }
-  </script>
-
-  <!-- Logika logowania -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
+    const loginButton = document.getElementById('go-to-login');
 
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      statusDiv.textContent = '⏳ Logowanie...';
+      statusDiv.textContent = '⏳ Rejestracja...';
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
 
         if (error) {
-          console.error('❌ Błąd logowania:', error.message);
-          statusDiv.textContent = '❌ Nieprawidłowy email lub hasło';
+          console.error('❌ Błąd rejestracji:', error.message);
+          statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
-          console.log('✅ Zalogowano jako:', data.user.email);
-          statusDiv.textContent = `✅ Zalogowano jako: ${data.user.email}`;
-          const plan = new URLSearchParams(window.location.search).get('plan') || 'start';
-          setTimeout(() => {
-            window.location.href = `/kup-plan.html?plan=${plan}`;
-          }, 1000);
+          console.log('✅ Rejestracja zakończona:', data);
+          document.getElementById('register-form').style.display = 'none';
+          statusDiv.textContent = '✅ Konto utworzone! Sprawdź swoją skrzynkę e-mail i kliknij w link, aby aktywować konto.';
+          loginButton.style.display = 'block';
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
         statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
-
-    // Dodanie planu do linku rejestracji
-    const currentParams = new URLSearchParams(window.location.search);
-    const plan = currentParams.get('plan');
-    if (plan) {
-      const registerLink = document.getElementById('register-link');
-      registerLink.href = `rejestracja.html?plan=${plan}`;
-    }
   </script>
 </body>
 </html>
