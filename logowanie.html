@@ -78,18 +78,15 @@
       text-decoration: underline;
     }
   </style>
-
   <script>
-    // 🔒 Blokuj wejścia spoza Softr, ale pozwól na tryb preview
     const ref = document.referrer;
-    const allowedReferrers = [
-      "https://gaselaspiner.softr.app",
-      "https://preview.softr.app"
-    ];
-    const isPreviewHost = window.location.hostname.includes("preview.softr.app");
-    const isAllowedReferrer = ref && allowedReferrers.some(url => ref.startsWith(url));
+    const isAllowedReferrer =
+      ref.startsWith("https://gaselaspiner.softr.app") ||
+      ref.startsWith("https://preview.softr.app");
 
-    if (!isAllowedReferrer && !isPreviewHost) {
+    const isPreviewFlag = window.location.search.includes("preview=1");
+
+    if (!isAllowedReferrer && !isPreviewFlag) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
