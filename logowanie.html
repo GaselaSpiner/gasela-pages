@@ -6,6 +6,25 @@
   <title>Logowanie – Gasela Spiner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- 🔒 Ochrona przed wejściem spoza Softr lub Preview -->
+  <script>
+    const ref = document.referrer;
+    const allowedReferrers = [
+      "https://gaselaspiner.softr.app",
+      "https://preview.softr.app"
+    ];
+
+    const isPreview = window.location.hostname.includes("localhost") || window.location.hostname.includes("preview.softr.app");
+
+    const isAllowed =
+      (ref && allowedReferrers.some(url => ref.startsWith(url))) || isPreview;
+
+    if (!isAllowed) {
+      window.location.href = "https://gaselaspiner.softr.app";
+    }
+  </script>
+
   <style>
     body {
       margin: 0;
@@ -78,18 +97,6 @@
       text-decoration: underline;
     }
   </style>
-
-  <!-- 🔒 Ochrona przed bezpośrednim wejściem -->
-  <script>
-    const ref = document.referrer;
-    const isAllowed =
-      ref.startsWith("https://gaselaspiner.softr.app") ||
-      ref.startsWith("https://preview.softr.app");
-
-    if (!ref || !isAllowed) {
-      window.location.href = "https://gaselaspiner.softr.app";
-    }
-  </script>
 </head>
 <body>
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
