@@ -1,51 +1,98 @@
-<!-- ✅ START KODU -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rejestracja – Gasela Spiner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <meta name="robots" content="noindex, nofollow" />
   <style>
     body {
+      margin: 0;
       font-family: 'Montserrat', sans-serif;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 100vh; margin: 0; padding: 20px;
-      background-color: #fff; color: #000;
+      background-color: #ffffff;
+      color: #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    img.logo {
+      max-width: 120px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #000000;
+      margin-bottom: 10px;
+      text-align: center;
     }
     form {
-      background: #f9f9f9; padding: 30px; border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 90%; max-width: 400px;
-      display: flex; flex-direction: column;
+      display: flex;
+      flex-direction: column;
+      background-color: #f9f9f9;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
     }
-    input, button {
-      font-size: 1rem; padding: 12px; margin-bottom: 15px;
-      border-radius: 6px; border: 1px solid #ccc;
+    input {
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
     }
     button {
-      background: #f6b500; border: none; font-weight: bold;
+      background-color: #f6b500;
+      color: #000000;
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
     }
     button:hover {
-      background: #e3a700;
+      background-color: #e3a700;
     }
-    .logo { max-width: 120px; margin-bottom: 20px; }
-    .login-link { font-size: 0.9rem; text-align: center; margin-top: 15px; }
-    .login-link a { color: #f6b500; text-decoration: none; font-weight: bold; }
-    .login-link a:hover { text-decoration: underline; }
-    #supabase-status { text-align: center; font-weight: bold; margin-bottom: 20px; max-width: 400px; }
+    #supabase-status {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #444;
+      max-width: 400px;
+    }
+    .login-link {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .login-link a {
+      color: #f6b500;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-
   <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
   <h1>Załóż konto w Gasela Spiner</h1>
-  <div id="supabase-status">🔐 Hasło musi mieć co najmniej 6 znaków.</div>
+
+  <div id="supabase-status">🔐 Hasło musi mieć co najmniej 6 znaków. Zapamiętaj je, nie będzie możliwości jego odzyskania.</div>
 
   <form id="register-form">
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Hasło (min. 6 znaków)" required />
+    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
+    <input type="password" id="password" placeholder="Hasło (min. 6 znaków)" autocomplete="new-password" required />
     <button type="submit">Zarejestruj się</button>
   </form>
 
@@ -56,37 +103,45 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Referrer ochrona – poprawiona -->
   <script>
-    // ⛔ Referrer blokada — możesz usunąć, jeśli niepotrzebna
-    const allowed = [
+    const allowedReferrers = [
       "https://gaselaspiner.softr.app",
       "https://preview.softr.app",
-      "https://app.gaselaspiner.pl"
+      "https://app.gaselaspiner.pl/logowanie.html"
     ];
     const ref = document.referrer || "";
-    const isAllowed = allowed.some(url => ref.startsWith(url));
-    if (ref !== "" && !isAllowed) {
+    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const isRejestracjaPage = window.location.pathname.includes("rejestracja.html");
+    const isManualDirectAccess = ref === "" && !isRejestracjaPage;
+
+    if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
+  </script>
 
-    // 🧠 Obsługa parametru `plan`
+  <!-- Obsługa parametru plan -->
+  <script>
     const params = new URLSearchParams(window.location.search);
     const plan = params.get('plan');
+    const loginLink = document.getElementById('login-link');
     if (plan) {
-      localStorage.setItem('pending_plan', plan);
-      document.getElementById('login-link').href = `logowanie.html?plan=${plan}`;
+      loginLink.href = logowanie.html?plan=${plan};
     }
+  </script>
 
-    // 🔐 Supabase config
-    const supabase = window.supabase.createClient(
-      'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
-    );
-
-    // 🧩 Rejestracja
+  <!-- Logika rejestracji -->
+  <script>
+    const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    const form = document.getElementById('register-form');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      statusDiv.textContent = '⏳ Rejestracja...';
+
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
 
@@ -95,25 +150,33 @@
         return;
       }
 
-      statusDiv.textContent = '⏳ Rejestracja...';
+      try {
+        const { data, error } = await supabase.auth.signUp({ email, password });
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          console.error('❌ Błąd rejestracji:', error.message);
+          statusDiv.textContent = '❌ Nie udało się założyć konta';
+        } else {
+          console.log('✅ Rejestracja zakończona:', data);
+          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+          form.reset();
+          form.style.display = 'none';
 
-      if (error) {
-        console.error('❌ Rejestracja nieudana:', error.message);
-        statusDiv.textContent = '❌ Nie udało się założyć konta. Spróbuj ponownie.';
-      } else {
-        console.log('✅ Sukces:', data);
-        statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź maila i kliknij link aktywacyjny.';
-        document.getElementById('register-form').style.display = 'none';
-
-        const btn = document.createElement('button');
-        btn.textContent = 'Przejdź do logowania';
-        btn.style.marginTop = '20px';
-        btn.onclick = () => {
-          window.location.href = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
-        };
-        document.body.appendChild(btn);
+          if (!document.getElementById('go-to-login-btn')) {
+            const loginBtn = document.createElement('button');
+            loginBtn.id = 'go-to-login-btn';
+            loginBtn.textContent = 'Przejdź do logowania';
+            loginBtn.style.marginTop = '20px';
+            loginBtn.onclick = () => {
+              const redirect = plan ? logowanie.html?plan=${plan} : 'logowanie.html';
+              window.location.href = redirect;
+            };
+            document.body.appendChild(loginBtn);
+          }
+        }
+      } catch (err) {
+        console.error('❌ Wyjątek:', err);
+        statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
   </script>
