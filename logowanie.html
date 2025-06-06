@@ -97,21 +97,22 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 🔒 Zabezpieczenie przed wejściem z zewnątrz (spoza Softr)
-    const isPreviewFlag = window.location.search.includes("preview=1");
+    // 🔒 Zabezpieczenie wejścia spoza Softr
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
       "https://preview.softr.app"
     ];
-
     const ref = document.referrer || "";
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const hostname = window.location.hostname;
 
-    if (!isReferrerAllowed && !isPreviewFlag) {
+    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const isInSoftrPreview = hostname === "preview.softr.app";
+
+    if (!isReferrerAllowed && !isInSoftrPreview) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
 
-    // 🔐 Supabase logowanie
+    // 🔐 Logika logowania z Supabase
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
 
