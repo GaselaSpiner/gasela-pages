@@ -159,7 +159,17 @@
           statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
           form.reset();
           form.style.display = 'none';
-
+          
+if (!document.getElementById('go-to-login-btn')) {
+  const loginBtn = document.createElement('button');
+  loginBtn.id = 'go-to-login-btn';
+  loginBtn.textContent = 'Przejdź do logowania';
+  loginBtn.style.marginTop = '20px';
+  loginBtn.onclick = () => {
+    window.location.href = 'logowanie.html';
+  };
+  document.body.appendChild(loginBtn);
+}
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
