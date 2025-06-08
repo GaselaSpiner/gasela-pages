@@ -102,25 +102,24 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 🔐 Referrer – ochrona -->
+  <!-- ✅ Precyzyjna ochrona referrera -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
       "https://preview.softr.app",
       "https://app.gaselaspiner.pl/logowanie.html"
     ];
-    const ref = document.referrer || "";
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
 
-    if (!isReferrerAllowed) {
+    const ref = document.referrer || "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasPlanParam = urlParams.has("plan");
+
+    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const isDirectEntryWithoutPlan = ref === "" && !hasPlanParam;
+
+    if (!isReferrerAllowed && isDirectEntryWithoutPlan) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
-  </script>
-
-  <!-- Obsługa parametru plan -->
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
   </script>
 
   <!-- Logika rejestracji -->
