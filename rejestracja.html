@@ -159,6 +159,10 @@
           statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
           form.reset();
           form.style.display = 'none';
+     const loginLinkDiv = document.querySelector('.login-link');
+if (loginLinkDiv) {
+  loginLinkDiv.remove();
+}
           
 if (!document.getElementById('go-to-login-btn')) {
   const loginBtn = document.createElement('button');
