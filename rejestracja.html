@@ -102,18 +102,27 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 🔐 Ochrona: wejście tylko z Softr -->
+  <!-- 🔐 Ochrona wejścia na stronę -->
   <script>
-    const allowedReferrers = [
-      "https://gaselaspiner.softr.app",
-      "https://preview.softr.app"
-    ];
     const ref = document.referrer || "";
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const hasPlan = new URLSearchParams(window.location.search).has("plan");
 
-    if (!isReferrerAllowed) {
+    const isFromSoftr = ref.startsWith("https://gaselaspiner.softr.app") || ref.startsWith("https://preview.softr.app");
+    const isFromLogin = ref.startsWith("https://app.gaselaspiner.pl/logowanie.html");
+
+    const isManualEntry = ref === "" && !hasPlan; // np. wpisanie samego /rejestracja.html
+    const isHackerTry = ref === "" && hasPlan;   // np. ręczne wpisanie /rejestracja.html?plan=start
+
+    if (!isFromSoftr && !isFromLogin && (isManualEntry || isHackerTry)) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
+  </script>
+
+  <!-- Obsługa parametru plan -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    // nie ustawiamy już planu w login-link – zawsze bez parametru
   </script>
 
   <!-- Logika rejestracji -->
@@ -154,7 +163,7 @@
             loginBtn.textContent = 'Przejdź do logowania';
             loginBtn.style.marginTop = '20px';
             loginBtn.onclick = () => {
-              window.location.href = 'logowanie.html';
+              window.location.href = 'logowanie.html'; // zawsze bez parametru
             };
             document.body.appendChild(loginBtn);
           }
