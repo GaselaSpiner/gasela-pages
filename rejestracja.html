@@ -100,34 +100,29 @@
     Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Referrer ochrona -->
+  <!-- ✅ Poprawiona ochrona referrera -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
-      "https://preview.softr.app"
+      "https://preview.softr.app",
+      "https://app.gaselaspiner.pl/logowanie.html"
     ];
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
     const isDirectEntry = ref === "";
-    const params = new URLSearchParams(window.location.search);
-    const hasPlanParam = params.has("plan");
 
-    // Jeśli referrer nie jest dozwolony i mamy bezpośrednie wejście lub plan w URL — blokujemy
-    if ((!isReferrerAllowed && isDirectEntry) || (!isReferrerAllowed && hasPlanParam)) {
+    if (!isReferrerAllowed && isDirectEntry) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
+  </script>
 
-    // Zapisz plan do localStorage (jeśli występuje)
-    const plan = params.get("plan");
-    if (plan) {
-      localStorage.setItem("selectedPlan", plan);
-    }
-
-    // Link "Zaloguj się" zawsze bez parametru
-    document.getElementById('login-link').href = 'logowanie.html';
+  <!-- Obsługa parametru plan -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    // nie ustawiamy już planu w login-link – zawsze bez parametru
   </script>
 
   <!-- Logika rejestracji -->
@@ -168,7 +163,7 @@
             loginBtn.textContent = 'Przejdź do logowania';
             loginBtn.style.marginTop = '20px';
             loginBtn.onclick = () => {
-              window.location.href = 'logowanie.html';
+              window.location.href = 'logowanie.html'; // zawsze bez parametru
             };
             document.body.appendChild(loginBtn);
           }
