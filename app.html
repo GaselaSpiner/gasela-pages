@@ -92,17 +92,41 @@
 
       const { data: subData, error } = await supabase
         .from('subscriptions')
-        .select('plan')
+        .select('plan_name, start_date, end_date')
         .eq('user_id', userId)
+        .order('end_date', { ascending: false })
+        .limit(1)
         .single();
 
-      if (error || !subData || !subData.plan) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // tylko data, bez czasu
+
+      if (
+        error ||
+        !subData ||
+        !subData.end_date ||
+        new Date(subData.end_date).setHours(0, 0, 0, 0) < now.getTime()
+      ) {
         const planParam = new URLSearchParams(window.location.search).get('plan') || 'start';
-        statusMsg.textContent = '⚠️ Nie masz aktywnego planu. Przekierowanie do zakupu...';
+        statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
         setTimeout(() => window.location.href = `kup-plan.html?plan=${planParam}`, 2000);
         return;
       }
 
-      console.log('✅ Plan aktywny:', subData.plan);
-      statusMsg.textContent = '✅ Plan aktywny – czat trenerski będzie wkrótce dostępny.';
-      // 🧠 W tym miejscu w przyszłości osadzimy czat OpenAI i logikę Edge F
+      // ✅ Plan aktywny
+      const endDate = new Date(subData.end_date);
+      endDate.setHours(0, 0, 0, 0);
+      const endDateFormatted = endDate.toISOString().split('T')[0];
+
+      statusMsg.textContent = `✅ Plan aktywny do ${endDateFormatted}. Czat trenerski będzie dostępny poniżej.`;
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = 'logowanie.html';
+    }
+
+    checkSessionAndPlan();
+  </script>
+</body>
+</html>
