@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gasela Spiner – Trening</title>
+  <title>Gasela Spiner – Czat Trenera</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <style>
@@ -24,14 +24,8 @@
     h1 {
       color: #f6b500;
       font-size: 1.8rem;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
       text-align: center;
-    }
-    .welcome {
-      font-size: 1rem;
-      color: #444;
-      text-align: center;
-      margin-bottom: 30px;
     }
     .chat-container {
       width: 100%;
@@ -42,78 +36,43 @@
       padding: 20px;
       min-height: 400px;
     }
-    .message {
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 8px;
+    .info {
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #444;
     }
-    .user {
-      background-color: #f6b500;
-      color: #000;
-      text-align: right;
-    }
-    .assistant {
-      background-color: #eee;
-      color: #000;
-      text-align: left;
-    }
-    #message-form {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 60px;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
+    .logout-btn {
+      margin-top: 30px;
+      padding: 10px 18px;
       background-color: #f6b500;
       color: #000;
       border: none;
       border-radius: 6px;
-      padding: 12px;
       font-weight: bold;
       font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
     }
-    button:hover {
+    .logout-btn:hover {
       background-color: #e3a700;
-    }
-    .limit-info {
-      margin-top: 15px;
-      font-size: 0.9rem;
-      color: #555;
-      text-align: center;
     }
   </style>
 </head>
 <body>
-  <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
-  <h1>Twój Trener Gasela Spiner</h1>
-  <div class="welcome">💬 Witaj ponownie! Zadaj pytanie swojemu trenerowi lub rozpocznij trening.</div>
+  <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo" />
+  <h1>Witaj w systemie Gasela Spiner</h1>
 
-  <div class="chat-container" id="chat-log">
-    <div class="assistant message">Cześć! Jestem gotów, by pomóc Ci w treningu tenisowym 🎾</div>
+  <div class="chat-container">
+    <p class="info">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
+    <!-- 🔜 Tutaj pojawi się interfejs czatu z OpenAI -->
   </div>
 
-  <form id="message-form">
-    <textarea id="user-message" placeholder="Wpisz wiadomość..."></textarea>
-    <button type="submit">Wyślij</button>
-  </form>
-
-  <div class="limit-info" id="limit-info">🔄 Sprawdzam dostępne wiadomości...</div>
+  <button class="logout-btn" onclick="logout()">Wyloguj się</button>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'PUBLIC_ANON_KEY_TUTAJ'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
     );
 
     async function checkSessionAndPlan() {
@@ -123,69 +82,27 @@
         return;
       }
 
-      const { data: userData, error } = await supabase
+      const userId = session.user.id;
+
+      // Odczyt planu z Supabase
+      const { data: subData, error } = await supabase
         .from('subscriptions')
         .select('plan')
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .single();
 
-      if (error || !userData || !userData.plan) {
+      if (error || !subData || !subData.plan) {
         window.location.href = 'kup-plan.html';
         return;
       }
 
-      console.log('✅ Plan aktywny:', userData.plan);
-      checkLimit(session.user.id);
+      console.log('✅ Plan aktywny:', subData.plan);
+      // 🧠 W tym miejscu w przyszłości osadzimy czat OpenAI i logikę Edge Functions
     }
 
-    async function checkLimit(userId) {
-      try {
-        const response = await fetch('https://gaselaspiner.pl/functions/v1/check_limit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ user_id: userId })
-        });
-        const result = await response.json();
-        document.getElementById('limit-info').textContent = `📦 Pozostało wiadomości: ${result.remaining}`;
-      } catch (e) {
-        document.getElementById('limit-info').textContent = `⚠️ Nie udało się sprawdzić limitu`;
-        console.error(e);
-      }
-    }
-
-    document.getElementById('message-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const textarea = document.getElementById('user-message');
-      const userMessage = textarea.value.trim();
-      if (!userMessage) return;
-
-      appendMessage('user', userMessage);
-      textarea.value = '';
-      document.getElementById('limit-info').textContent = '⏳ Wysyłanie...';
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch('https://gaselaspiner.pl/functions/v1/send_message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_id: session.user.id, message: userMessage })
-      });
-
-      const result = await response.json();
-      appendMessage('assistant', result.reply);
-      checkLimit(session.user.id);
-    });
-
-    function appendMessage(sender, text) {
-      const chatLog = document.getElementById('chat-log');
-      const message = document.createElement('div');
-      message.className = `message ${sender}`;
-      message.textContent = text;
-      chatLog.appendChild(message);
-      chatLog.scrollTop = chatLog.scrollHeight;
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = 'logowanie.html';
     }
 
     checkSessionAndPlan();
