@@ -99,23 +99,7 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Ochrona referrera -->
-  <script>
-    const allowedReferrers = [
-      "https://gaselaspiner.softr.app",
-      "https://preview.softr.app",
-      "https://app.gaselaspiner.pl/rejestracja.html"
-    ];
-    const ref = document.referrer || "";
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isLogowaniePage = window.location.pathname.includes("logowanie.html");
-    const isManualDirectAccess = ref === "" && !isLogowaniePage;
-
-    if (!isReferrerAllowed && isManualDirectAccess) {
-      window.location.href = "https://gaselaspiner.softr.app";
-    }
-  </script>
-
+ 
   <!-- Logika logowania -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
