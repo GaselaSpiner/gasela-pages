@@ -122,7 +122,10 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const plan = params.get('plan');
-    // nie ustawiamy już planu w login-link – zawsze bez parametru
+
+    if (plan) {
+      localStorage.setItem('gasela_selected_plan', plan);
+    }
   </script>
 
   <!-- Logika rejestracji -->
@@ -163,7 +166,7 @@
             loginBtn.textContent = 'Przejdź do logowania';
             loginBtn.style.marginTop = '20px';
             loginBtn.onclick = () => {
-              window.location.href = 'logowanie.html'; // zawsze bez parametru
+              window.location.href = 'logowanie.html';
             };
             document.body.appendChild(loginBtn);
           }
