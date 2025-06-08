@@ -111,18 +111,13 @@
     ];
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isDirectEntry = ref === "";
-
-    if (!isReferrerAllowed && isDirectEntry) {
-      window.location.href = "https://gaselaspiner.softr.app";
-    }
-  </script>
-
-  <!-- Obsługa parametru plan -->
-  <script>
     const params = new URLSearchParams(window.location.search);
     const plan = params.get('plan');
-    // nie ustawiamy już planu w login-link – zawsze bez parametru
+    const isPlanPresent = !!plan;
+
+    if (!isReferrerAllowed && !isPlanPresent) {
+      window.location.href = "https://gaselaspiner.softr.app";
+    }
   </script>
 
   <!-- Logika rejestracji -->
@@ -163,7 +158,7 @@
             loginBtn.textContent = 'Przejdź do logowania';
             loginBtn.style.marginTop = '20px';
             loginBtn.onclick = () => {
-              window.location.href = 'logowanie.html'; // zawsze bez parametru
+              window.location.href = 'logowanie.html';
             };
             document.body.appendChild(loginBtn);
           }
