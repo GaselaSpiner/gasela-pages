@@ -111,13 +111,18 @@
     ];
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
-    const isPlanPresent = !!plan;
+    const isRefEmpty = ref === "";
 
-    if (!isReferrerAllowed && !isPlanPresent) {
+    if (isRefEmpty || !isReferrerAllowed) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
+  </script>
+
+  <!-- Obsługa parametru plan -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    // Nie dodajemy planu do przycisku logowania – zawsze kierujemy na logowanie.html bez parametru
   </script>
 
   <!-- Logika rejestracji -->
