@@ -100,9 +100,10 @@
     Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- ✅ Poprawiona ochrona referrera -->
+  <!-- ✅ Referrer + parametr `plan` -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -111,24 +112,19 @@
     ];
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isRefEmpty = ref === "";
 
-    if (isRefEmpty || !isReferrerAllowed) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasValidPlanParam = urlParams.has('plan') && urlParams.get('plan').trim() !== "";
+
+    if (!isReferrerAllowed && !hasValidPlanParam) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
 
-  <!-- Obsługa parametru plan -->
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
-    // Nie dodajemy planu do przycisku logowania – zawsze kierujemy na logowanie.html bez parametru
-  </script>
-
-  <!-- Logika rejestracji -->
+  <!-- Rejestracja -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // skrócone
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const form = document.getElementById('register-form');
@@ -153,20 +149,15 @@
           statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
           console.log('✅ Rejestracja zakończona:', data);
-          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający.';
           form.reset();
           form.style.display = 'none';
 
-          if (!document.getElementById('go-to-login-btn')) {
-            const loginBtn = document.createElement('button');
-            loginBtn.id = 'go-to-login-btn';
-            loginBtn.textContent = 'Przejdź do logowania';
-            loginBtn.style.marginTop = '20px';
-            loginBtn.onclick = () => {
-              window.location.href = 'logowanie.html';
-            };
-            document.body.appendChild(loginBtn);
-          }
+          const btn = document.createElement('button');
+          btn.textContent = 'Przejdź do logowania';
+          btn.style.marginTop = '20px';
+          btn.onclick = () => window.location.href = 'logowanie.html';
+          document.body.appendChild(btn);
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
