@@ -103,25 +103,30 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Referrer ochrona – poprawiona -->
+  <!-- Referrer ochrona -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
       "https://preview.softr.app"
     ];
     const ref = document.referrer || "";
+    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
+    const isDirectEntry = ref === "";
     const params = new URLSearchParams(window.location.search);
     const hasPlanParam = params.has("plan");
-    const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isManualDirectAccess = ref === "" && !hasPlanParam;
 
-    if (!isReferrerAllowed && isManualDirectAccess) {
+    // Jeśli referrer nie jest dozwolony i mamy bezpośrednie wejście lub plan w URL — blokujemy
+    if ((!isReferrerAllowed && isDirectEntry) || (!isReferrerAllowed && hasPlanParam)) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
-  </script>
 
-  <!-- Przycisk logowania bez parametru -->
-  <script>
+    // Zapisz plan do localStorage (jeśli występuje)
+    const plan = params.get("plan");
+    if (plan) {
+      localStorage.setItem("selectedPlan", plan);
+    }
+
+    // Link "Zaloguj się" zawsze bez parametru
     document.getElementById('login-link').href = 'logowanie.html';
   </script>
 
@@ -132,7 +137,6 @@
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const form = document.getElementById('register-form');
-    const plan = new URLSearchParams(window.location.search).get('plan');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
