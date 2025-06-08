@@ -97,8 +97,8 @@
   </form>
 
   <div class="login-link">
-  Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
-</div>
+    Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -110,8 +110,8 @@
     const isFromSoftr = ref.startsWith("https://gaselaspiner.softr.app") || ref.startsWith("https://preview.softr.app");
     const isFromLogin = ref.startsWith("https://app.gaselaspiner.pl/logowanie.html");
 
-    const isManualEntry = ref === "" && !hasPlan; // np. wpisanie samego /rejestracja.html
-    const isHackerTry = ref === "" && hasPlan;   // np. ręczne wpisanie /rejestracja.html?plan=start
+    const isManualEntry = ref === "" && !hasPlan;
+    const isHackerTry = ref === "" && hasPlan;
 
     if (!isFromSoftr && !isFromLogin && (isManualEntry || isHackerTry)) {
       window.location.href = "https://gaselaspiner.softr.app";
@@ -122,7 +122,6 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const plan = params.get('plan');
-
     if (plan) {
       localStorage.setItem('gasela_selected_plan', plan);
     }
@@ -156,24 +155,35 @@
           statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
           console.log('✅ Rejestracja zakończona:', data);
-          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
+
+          statusDiv.innerHTML = `
+            <div style="color:green; font-weight:bold; text-align:center;">
+              ✅ Rejestracja zakończona.<br>
+              📩 Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.<br>
+              ⏳ Nastąpi przekierowanie do logowania za 5 sekund...
+            </div>
+          `;
+
           form.reset();
           form.style.display = 'none';
-     const loginLinkDiv = document.querySelector('.login-link');
-if (loginLinkDiv) {
-  loginLinkDiv.remove();
-}
-          
-if (!document.getElementById('go-to-login-btn')) {
-  const loginBtn = document.createElement('button');
-  loginBtn.id = 'go-to-login-btn';
-  loginBtn.textContent = 'Przejdź do logowania';
-  loginBtn.style.marginTop = '20px';
-  loginBtn.onclick = () => {
-    window.location.href = 'logowanie.html';
-  };
-  document.body.appendChild(loginBtn);
-}
+
+          const loginLinkDiv = document.querySelector('.login-link');
+          if (loginLinkDiv) loginLinkDiv.remove();
+
+          if (!document.getElementById('go-to-login-btn')) {
+            const loginBtn = document.createElement('button');
+            loginBtn.id = 'go-to-login-btn';
+            loginBtn.textContent = 'Przejdź do logowania';
+            loginBtn.style.marginTop = '20px';
+            loginBtn.onclick = () => {
+              window.location.href = 'logowanie.html';
+            };
+            document.body.appendChild(loginBtn);
+          }
+
+          setTimeout(() => {
+            window.location.href = 'logowanie.html';
+          }, 5000);
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
