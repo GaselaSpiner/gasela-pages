@@ -1,1 +1,88 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gasela Spiner – Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #ffffff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+    .logo {
+      max-width: 120px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      color: #f6b500;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 700px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      min-height: 400px;
+    }
+    .info {
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo" />
+  <h1>Witaj w systemie Gasela Spiner</h1>
+
+  <div class="chat-container">
+    <p class="info">💬 Czat trenera pojawi się tutaj po aktywacji...</p>
+    <!-- tutaj dodamy kod czatu -->
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://lmussgaiutaldicolyba.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
+    );
+
+    async function checkSessionAndPlan() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = 'logowanie.html';
+        return;
+      }
+
+      const { data: userData, error } = await supabase
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error || !userData || !userData.plan) {
+        window.location.href = 'kup-plan.html';
+        return;
+      }
+
+      console.log('✅ Plan aktywny:', userData.plan);
+      // Tutaj wstawimy kod chatu OpenAI w kolejnym kroku
+    }
+
+    checkSessionAndPlan();
+  </script>
+</body>
+</html>
 
