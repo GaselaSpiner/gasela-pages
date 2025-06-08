@@ -100,10 +100,9 @@
     Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 🔐 Referrer + plan security -->
+  <!-- 🔐 Referrer – ochrona -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -113,15 +112,15 @@
     const ref = document.referrer || "";
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasPlanParam = urlParams.has('plan') && urlParams.get('plan').trim() !== "";
-
-    const isManualEntry = ref === "";
-
-    // Blokujemy wejścia ręczne lub z niedozwolonych referrerów – nawet z parametrem
-    if (isManualEntry || !isReferrerAllowed) {
+    if (!isReferrerAllowed) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
+  </script>
+
+  <!-- Obsługa parametru plan -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
   </script>
 
   <!-- Logika rejestracji -->
