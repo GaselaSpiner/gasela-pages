@@ -59,10 +59,10 @@
 </head>
 <body>
   <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo" />
-  <h1>Witaj w systemie Gasela Spiner</h1>
+  <h1 id="welcome">Witaj w systemie Gasela Spiner</h1>
 
   <div class="chat-container">
-    <p class="info">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
+    <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
     <!-- 🔜 Tutaj pojawi się interfejs czatu z OpenAI -->
   </div>
 
@@ -75,16 +75,21 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
     );
 
+    const statusMsg = document.getElementById('status-msg');
+    const welcome = document.getElementById('welcome');
+
     async function checkSessionAndPlan() {
       const { data: { session } } = await supabase.auth.getSession();
+
       if (!session) {
-        window.location.href = 'logowanie.html';
+        statusMsg.textContent = '🔒 Brak aktywnej sesji. Przekierowanie do logowania...';
+        setTimeout(() => window.location.href = 'logowanie.html', 2000);
         return;
       }
 
       const userId = session.user.id;
+      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      // Odczyt planu z Supabase
       const { data: subData, error } = await supabase
         .from('subscriptions')
         .select('plan')
@@ -92,20 +97,12 @@
         .single();
 
       if (error || !subData || !subData.plan) {
-        window.location.href = 'kup-plan.html';
+        const planParam = new URLSearchParams(window.location.search).get('plan') || 'start';
+        statusMsg.textContent = '⚠️ Nie masz aktywnego planu. Przekierowanie do zakupu...';
+        setTimeout(() => window.location.href = `kup-plan.html?plan=${planParam}`, 2000);
         return;
       }
 
       console.log('✅ Plan aktywny:', subData.plan);
-      // 🧠 W tym miejscu w przyszłości osadzimy czat OpenAI i logikę Edge Functions
-    }
-
-    async function logout() {
-      await supabase.auth.signOut();
-      window.location.href = 'logowanie.html';
-    }
-
-    checkSessionAndPlan();
-  </script>
-</body>
-</html>
+      statusMsg.textContent = '✅ Plan aktywny – czat trenerski będzie wkrótce dostępny.';
+      // 🧠 W tym miejscu w przyszłości osadzimy czat OpenAI i logikę Edge F
