@@ -103,7 +103,7 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- ✅ Referrer + parametr `plan` -->
+  <!-- 🔐 Referrer + plan security -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -114,17 +114,20 @@
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
 
     const urlParams = new URLSearchParams(window.location.search);
-    const hasValidPlanParam = urlParams.has('plan') && urlParams.get('plan').trim() !== "";
+    const hasPlanParam = urlParams.has('plan') && urlParams.get('plan').trim() !== "";
 
-    if (!isReferrerAllowed && !hasValidPlanParam) {
+    const isManualEntry = ref === "";
+
+    // Blokujemy wejścia ręczne lub z niedozwolonych referrerów – nawet z parametrem
+    if (isManualEntry || !isReferrerAllowed) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
 
-  <!-- Rejestracja -->
+  <!-- Logika rejestracji -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // skrócone
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const form = document.getElementById('register-form');
@@ -149,15 +152,20 @@
           statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
           console.log('✅ Rejestracja zakończona:', data);
-          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający.';
+          statusDiv.textContent = '✅ Rejestracja zakończona. Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.';
           form.reset();
           form.style.display = 'none';
 
-          const btn = document.createElement('button');
-          btn.textContent = 'Przejdź do logowania';
-          btn.style.marginTop = '20px';
-          btn.onclick = () => window.location.href = 'logowanie.html';
-          document.body.appendChild(btn);
+          if (!document.getElementById('go-to-login-btn')) {
+            const loginBtn = document.createElement('button');
+            loginBtn.id = 'go-to-login-btn';
+            loginBtn.textContent = 'Przejdź do logowania';
+            loginBtn.style.marginTop = '20px';
+            loginBtn.onclick = () => {
+              window.location.href = 'logowanie.html';
+            };
+            document.body.appendChild(loginBtn);
+          }
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
