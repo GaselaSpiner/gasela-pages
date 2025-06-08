@@ -103,31 +103,26 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Referrer ochrona -->
+  <!-- Referrer ochrona – poprawiona -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
-      "https://preview.softr.app",
-      "https://app.gaselaspiner.pl/logowanie.html"
+      "https://preview.softr.app"
     ];
     const ref = document.referrer || "";
+    const params = new URLSearchParams(window.location.search);
+    const hasPlanParam = params.has("plan");
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isRejestracjaPage = window.location.pathname.includes("rejestracja.html");
-    const isManualDirectAccess = ref === "" && !isRejestracjaPage;
+    const isManualDirectAccess = ref === "" && !hasPlanParam;
 
     if (!isReferrerAllowed && isManualDirectAccess) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
 
-  <!-- Obsługa parametru plan -->
+  <!-- Przycisk logowania bez parametru -->
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
-    const loginLink = document.getElementById('login-link');
-    if (plan) {
-      loginLink.href = `logowanie.html?plan=${plan}`;
-    }
+    document.getElementById('login-link').href = 'logowanie.html';
   </script>
 
   <!-- Logika rejestracji -->
@@ -137,6 +132,7 @@
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const form = document.getElementById('register-form');
+    const plan = new URLSearchParams(window.location.search).get('plan');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -168,8 +164,7 @@
             loginBtn.textContent = 'Przejdź do logowania';
             loginBtn.style.marginTop = '20px';
             loginBtn.onclick = () => {
-              const redirect = plan ? `logowanie.html?plan=${plan}` : 'logowanie.html';
-              window.location.href = redirect;
+              window.location.href = 'logowanie.html';
             };
             document.body.appendChild(loginBtn);
           }
