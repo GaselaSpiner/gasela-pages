@@ -93,13 +93,13 @@
   </form>
 
   <div class="register-link">
-    Nie masz konta? <a id="register-link" href="#">Zarejestruj się</a>
+    Nie masz jeszcze konta? <a href="https://gaselaspiner.softr.app/trening" target="_self">Wróć i wybierz plan</a>
   </div>
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Ochrona referrera – z uwzględnieniem rejestracji i logowania -->
+  <!-- Ochrona referrera -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
@@ -125,7 +125,7 @@
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      statusDiv.textContent = '🔐 Wprowadź swój email i hasło, aby zalogować się do systemu Gasela Spiner.';
+      statusDiv.textContent = '⏳ Logowanie...';
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -149,14 +149,6 @@
         statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
       }
     });
-
-    // Obsługa linku do rejestracji z zachowaniem planu
-    const currentParams = new URLSearchParams(window.location.search);
-    const plan = currentParams.get('plan');
-    if (plan) {
-      const registerLink = document.getElementById('register-link');
-      registerLink.href = `rejestracja.html?plan=${plan}`;
-    }
   </script>
 </body>
 </html>
