@@ -160,7 +160,7 @@
             <div style="color:green; font-weight:bold; text-align:center;">
               ✅ Rejestracja zakończona.<br>
               📩 Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.<br>
-              ⏳ Nastąpi przekierowanie do logowania za 5 sekund...
+              ⏳ Nastąpi przekierowanie do logowania za 10 sekund...
             </div>
           `;
 
@@ -183,7 +183,7 @@
 
           setTimeout(() => {
             window.location.href = 'logowanie.html';
-          }, 5000);
+          }, 10000);
         }
       } catch (err) {
         console.error('❌ Wyjątek:', err);
