@@ -102,22 +102,16 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- ✅ Precyzyjna ochrona referrera -->
+  <!-- 🔐 Ochrona: wejście tylko z Softr -->
   <script>
     const allowedReferrers = [
       "https://gaselaspiner.softr.app",
-      "https://preview.softr.app",
-      "https://app.gaselaspiner.pl/logowanie.html"
+      "https://preview.softr.app"
     ];
-
     const ref = document.referrer || "";
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasPlanParam = urlParams.has("plan");
-
     const isReferrerAllowed = allowedReferrers.some(url => ref.startsWith(url));
-    const isDirectEntryWithoutPlan = ref === "" && !hasPlanParam;
 
-    if (!isReferrerAllowed && isDirectEntryWithoutPlan) {
+    if (!isReferrerAllowed) {
       window.location.href = "https://gaselaspiner.softr.app";
     }
   </script>
