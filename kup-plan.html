@@ -72,16 +72,26 @@
       <h2>🎾 Plan Start</h2>
       <p>100 wiadomości</p>
       <p>9 zł</p>
-      <button onclick="kupPlan('start')">Wybierz Plan Start</button>
+      <button onclick="kupPlan('start')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
     </div>
     <div class="plan">
       <h2>🔥 Plan PRO</h2>
       <p>500 wiadomości</p>
       <p>29 zł</p>
-      <button onclick="kupPlan('pro')">Wybierz Plan PRO</button>
+      <button onclick="kupPlan('pro')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
     </div>
     <div class="plan">
       <h2>👑 Plan Mistrz</h2>
       <p>2000 wiadomości</p>
       <p>89 zł</p>
-      <button oncl
+      <button onclick="kupPlan('mistrz')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
+    </div>
+  </div>
+
+  <script>
+    function kupPlan(plan) {
+      window.location.href = `logowanie.html?plan=${plan}`;
+    }
+  </script>
+</body>
+</html>
