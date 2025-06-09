@@ -109,7 +109,7 @@
       ) {
         const planParam = new URLSearchParams(window.location.search).get('plan') || 'start';
         statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
-        setTimeout(() => window.location.href = `kup-plan.html?plan=${planParam}`, 2000);
+        setTimeout(() => window.location.href = `kup-plan.html`, 3000);
         return;
       }
 
