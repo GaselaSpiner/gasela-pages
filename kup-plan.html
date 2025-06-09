@@ -6,6 +6,7 @@
   <title>Wybierz Plan – Gasela Spiner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     body {
       margin: 0;
@@ -89,8 +90,34 @@
   </div>
 
   <script>
-    function kupPlan(plan) {
-      window.location.href = `logowanie.html?plan=${plan}`;
+    const supabase = window.supabase.createClient(
+      'https://YOUR-SUPABASE-URL.supabase.co',
+      'YOUR-ANON-KEY'
+    );
+
+    async function kupPlan(plan) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData?.session?.user;
+
+      if (!user) {
+        alert("Musisz być zalogowany, aby kupić plan.");
+        return window.location.href = "logowanie.html";
+      }
+
+      const response = await fetch('/functions/kup_plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("✅ Plan aktywowany! Możesz rozpocząć trening.");
+        window.location.href = "app.html";
+      } else {
+        alert(`❌ Błąd: ${result.error || "Coś poszło nie tak."}`);
+      }
     }
   </script>
 </body>
