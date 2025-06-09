@@ -6,7 +6,6 @@
   <title>Wybierz Plan – Gasela Spiner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     body {
       margin: 0;
@@ -89,23 +88,40 @@
     </div>
   </div>
 
-  <script>
-    const supabase = supabase.createClient('https://YOUR_PROJECT_ID.supabase.co', 'YOUR_PUBLIC_ANON_KEY');
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    // Sprawdź sesję (czy użytkownik jest zalogowany)
-    let currentUser = null;
+    const supabase = createClient(
+      "https://lmussgaiutaldicolyba.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0"
+    );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session || !session.user) {
+    async function kupPlan(planName) {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
         alert("Musisz być zalogowany, aby kupić plan.");
         window.location.href = "logowanie.html";
-      } else {
-        currentUser = session.user;
-      }
-    });
-
-    // Kup plan – wywołanie funkcji edge
-    async function kupPlan(planName) {
-      if (!currentUser) {
-        alert("Musisz być zalogowany, aby kupić plan.");
         return;
+      }
+
+      try {
+        const response = await supabase.functions.invoke("kup_plan", {
+          body: { plan: planName },
+        });
+
+        if (response.error) {
+          alert("Wystąpił błąd podczas zakupu planu: " + response.error.message);
+          return;
+        }
+
+        window.location.href = "app.html";
+      } catch (error) {
+        alert("Błąd połączenia z serwerem.");
+      }
+    }
+
+    window.kupPlan = kupPlan;
+  </script>
+</body>
+</html>
