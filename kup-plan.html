@@ -93,7 +93,7 @@
 
     const supabase = createClient(
       "https://lmussgaiutaldicolyba.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0"
+      "public-anon-key" // 🟡 tu możesz wpisać jawnie swój anon key, lub pozostawić jak jest
     );
 
     async function kupPlan(planName) {
@@ -106,17 +106,26 @@
       }
 
       try {
-        const response = await supabase.functions.invoke("kup_plan", {
-          body: { plan: planName },
+        const response = await fetch("https://lmussgaiutaldicolyba.supabase.co/functions/v1/kup_plan", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ plan: planName }),
         });
 
-        if (response.error) {
-          alert("Wystąpił błąd podczas zakupu planu: " + response.error.message);
+        const result = await response.json();
+        console.log("✅ Odpowiedź funkcji:", result);
+
+        if (!response.ok) {
+          alert("Wystąpił błąd podczas zakupu planu: " + (result.error || response.statusText));
           return;
         }
 
         window.location.href = "app.html";
       } catch (error) {
+        console.error("❌ Błąd połączenia z funkcją:", error);
         alert("Błąd połączenia z serwerem.");
       }
     }
