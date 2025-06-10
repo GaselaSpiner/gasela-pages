@@ -118,12 +118,36 @@
     }
   </script>
 
-  <!-- Obsługa parametru plan -->
+  <!-- 🧠 Obsługa zapisu planu do pending_plans -->
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
-    if (plan) {
-      localStorage.setItem('gasela_selected_plan', plan);
+    function getPlanFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('plan');
+    }
+
+    async function zapiszPlanDoPending(email) {
+      const plan = getPlanFromURL();
+      if (!plan) {
+        console.warn('Brak planu w URL – nie zapisano');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/zapisz_plan.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, plan }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          console.error('❌ Błąd zapisu planu:', result.error);
+        } else {
+          console.log('✅ Plan zapisany:', result.message);
+        }
+      } catch (err) {
+        console.error('❌ Błąd połączenia z API:', err);
+      }
     }
   </script>
 
@@ -148,19 +172,22 @@
       }
 
       try {
-       const { data, error } = await supabase.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: 'https://app.gaselaspiner.pl/potwierdzenie.html'
-  }
-});
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: 'https://app.gaselaspiner.pl/potwierdzenie.html'
+          }
+        });
 
         if (error) {
           console.error('❌ Błąd rejestracji:', error.message);
           statusDiv.textContent = '❌ Nie udało się założyć konta';
         } else {
           console.log('✅ Rejestracja zakończona:', data);
+
+          // 🔁 Zapisz plan do pending_plans
+          await zapiszPlanDoPending(email);
 
           statusDiv.innerHTML = `
             <div style="color:green; font-weight:bold; text-align:center;">
