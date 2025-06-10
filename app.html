@@ -79,7 +79,12 @@
     const welcome = document.getElementById('welcome');
 
     async function aktywujPlanJeśliIstnieje(session) {
-      const jwt = session.access_token;
+      const jwt = session?.access_token;
+
+      if (!jwt) {
+        console.warn('❌ Brak JWT, nie wywołuję aktywacji planu');
+        return;
+      }
 
       try {
         const res = await fetch('https://lmussgaiutaldicolyba.functions.supabase.co/aktywuj_plan', {
@@ -103,20 +108,22 @@
     }
 
     async function checkSessionAndPlan() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (!session) {
+      if (!session || !session.access_token) {
         statusMsg.textContent = '🔒 Brak aktywnej sesji. Przekierowanie do logowania...';
+        console.warn('❌ Sesja nie istnieje lub brak access_token');
         setTimeout(() => window.location.href = 'logowanie.html', 2000);
         return;
       }
 
+      console.log('📦 JWT:', session.access_token);
       await aktywujPlanJeśliIstnieje(session);
 
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      const { data: subData, error } = await supabase
+      const { data: subData, error: subError } = await supabase
         .from('subscriptions')
         .select('plan_name, start_date, end_date')
         .eq('user_id', userId)
@@ -125,15 +132,14 @@
         .single();
 
       const now = new Date();
-      now.setHours(0, 0, 0, 0); // tylko data, bez czasu
+      now.setHours(0, 0, 0, 0); // tylko data
 
       if (
-        error ||
+        subError ||
         !subData ||
         !subData.end_date ||
         new Date(subData.end_date).setHours(0, 0, 0, 0) < now.getTime()
       ) {
-        const planParam = new URLSearchParams(window.location.search).get('plan') || 'start';
         statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
         setTimeout(() => window.location.href = `kup-plan.html`, 3000);
         return;
