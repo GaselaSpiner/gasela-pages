@@ -63,7 +63,6 @@
 
   <div class="chat-container">
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
-    <!-- 🔜 Tutaj pojawi się interfejs czatu z OpenAI -->
   </div>
 
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
@@ -78,9 +77,17 @@
     const statusMsg = document.getElementById('status-msg');
     const welcome = document.getElementById('welcome');
 
+    async function waitForSession(retries = 10) {
+      for (let i = 0; i < retries; i++) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) return session;
+        await new Promise(r => setTimeout(r, 200)); // czekaj 200ms
+      }
+      return null;
+    }
+
     async function aktywujPlanJeśliIstnieje(session) {
       const jwt = session?.access_token;
-
       if (!jwt) {
         console.warn('❌ Brak JWT, nie wywołuję aktywacji planu');
         return;
@@ -108,10 +115,10 @@
     }
 
     async function checkSessionAndPlan() {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const session = await waitForSession();
 
-      if (!session || !session.access_token) {
-        statusMsg.textContent = '🔒 Brak aktywnej sesji. Przekierowanie do logowania...';
+      if (!session) {
+        statusMsg.textContent = '🔒 Nie udało się przywrócić sesji. Przekierowanie do logowania...';
         console.warn('❌ Sesja nie istnieje lub brak access_token');
         setTimeout(() => window.location.href = 'logowanie.html', 2000);
         return;
@@ -132,7 +139,7 @@
         .single();
 
       const now = new Date();
-      now.setHours(0, 0, 0, 0); // tylko data
+      now.setHours(0, 0, 0, 0);
 
       if (
         subError ||
