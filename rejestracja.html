@@ -148,14 +148,24 @@
 
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'; // skrócony dla bezpieczeństwa
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // skrócony
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     const statusDiv = document.getElementById('supabase-status');
     const form = document.getElementById('register-form');
 
     async function checkIfUserExists(email) {
-      const { data, error } = await supabase.auth.admin.listUsers({ email });
-      return data?.users?.length > 0;
+      try {
+        const response = await fetch('https://api.gaselaspiner.pl/api/czy_istnieje.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await response.json();
+        return result.exists === true;
+      } catch (error) {
+        console.error('❌ Błąd sprawdzania e-maila:', error);
+        return false;
+      }
     }
 
     form.addEventListener('submit', async (e) => {
