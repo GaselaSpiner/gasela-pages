@@ -63,6 +63,7 @@
 
   <div class="chat-container">
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
+    <!-- 🔜 Tutaj pojawi się interfejs czatu z OpenAI -->
   </div>
 
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
@@ -77,21 +78,8 @@
     const statusMsg = document.getElementById('status-msg');
     const welcome = document.getElementById('welcome');
 
-    async function waitForSession(retries = 10) {
-      for (let i = 0; i < retries; i++) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) return session;
-        await new Promise(r => setTimeout(r, 200)); // czekaj 200ms
-      }
-      return null;
-    }
-
     async function aktywujPlanJeśliIstnieje(session) {
-      const jwt = session?.access_token;
-      if (!jwt) {
-        console.warn('❌ Brak JWT, nie wywołuję aktywacji planu');
-        return;
-      }
+      const jwt = session.access_token;
 
       try {
         const res = await fetch('https://lmussgaiutaldicolyba.functions.supabase.co/aktywuj_plan', {
@@ -115,22 +103,20 @@
     }
 
     async function checkSessionAndPlan() {
-      const session = await waitForSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        statusMsg.textContent = '🔒 Nie udało się przywrócić sesji. Przekierowanie do logowania...';
-        console.warn('❌ Sesja nie istnieje lub brak access_token');
+        statusMsg.textContent = '🔒 Brak aktywnej sesji. Przekierowanie do logowania...';
         setTimeout(() => window.location.href = 'logowanie.html', 2000);
         return;
       }
 
-      console.log('📦 JWT:', session.access_token);
       await aktywujPlanJeśliIstnieje(session);
 
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      const { data: subData, error: subError } = await supabase
+      const { data: subData, error } = await supabase
         .from('subscriptions')
         .select('plan_name, start_date, end_date')
         .eq('user_id', userId)
@@ -139,14 +125,15 @@
         .single();
 
       const now = new Date();
-      now.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0); // tylko data, bez czasu
 
       if (
-        subError ||
+        error ||
         !subData ||
         !subData.end_date ||
         new Date(subData.end_date).setHours(0, 0, 0, 0) < now.getTime()
       ) {
+        const planParam = new URLSearchParams(window.location.search).get('plan') || 'start';
         statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
         setTimeout(() => window.location.href = `kup-plan.html`, 3000);
         return;
