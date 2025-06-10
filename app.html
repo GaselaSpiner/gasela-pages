@@ -78,6 +78,30 @@
     const statusMsg = document.getElementById('status-msg');
     const welcome = document.getElementById('welcome');
 
+    async function aktywujPlanJeśliIstnieje(session) {
+      const jwt = session.access_token;
+
+      try {
+        const res = await fetch('https://lmussgaiutaldicolyba.functions.supabase.co/aktywuj_plan', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${jwt}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log('✅ Plan aktywowany:', data);
+        } else if (res.status === 404) {
+          console.log('ℹ️ Brak planu oczekującego (pending)');
+        } else {
+          console.error('❌ Błąd aktywacji planu:', await res.text());
+        }
+      } catch (err) {
+        console.error('❌ Wyjątek podczas aktywacji planu:', err);
+      }
+    }
+
     async function checkSessionAndPlan() {
       const { data: { session } } = await supabase.auth.getSession();
 
@@ -86,6 +110,8 @@
         setTimeout(() => window.location.href = 'logowanie.html', 2000);
         return;
       }
+
+      await aktywujPlanJeśliIstnieje(session);
 
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
@@ -113,7 +139,6 @@
         return;
       }
 
-      // ✅ Plan aktywny
       const endDate = new Date(subData.end_date);
       endDate.setHours(0, 0, 0, 0);
       const endDateFormatted = endDate.toISOString().split('T')[0];
