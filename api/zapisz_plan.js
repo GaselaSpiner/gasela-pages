@@ -1,8 +1,9 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.https://lmussgaiutaldicolyba.supabase.co
+,
+  process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgxNTAwNCwiZXhwIjoyMDY0MzkxMDA0fQ.9s1aR4nocxWRvP91e3TiUylZsSji93iAdEjWQ38taSQ
 );
 
 module.exports = async (req, res) => {
