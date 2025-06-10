@@ -1,41 +1,34 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
-  process.env.https://lmussgaiutaldicolyba.supabase.co
-,
-  process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODgxNTAwNCwiZXhwIjoyMDY0MzkxMDA0fQ.9s1aR4nocxWRvP91e3TiUylZsSji93iAdEjWQ38taSQ
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Metoda niedozwolona' });
-  }
-
-  const { email, plan } = req.body;
-
-  if (!email || !plan) {
-    return res.status(400).json({ error: 'Brak emaila lub planu' });
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const { error } = await supabase.from('pending_plans').upsert(
-      {
-        email,
-        plan_name: plan,
-        created_at: new Date().toISOString(),
-      },
-      { onConflict: 'email' }
-    );
+    const { email, plan } = req.body;
 
-    if (error) {
-      console.error('❌ Supabase error:', error);
-      return res.status(500).json({ error: error.message || 'Błąd zapisu' });
+    if (!email || !plan) {
+      return res.status(400).json({ error: 'Brakuje emaila lub planu' });
     }
 
-    return res.status(200).json({ message: 'Plan zapisany pomyślnie' });
+    const { error } = await supabase
+      .from('pending_plans')
+      .upsert({ email, plan }, { onConflict: 'email' });
 
+    if (error) {
+      console.error('❌ Błąd Supabase:', error);
+      return res.status(500).json({ error: 'Błąd zapisu do bazy danych' });
+    }
+
+    return res.status(200).json({ message: '✅ Plan zapisany poprawnie' });
   } catch (err) {
-    console.error('❌ Nieoczekiwany wyjątek:', err);
-    return res.status(500).json({ error: err.message || 'Internal Server Error' });
+    console.error('❌ Błąd serwera:', err);
+    return res.status(500).json({ error: 'Błąd serwera' });
   }
 };
