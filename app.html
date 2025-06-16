@@ -103,44 +103,50 @@
     }
 
     sendButton.addEventListener("click", async () => {
-      const message = userInput.value.trim();
-      const promptKey = promptSelector.value;
+  const message = userInput.value.trim();
+  const promptKey = promptSelector.value;
 
-      if (!message || !promptKey) {
-        alert("Wpisz wiadomość i wybierz temat!");
-        return;
-      }
+  if (!message || !promptKey) {
+    alert("Wpisz wiadomość i wybierz temat!");
+    return;
+  }
 
-      appendMessage(message, 'user');
-      userInput.value = "";
+  if (message.length > 1000) {
+    alert("Twoja wiadomość jest zbyt długa (maks. 1000 znaków). Skróć ją.");
+    return;
+  }
 
-      try {
-        const jwt = (await supabase.auth.getSession()).data.session.access_token;
+  appendMessage(message, 'user');
+  userInput.value = "";
 
-        const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwt}`
-          },
-          body: JSON.stringify({
-            prompt_key: promptKey,
-            user_input: message
-          })
-        });
+  try {
+    const jwt = (await supabase.auth.getSession()).data.session.access_token;
 
-        if (!res.ok) {
-          const err = await res.text();
-          appendMessage(`❌ Błąd serwera: ${err}`, 'ai');
-          return;
-        }
-
-        const { reply } = await res.json();
-        appendMessage(reply, 'ai');
-      } catch (error) {
-        appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
-      }
+    const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`
+      },
+      body: JSON.stringify({
+        prompt_key: promptKey,
+        user_input: message
+      })
     });
+
+    if (!res.ok) {
+      const err = await res.text();
+      appendMessage(`❌ Błąd serwera: ${err}`, 'ai');
+      return;
+    }
+
+    const { reply } = await res.json();
+    appendMessage(reply, 'ai');
+  } catch (error) {
+    appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
+  }
+});
+
 
     async function fetchPrompts(jwt) {
       try {
