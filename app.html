@@ -114,10 +114,32 @@
       appendMessage(message, 'user');
       userInput.value = "";
 
-      // Placeholder – tutaj pojawi się zapytanie do OpenAI
-      setTimeout(() => {
-        appendMessage("🔧 (Tutaj pojawi się odpowiedź AI po integracji z OpenAI)", 'ai');
-      }, 500);
+      try {
+        const jwt = (await supabase.auth.getSession()).data.session.access_token;
+
+        const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`
+          },
+          body: JSON.stringify({
+            prompt_key: promptKey,
+            user_input: message
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          appendMessage(`❌ Błąd serwera: ${err}`, 'ai');
+          return;
+        }
+
+        const { reply } = await res.json();
+        appendMessage(reply, 'ai');
+      } catch (error) {
+        appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
+      }
     });
 
     async function fetchPrompts(jwt) {
@@ -141,7 +163,7 @@
         prompts.forEach(p => {
           const opt = document.createElement("option");
           opt.value = p.prompt_key;
-          opt.textContent = p.description; // Zakładamy, że masz pole description
+          opt.textContent = p.description;
           promptSelector.appendChild(opt);
         });
 
