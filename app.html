@@ -114,15 +114,15 @@
       appendMessage(message, 'user');
       userInput.value = "";
 
-      // Placeholder na odpowiedź AI
+      // Placeholder – tutaj pojawi się zapytanie do OpenAI
       setTimeout(() => {
-        appendMessage("🔧 (Tutaj pojawi się odpowiedź AI po integracji)", 'ai');
+        appendMessage("🔧 (Tutaj pojawi się odpowiedź AI po integracji z OpenAI)", 'ai');
       }, 500);
     });
 
     async function fetchPrompts(jwt) {
       try {
-        const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
+        const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${jwt}`
@@ -134,12 +134,14 @@
           return;
         }
 
-        const prompts = await res.json();
+        const { prompts } = await res.json();
+        console.log("📚 Dostępne prompty:", prompts);
+
         promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
         prompts.forEach(p => {
           const opt = document.createElement("option");
           opt.value = p.prompt_key;
-          opt.textContent = p.description;
+          opt.textContent = p.description; // Zakładamy, że masz pole description
           promptSelector.appendChild(opt);
         });
 
@@ -170,17 +172,13 @@
           }
         });
 
-        if (!res.ok) {
-          console.error('❌ Błąd aktywacji planu:', await res.text());
-          return;
-        }
-
-        const data = await res.json();
-
-        if (data?.message === 'Brak planu do aktywacji') {
-          console.log('ℹ️ Plan już był aktywowany wcześniej.');
-        } else {
+        if (res.ok) {
+          const data = await res.json();
           console.log('✅ Plan aktywowany:', data);
+        } else if (res.status === 404) {
+          console.log('ℹ️ Brak planu oczekującego (pending)');
+        } else {
+          console.error('❌ Błąd aktywacji planu:', await res.text());
         }
       } catch (err) {
         console.error('❌ Wyjątek podczas aktywacji planu:', err);
