@@ -123,32 +123,47 @@
   appendMessage(message, 'user');
   userInput.value = "";
 
-  try {
-    const jwt = (await supabase.auth.getSession()).data.session.access_token;
+ try {
+  const jwt = (await supabase.auth.getSession()).data.session.access_token;
 
-    const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwt}`
-      },
-      body: JSON.stringify({
-        prompt_key: promptKey,
-        user_input: message
-      })
-    });
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwt}`
+    },
+    body: JSON.stringify({
+      prompt_key: promptKey,
+      user_input: message
+    })
+  });
 
-    if (!res.ok) {
-      const err = await res.text();
-      appendMessage(`❌ Błąd serwera: ${err}`, 'ai');
-      return;
+  if (!res.ok) {
+    const errText = await res.text();
+    try {
+      const errJson = JSON.parse(errText);
+
+      if (errJson?.error?.includes('Input too long')) {
+        appendMessage("✋ Twoja wiadomość jest za długa. Spróbuj ją skrócić.", 'ai');
+      } else if (errJson?.error?.includes('Prompt not found')) {
+        appendMessage("🔍 Nie znaleziono odpowiedniego promptu dla Twojego planu.", 'ai');
+      } else if (errJson?.error?.includes('Unauthorized')) {
+        appendMessage("🔐 Brak autoryzacji. Zaloguj się ponownie.", 'ai');
+      } else {
+        appendMessage(`❌ Błąd serwera: ${errJson.error}`, 'ai');
+      }
+    } catch (e) {
+      appendMessage(`❌ Wystąpił nieznany błąd: ${errText}`, 'ai');
     }
-
-    const { reply } = await res.json();
-    appendMessage(reply, 'ai');
-  } catch (error) {
-    appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
+    return;
   }
+
+  const { reply } = await res.json();
+  appendMessage(reply, 'ai');
+} catch (error) {
+  appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
+}
+
 });
 
 
