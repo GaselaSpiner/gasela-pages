@@ -104,6 +104,10 @@
 
     sendButton.addEventListener("click", async () => {
   const message = userInput.value.trim();
+      if (message.length > window.maxInputLength) {
+  alert(`Wiadomość jest za długa. Limit: ${window.maxInputLength} znaków.`);
+  return;
+}
   const promptKey = promptSelector.value;
 
   if (!message || !promptKey) {
