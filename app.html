@@ -213,42 +213,59 @@
       }
     }
 
-    async function checkSessionAndPlan() {
-      const session = await waitForSession();
+ async function checkSessionAndPlan() {
+  const session = await waitForSession();
 
-      if (!session) {
-        statusMsg.textContent = '🔒 Nie udało się przywrócić sesji. Przekierowanie do logowania...';
-        setTimeout(() => window.location.href = 'logowanie.html', 2000);
-        return;
-      }
+  if (!session) {
+    statusMsg.textContent = '🔒 Nie udało się przywrócić sesji. Przekierowanie do logowania...';
+    setTimeout(() => window.location.href = 'logowanie.html', 2000);
+    return;
+  }
 
-      await aktywujPlanJeśliIstnieje(session);
+  await aktywujPlanJeśliIstnieje(session);
 
-      const userId = session.user.id;
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+  const userId = session.user.id;
+  welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      const { data: subData, error: subError } = await supabase
-        .from('subscriptions')
-        .select('plan_name, start_date, end_date')
-        .eq('user_id', userId)
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .single();
+  const { data: subData, error: subError } = await supabase
+    .from('subscriptions')
+    .select('plan_name, start_date, end_date')
+    .eq('user_id', userId)
+    .order('end_date', { ascending: false })
+    .limit(1)
+    .single();
 
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
 
-      if (subError || !subData || !subData.end_date || new Date(subData.end_date) < now) {
-        statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
-        setTimeout(() => window.location.href = `kup-plan.html`, 3000);
-        return;
-      }
+  if (subError || !subData || !subData.end_date || new Date(subData.end_date) < now) {
+    statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
+    setTimeout(() => window.location.href = `kup-plan.html`, 3000);
+    return;
+  }
 
-      const endDateFormatted = new Date(subData.end_date).toISOString().split('T')[0];
-      statusMsg.textContent = `✅ Plan aktywny do ${endDateFormatted}.`;
+  const endDateFormatted = new Date(subData.end_date).toISOString().split('T')[0];
+  statusMsg.textContent = `✅ Plan aktywny do ${endDateFormatted}.`;
 
-      await fetchPrompts(session.access_token);
-    }
+  // 🟡 Dynamiczne ograniczenie długości inputu
+  const currentPlanName = subData.plan_name;
+  function getMaxInputLength(planName) {
+    if (planName === 'pro') return 800;
+    if (planName === 'mistrz') return 1000;
+    return 600; // START lub inne
+  }
+  const maxInputLength = getMaxInputLength(currentPlanName);
+
+  // 🟡 Przypisz limit do pola tekstowego
+  userInput.setAttribute("maxlength", maxInputLength);
+
+  // 🟡 Zapamiętaj plan i limit do użycia w sendButton (jeśli chcesz, możesz przekazać przez zmienną globalną)
+  window.currentPlanName = currentPlanName;
+  window.maxInputLength = maxInputLength;
+
+  await fetchPrompts(session.access_token);
+}
+
 
     async function logout() {
       await supabase.auth.signOut();
