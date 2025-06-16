@@ -63,6 +63,20 @@
 
   <div class="chat-container">
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
+
+    <div>
+      <label for="promptSelector">🎯 Wybierz temat:</label>
+      <select id="promptSelector">
+        <option value="">— wybierz temat —</option>
+        <option value="forehand_intro">Forehand – wprowadzenie</option>
+        <option value="mental_focus">Koncentracja – trening mentalny</option>
+      </select>
+    </div>
+
+    <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
+
+    <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px;"></textarea>
+    <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
   </div>
 
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
@@ -81,7 +95,7 @@
       for (let i = 0; i < retries; i++) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.access_token) return session;
-        await new Promise(r => setTimeout(r, 200)); // czekaj 200ms
+        await new Promise(r => setTimeout(r, 200));
       }
       return null;
     }
@@ -165,6 +179,38 @@
     }
 
     checkSessionAndPlan();
+
+    // 🎯 Czat interaktywny (wczesna wersja)
+    const messagesDiv = document.getElementById("messages");
+    const userInput = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    const promptSelector = document.getElementById("promptSelector");
+
+    function appendMessage(text, sender) {
+      const messageEl = document.createElement("div");
+      messageEl.style.marginBottom = "10px";
+      messageEl.innerHTML = `<strong>${sender === 'user' ? 'Ty' : 'AI'}:</strong> ${text}`;
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      const promptKey = promptSelector.value;
+
+      if (!message || !promptKey) {
+        alert("Wpisz wiadomość i wybierz temat!");
+        return;
+      }
+
+      appendMessage(message, 'user');
+      userInput.value = "";
+
+      // ⏳ Placeholder – później tu wstawimy zapytanie do funkcji ask_openai
+      setTimeout(() => {
+        appendMessage("🔧 (Tutaj pojawi się odpowiedź AI po integracji)", 'ai');
+      }, 500);
+    });
   </script>
 </body>
 </html>
