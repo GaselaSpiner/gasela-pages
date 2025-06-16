@@ -64,19 +64,17 @@
   <div class="chat-container">
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
 
-    <div>
+    <div id="chat-ui" style="display: none;">
       <label for="promptSelector">🎯 Wybierz temat:</label>
       <select id="promptSelector">
         <option value="">— wybierz temat —</option>
-        <option value="forehand_intro">Forehand – wprowadzenie</option>
-        <option value="mental_focus">Koncentracja – trening mentalny</option>
       </select>
+
+      <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
+
+      <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px;"></textarea>
+      <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
     </div>
-
-    <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
-
-    <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px;"></textarea>
-    <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
   </div>
 
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
@@ -90,6 +88,68 @@
 
     const statusMsg = document.getElementById('status-msg');
     const welcome = document.getElementById('welcome');
+    const chatUI = document.getElementById("chat-ui");
+    const messagesDiv = document.getElementById("messages");
+    const userInput = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    const promptSelector = document.getElementById("promptSelector");
+
+    function appendMessage(text, sender) {
+      const messageEl = document.createElement("div");
+      messageEl.style.marginBottom = "10px";
+      messageEl.innerHTML = `<strong>${sender === 'user' ? 'Ty' : 'AI'}:</strong> ${text}`;
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      const promptKey = promptSelector.value;
+
+      if (!message || !promptKey) {
+        alert("Wpisz wiadomość i wybierz temat!");
+        return;
+      }
+
+      appendMessage(message, 'user');
+      userInput.value = "";
+
+      // Placeholder – tutaj pojawi się zapytanie do OpenAI
+      setTimeout(() => {
+        appendMessage("🔧 (Tutaj pojawi się odpowiedź AI po integracji z OpenAI)", 'ai');
+      }, 500);
+    });
+
+    async function fetchPrompts(jwt) {
+      try {
+        const res = await fetch('https://lmussgaiutaldicolyba.functions.supabase.co/get_prompts_by_plan', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${jwt}`
+          }
+        });
+
+        if (!res.ok) {
+          console.error("❌ Błąd pobierania promptów:", await res.text());
+          return;
+        }
+
+        const prompts = await res.json();
+        console.log("📚 Dostępne prompty:", prompts);
+
+        promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
+        prompts.forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p.prompt_key;
+          opt.textContent = p.title;
+          promptSelector.appendChild(opt);
+        });
+
+        chatUI.style.display = 'block';
+      } catch (err) {
+        console.error("❌ Błąd sieci:", err);
+      }
+    }
 
     async function waitForSession(retries = 10) {
       for (let i = 0; i < retries; i++) {
@@ -102,10 +162,7 @@
 
     async function aktywujPlanJeśliIstnieje(session) {
       const jwt = session?.access_token;
-      if (!jwt) {
-        console.warn('❌ Brak JWT, nie wywołuję aktywacji planu');
-        return;
-      }
+      if (!jwt) return;
 
       try {
         const res = await fetch('https://lmussgaiutaldicolyba.functions.supabase.co/aktywuj_plan', {
@@ -133,12 +190,10 @@
 
       if (!session) {
         statusMsg.textContent = '🔒 Nie udało się przywrócić sesji. Przekierowanie do logowania...';
-        console.warn('❌ Sesja nie istnieje lub brak access_token');
         setTimeout(() => window.location.href = 'logowanie.html', 2000);
         return;
       }
 
-      console.log('📦 JWT:', session.access_token);
       await aktywujPlanJeśliIstnieje(session);
 
       const userId = session.user.id;
@@ -155,22 +210,16 @@
       const now = new Date();
       now.setHours(0, 0, 0, 0);
 
-      if (
-        subError ||
-        !subData ||
-        !subData.end_date ||
-        new Date(subData.end_date).setHours(0, 0, 0, 0) < now.getTime()
-      ) {
+      if (subError || !subData || !subData.end_date || new Date(subData.end_date) < now) {
         statusMsg.textContent = '⚠️ Twój plan wygasł lub nie istnieje. Przekierowanie do zakupu...';
         setTimeout(() => window.location.href = `kup-plan.html`, 3000);
         return;
       }
 
-      const endDate = new Date(subData.end_date);
-      endDate.setHours(0, 0, 0, 0);
-      const endDateFormatted = endDate.toISOString().split('T')[0];
+      const endDateFormatted = new Date(subData.end_date).toISOString().split('T')[0];
+      statusMsg.textContent = `✅ Plan aktywny do ${endDateFormatted}.`;
 
-      statusMsg.textContent = `✅ Plan aktywny do ${endDateFormatted}. Czat trenerski będzie dostępny poniżej.`;
+      await fetchPrompts(session.access_token);
     }
 
     async function logout() {
@@ -179,38 +228,6 @@
     }
 
     checkSessionAndPlan();
-
-    // 🎯 Czat interaktywny (wczesna wersja)
-    const messagesDiv = document.getElementById("messages");
-    const userInput = document.getElementById("userInput");
-    const sendButton = document.getElementById("sendButton");
-    const promptSelector = document.getElementById("promptSelector");
-
-    function appendMessage(text, sender) {
-      const messageEl = document.createElement("div");
-      messageEl.style.marginBottom = "10px";
-      messageEl.innerHTML = `<strong>${sender === 'user' ? 'Ty' : 'AI'}:</strong> ${text}`;
-      messagesDiv.appendChild(messageEl);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    sendButton.addEventListener("click", async () => {
-      const message = userInput.value.trim();
-      const promptKey = promptSelector.value;
-
-      if (!message || !promptKey) {
-        alert("Wpisz wiadomość i wybierz temat!");
-        return;
-      }
-
-      appendMessage(message, 'user');
-      userInput.value = "";
-
-      // ⏳ Placeholder – później tu wstawimy zapytanie do funkcji ask_openai
-      setTimeout(() => {
-        appendMessage("🔧 (Tutaj pojawi się odpowiedź AI po integracji)", 'ai');
-      }, 500);
-    });
   </script>
 </body>
 </html>
