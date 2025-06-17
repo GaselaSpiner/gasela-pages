@@ -126,6 +126,22 @@
  try {
   const jwt = (await supabase.auth.getSession()).data.session.access_token;
 
+  // 🔁 Najpierw: verify_and_increment
+  const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!verifyRes.ok) {
+    const { error } = await verifyRes.json();
+    appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+    return;
+  }
+
+  // ✅ Dopiero potem: ask_openai
   const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
     method: 'POST',
     headers: {
