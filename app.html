@@ -39,7 +39,7 @@
       color: #444;
       white-space: pre-line;
     }
-    .logout-btn {
+    .logout-btn, .send-btn {
       margin-top: 30px;
       padding: 10px 18px;
       background-color: #f6b500;
@@ -50,8 +50,21 @@
       font-size: 1rem;
       cursor: pointer;
     }
-    .logout-btn:hover {
+    .logout-btn:hover, .send-btn:hover {
       background-color: #e3a700;
+    }
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-top: 2px solid #000;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -71,7 +84,7 @@
       <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
 
       <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px;"></textarea>
-      <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
+      <button id="sendButton" class="send-btn">Wyślij <span id="spinner" style="display:none;" class="spinner"></span></button>
     </div>
   </div>
 
@@ -81,7 +94,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'public-anon-key' // <- podmień na właściwy klucz anon
+      'public-anon-key'
     );
 
     const statusMsg = document.getElementById('status-msg');
@@ -91,6 +104,7 @@
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
+    const spinner = document.getElementById("spinner");
 
     function appendMessage(text, sender) {
       const messageEl = document.createElement("div");
@@ -138,7 +152,6 @@
     sendButton.addEventListener("click", async () => {
       const message = userInput.value.trim();
       const promptKey = promptSelector.value;
-
       if (!message || !promptKey) {
         alert("Wpisz wiadomość i wybierz temat!");
         return;
@@ -146,6 +159,7 @@
 
       appendMessage(message, 'user');
       userInput.value = "";
+      spinner.style.display = 'inline-block';
 
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
@@ -163,6 +177,7 @@
         const { error } = await verifyRes.json();
         appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
         setTimeout(() => window.location.href = 'kup-plan.html', 2000);
+        spinner.style.display = 'none';
         return;
       }
 
@@ -172,16 +187,13 @@
           'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`
         },
-        body: JSON.stringify({
-          prompt_key: promptKey,
-          user_input: message
-        })
+        body: JSON.stringify({ prompt_key: promptKey, user_input: message })
       });
 
       const data = await res.json();
       appendMessage(data.reply, 'ai');
-
       await updateMessageLimit(jwt, userId);
+      spinner.style.display = 'none';
     });
 
     async function logout() {
@@ -197,7 +209,6 @@
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      // Sprawdzenie, czy plan już istnieje
       const { data: hasPlan } = await supabase
         .from('subscriptions')
         .select('id')
@@ -208,9 +219,7 @@
       if (!hasPlan) {
         await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${jwt}`
-          }
+          headers: { Authorization: `Bearer ${jwt}` }
         });
       }
 
@@ -235,13 +244,14 @@
 
       const remaining = limitData.total_limit - limitData.used_messages;
       const endDate = subData.end_date ? new Date(subData.end_date).toISOString().split('T')[0] : 'brak daty';
-      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz ${remaining} wiadomości.`;
+      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.
+
+🔥 Masz ${remaining} wiadomości.`;
 
       chatUI.style.display = 'block';
       const plan = subData.plan_name;
       window.maxInputLength = plan === 'pro' ? 800 : plan === 'mistrz' ? 1000 : 600;
       userInput.setAttribute("maxlength", window.maxInputLength);
-
       await fetchPrompts(jwt);
     }
 
