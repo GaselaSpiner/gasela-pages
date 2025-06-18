@@ -95,6 +95,9 @@
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
 
+    let userId = null;
+    let planEndDate = null;
+
     function appendMessage(text, sender) {
       const messageEl = document.createElement("div");
       messageEl.style.marginBottom = "10px";
@@ -150,6 +153,17 @@
 
         const data = await res.json();
         appendMessage(data.reply, 'ai');
+
+        // 🔄 Zaktualizuj licznik wiadomości
+        const { data: limitDataAfter } = await supabase
+          .from('message_limits')
+          .select('total_limit, used_messages')
+          .eq('user_id', userId)
+          .single();
+
+        const remainingAfter = limitDataAfter.total_limit - limitDataAfter.used_messages;
+        statusMsg.textContent = `✅ Plan aktywny do ${planEndDate}.\n\n🔥 Masz jeszcze ${remainingAfter} wiadomości do wykorzystania – powodzenia!`;
+
       } catch (error) {
         appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
       }
@@ -183,7 +197,7 @@
       if (!session) return;
 
       const jwt = session.access_token;
-      const userId = session.user.id;
+      userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
       const { data: subData } = await supabase
@@ -194,6 +208,8 @@
         .limit(1)
         .single();
 
+      planEndDate = new Date(subData.end_date).toISOString().split('T')[0];
+
       const { data: limitData } = await supabase
         .from('message_limits')
         .select('total_limit, used_messages')
@@ -201,10 +217,8 @@
         .single();
 
       const remaining = limitData.total_limit - limitData.used_messages;
-      statusMsg.textContent = `✅ Plan aktywny do ${new Date(subData.end_date).toISOString().split('T')[0]}.`;
-      statusMsg.textContent += `\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+      statusMsg.textContent = `✅ Plan aktywny do ${planEndDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
 
-      // 🟡 Włącz interfejs czatu
       chatUI.style.display = 'block';
 
       const currentPlanName = subData.plan_name;
