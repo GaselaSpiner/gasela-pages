@@ -149,11 +149,17 @@
         });
 
         if (!verifyRes.ok) {
-          const { error } = await verifyRes.json();
-          appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
-          return;
-        }
+  const { error } = await verifyRes.json();
+  appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
 
+  if (error.includes("Limit wiadomości został wyczerpany")) {
+    setTimeout(() => {
+      window.location.href = 'kup-plan.html';
+    }, 2000); // 2 sekundy po komunikacie
+  }
+
+  return;
+}
         const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
           method: 'POST',
           headers: {
