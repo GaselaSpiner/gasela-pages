@@ -1,12 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gasela Spiner – Czat Trenera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <style>
     body {
+      margin: 0;
       font-family: 'Montserrat', sans-serif;
       background: #ffffff;
       color: #000;
@@ -23,6 +26,7 @@
       color: #f6b500;
       font-size: 1.8rem;
       margin-bottom: 20px;
+      text-align: center;
     }
     .chat-container {
       width: 100%;
@@ -39,7 +43,7 @@
       color: #444;
       white-space: pre-line;
     }
-    .logout-btn, .send-btn {
+    .logout-btn {
       margin-top: 30px;
       padding: 10px 18px;
       background-color: #f6b500;
@@ -50,21 +54,8 @@
       font-size: 1rem;
       cursor: pointer;
     }
-    .logout-btn:hover, .send-btn:hover {
+    .logout-btn:hover {
       background-color: #e3a700;
-    }
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #fff;
-      border-top: 2px solid #000;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-left: 10px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -84,7 +75,7 @@
       <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
 
       <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px;"></textarea>
-      <button id="sendButton" class="send-btn">Wyślij <span id="spinner" style="display:none;" class="spinner"></span></button>
+      <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
     </div>
   </div>
 
@@ -94,7 +85,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'public-anon-key'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
     );
 
     const statusMsg = document.getElementById('status-msg');
@@ -104,7 +95,6 @@
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
-    const spinner = document.getElementById("spinner");
 
     function appendMessage(text, sender) {
       const messageEl = document.createElement("div");
@@ -114,10 +104,84 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
+    async function updateMessageLimit(jwt, userId) {
+      const { data: limitData, error } = await supabase
+        .from('message_limits')
+        .select('total_limit, used_messages')
+        .eq('user_id', userId)
+        .single();
+
+      if (error || !limitData) {
+        statusMsg.textContent = '❓ Nie udało się pobrać limitu wiadomości.';
+        return;
+      }
+
+      const remaining = limitData.total_limit - limitData.used_messages;
+      statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+    }
+
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      if (message.length > window.maxInputLength) {
+        alert(`Wiadomość jest za długa. Limit: ${window.maxInputLength} znaków.`);
+        return;
+      }
+
+      const promptKey = promptSelector.value;
+      if (!message || !promptKey) {
+        alert("Wpisz wiadomość i wybierz temat!");
+        return;
+      }
+
+      appendMessage(message, 'user');
+      userInput.value = "";
+
+      try {
+        const session = (await supabase.auth.getSession()).data.session;
+        const jwt = session.access_token;
+        const userId = session.user.id;
+
+        const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!verifyRes.ok) {
+          const { error } = await verifyRes.json();
+          appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+          return;
+        }
+
+        const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`
+          },
+          body: JSON.stringify({
+            prompt_key: promptKey,
+            user_input: message
+          })
+        });
+
+        const data = await res.json();
+        appendMessage(data.reply, 'ai');
+
+        await updateMessageLimit(jwt, userId);
+      } catch (error) {
+        appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
+      }
+    });
+
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+        method: 'GET',
         headers: { Authorization: `Bearer ${jwt}` }
       });
+
       const { prompts } = await res.json();
       promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
       prompts.forEach(p => {
@@ -127,74 +191,6 @@
         promptSelector.appendChild(opt);
       });
     }
-
-    async function updateMessageLimit(jwt, userId) {
-      const { data: limitData, error } = await supabase
-        .from('message_limits')
-        .select('total_limit, used_messages')
-        .eq('user_id', userId)
-        .single();
-
-      if (!limitData || error) {
-        statusMsg.textContent = '❓ Nie udało się pobrać limitu.';
-        return;
-      }
-
-      const remaining = limitData.total_limit - limitData.used_messages;
-      if (remaining <= 0) {
-        window.location.href = 'kup-plan.html';
-        return;
-      }
-
-      statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości – powodzenia!`;
-    }
-
-    sendButton.addEventListener("click", async () => {
-      const message = userInput.value.trim();
-      const promptKey = promptSelector.value;
-      if (!message || !promptKey) {
-        alert("Wpisz wiadomość i wybierz temat!");
-        return;
-      }
-
-      appendMessage(message, 'user');
-      userInput.value = "";
-      spinner.style.display = 'inline-block';
-
-      const session = (await supabase.auth.getSession()).data.session;
-      const jwt = session.access_token;
-      const userId = session.user.id;
-
-      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${jwt}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!verifyRes.ok) {
-        const { error } = await verifyRes.json();
-        appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
-        setTimeout(() => window.location.href = 'kup-plan.html', 2000);
-        spinner.style.display = 'none';
-        return;
-      }
-
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ prompt_key: promptKey, user_input: message })
-      });
-
-      const data = await res.json();
-      appendMessage(data.reply, 'ai');
-      await updateMessageLimit(jwt, userId);
-      spinner.style.display = 'none';
-    });
 
     async function logout() {
       await supabase.auth.signOut();
@@ -209,21 +205,15 @@
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      const { data: hasPlan } = await supabase
-        .from('subscriptions')
-        .select('id')
-        .eq('user_id', userId)
-        .limit(1)
-        .maybeSingle();
+      // 🧩 Spróbuj aktywować plan przy pierwszym logowaniu
+      await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        }
+      });
 
-      if (!hasPlan) {
-        await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${jwt}` }
-        });
-      }
-
-      const { data: subData } = await supabase
+      const { data: subData, error: subError } = await supabase
         .from('subscriptions')
         .select('plan_name, end_date')
         .eq('user_id', userId)
@@ -231,27 +221,31 @@
         .limit(1)
         .maybeSingle();
 
-      const { data: limitData } = await supabase
+      if (subError || !subData) {
+        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
+        return;
+      }
+
+      const { data: limitData, error: limitError } = await supabase
         .from('message_limits')
         .select('total_limit, used_messages')
         .eq('user_id', userId)
-        .maybeSingle();
+        .single();
 
-      if (!subData || !limitData) {
-        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu lub limitów.';
+      if (limitError || !limitData) {
+        statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
         return;
       }
 
       const remaining = limitData.total_limit - limitData.used_messages;
       const endDate = subData.end_date ? new Date(subData.end_date).toISOString().split('T')[0] : 'brak daty';
-      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.
-
-🔥 Masz ${remaining} wiadomości.`;
+      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
 
       chatUI.style.display = 'block';
       const plan = subData.plan_name;
       window.maxInputLength = plan === 'pro' ? 800 : plan === 'mistrz' ? 1000 : 600;
       userInput.setAttribute("maxlength", window.maxInputLength);
+
       await fetchPrompts(jwt);
     }
 
