@@ -95,15 +95,28 @@
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
 
-    let userId = null;
-    let planEndDate = null;
-
     function appendMessage(text, sender) {
       const messageEl = document.createElement("div");
       messageEl.style.marginBottom = "10px";
       messageEl.innerHTML = `<strong>${sender === 'user' ? 'Ty' : 'AI'}:</strong> ${text}`;
       messagesDiv.appendChild(messageEl);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function updateMessageLimit(jwt, userId) {
+      const { data: limitData, error } = await supabase
+        .from('message_limits')
+        .select('total_limit, used_messages')
+        .eq('user_id', userId)
+        .single();
+
+      if (error || !limitData) {
+        statusMsg.textContent = '❓ Nie udało się pobrać limitu wiadomości.';
+        return;
+      }
+
+      const remaining = limitData.total_limit - limitData.used_messages;
+      statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
     }
 
     sendButton.addEventListener("click", async () => {
@@ -123,7 +136,9 @@
       userInput.value = "";
 
       try {
-        const jwt = (await supabase.auth.getSession()).data.session.access_token;
+        const session = (await supabase.auth.getSession()).data.session;
+        const jwt = session.access_token;
+        const userId = session.user.id;
 
         const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
           method: 'POST',
@@ -154,16 +169,7 @@
         const data = await res.json();
         appendMessage(data.reply, 'ai');
 
-        // 🔄 Zaktualizuj licznik wiadomości
-        const { data: limitDataAfter } = await supabase
-          .from('message_limits')
-          .select('total_limit, used_messages')
-          .eq('user_id', userId)
-          .single();
-
-        const remainingAfter = limitDataAfter.total_limit - limitDataAfter.used_messages;
-        statusMsg.textContent = `✅ Plan aktywny do ${planEndDate}.\n\n🔥 Masz jeszcze ${remainingAfter} wiadomości do wykorzystania – powodzenia!`;
-
+        await updateMessageLimit(jwt, userId); // 🟢 Aktualizacja licznika po wysłaniu
       } catch (error) {
         appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
       }
@@ -172,9 +178,7 @@
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        headers: { Authorization: `Bearer ${jwt}` }
       });
 
       const { prompts } = await res.json();
@@ -197,34 +201,42 @@
       if (!session) return;
 
       const jwt = session.access_token;
-      userId = session.user.id;
+      const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
-      const { data: subData } = await supabase
+      const { data: subData, error: subError } = await supabase
         .from('subscriptions')
         .select('plan_name, end_date')
         .eq('user_id', userId)
         .order('end_date', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      planEndDate = new Date(subData.end_date).toISOString().split('T')[0];
+      if (subError || !subData) {
+        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
+        return;
+      }
 
-      const { data: limitData } = await supabase
+      const { data: limitData, error: limitError } = await supabase
         .from('message_limits')
         .select('total_limit, used_messages')
         .eq('user_id', userId)
         .single();
 
+      if (limitError || !limitData) {
+        statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
+        return;
+      }
+
       const remaining = limitData.total_limit - limitData.used_messages;
-      statusMsg.textContent = `✅ Plan aktywny do ${planEndDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+      const endDate = subData.end_date ? new Date(subData.end_date).toISOString().split('T')[0] : 'brak daty';
+      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
 
       chatUI.style.display = 'block';
-
-      const currentPlanName = subData.plan_name;
-      window.maxInputLength = currentPlanName === 'pro' ? 800 : currentPlanName === 'mistrz' ? 1000 : 600;
-
+      const plan = subData.plan_name;
+      window.maxInputLength = plan === 'pro' ? 800 : plan === 'mistrz' ? 1000 : 600;
       userInput.setAttribute("maxlength", window.maxInputLength);
+
       await fetchPrompts(jwt);
     }
 
