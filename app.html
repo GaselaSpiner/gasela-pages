@@ -40,6 +40,7 @@
       margin-bottom: 20px;
       font-size: 0.95rem;
       color: #444;
+      white-space: pre-line;
     }
     .logout-btn {
       margin-top: 30px;
@@ -63,7 +64,6 @@
 
   <div class="chat-container">
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
-    <p class="info" id="messages-left"></p>
 
     <div id="chat-ui" style="display: none;">
       <label for="promptSelector">🎯 Wybierz temat:</label>
@@ -84,7 +84,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'PUBLIC_ANON_KEY_TUTAJ'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
     );
 
     const statusMsg = document.getElementById('status-msg');
@@ -94,7 +94,6 @@
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
-    const messagesLeft = document.getElementById("messages-left");
 
     function appendMessage(text, sender) {
       const messageEl = document.createElement("div");
@@ -104,25 +103,15 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    async function updateMessageCount(userId) {
-      const { data, error } = await supabase
-        .from('message_limits')
-        .select('total_limit, used_messages')
-        .eq('user_id', userId)
-        .single();
-
-      if (error || !data) {
-        messagesLeft.textContent = '❓ Nie udało się pobrać limitu wiadomości.';
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      if (message.length > window.maxInputLength) {
+        alert(`Wiadomość jest za długa. Limit: ${window.maxInputLength} znaków.`);
         return;
       }
 
-      const remaining = data.total_limit - data.used_messages;
-      messagesLeft.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
-    }
-
-    sendButton.addEventListener("click", async () => {
-      const message = userInput.value.trim();
-      if (!message || !promptSelector.value) {
+      const promptKey = promptSelector.value;
+      if (!message || !promptKey) {
         alert("Wpisz wiadomość i wybierz temat!");
         return;
       }
@@ -130,43 +119,99 @@
       appendMessage(message, 'user');
       userInput.value = "";
 
-      const jwt = (await supabase.auth.getSession()).data.session.access_token;
+      try {
+        const jwt = (await supabase.auth.getSession()).data.session.access_token;
 
-      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' }
-      });
+        const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-      if (!verifyRes.ok) {
-        const { error } = await verifyRes.json();
-        appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
-        return;
+        if (!verifyRes.ok) {
+          const { error } = await verifyRes.json();
+          appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+          return;
+        }
+
+        const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`
+          },
+          body: JSON.stringify({
+            prompt_key: promptKey,
+            user_input: message
+          })
+        });
+
+        const data = await res.json();
+        appendMessage(data.reply, 'ai');
+      } catch (error) {
+        appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
       }
-
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ prompt_key: promptSelector.value, user_input: message })
-      });
-
-      const { reply } = await res.json();
-      appendMessage(reply, 'ai');
-
-      const user = (await supabase.auth.getUser()).data.user;
-      await updateMessageCount(user.id);
     });
 
-    async function checkSessionAndPlan() {
-      const session = await supabase.auth.getSession();
-      const user = session.data.session.user;
-      welcome.textContent = `Witaj, ${user.email}`;
-      chatUI.style.display = 'block';
-      await updateMessageCount(user.id);
+    async function fetchPrompts(jwt) {
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        }
+      });
+
+      const { prompts } = await res.json();
+      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
+      prompts.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.prompt_key;
+        opt.textContent = p.description;
+        promptSelector.appendChild(opt);
+      });
     }
 
     async function logout() {
       await supabase.auth.signOut();
       window.location.href = 'logowanie.html';
+    }
+
+    async function checkSessionAndPlan() {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) return;
+
+      const jwt = session.access_token;
+      const userId = session.user.id;
+      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+
+      const { data: subData } = await supabase
+        .from('subscriptions')
+        .select('plan_name, end_date')
+        .eq('user_id', userId)
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .single();
+
+      const { data: limitData } = await supabase
+        .from('message_limits')
+        .select('total_limit, used_messages')
+        .eq('user_id', userId)
+        .single();
+
+      const remaining = limitData.total_limit - limitData.used_messages;
+      statusMsg.textContent = `✅ Plan aktywny do ${new Date(subData.end_date).toISOString().split('T')[0]}.`;
+      statusMsg.textContent += `\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+
+      // 🟡 Włącz interfejs czatu
+      chatUI.style.display = 'block';
+
+      const currentPlanName = subData.plan_name;
+      window.maxInputLength = currentPlanName === 'pro' ? 800 : currentPlanName === 'mistrz' ? 1000 : 600;
+
+      userInput.setAttribute("maxlength", window.maxInputLength);
+      await fetchPrompts(jwt);
     }
 
     checkSessionAndPlan();
