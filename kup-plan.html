@@ -58,22 +58,8 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .plan button.loading {
-      opacity: 0.7;
-      cursor: wait;
-    }
-    .plan button.loading::after {
-      content: " ⏳";
-    }
-    .summary {
-      background: #e8f7dd;
-      border-left: 5px solid #64a000;
-      padding: 15px;
-      margin-bottom: 30px;
-      width: 100%;
-      max-width: 600px;
-      border-radius: 6px;
-      font-size: 0.95rem;
+    .plan button:hover {
+      background-color: #e3a700;
     }
   </style>
 </head>
@@ -81,29 +67,24 @@
   <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo">
   <h1>Wybierz plan treningowy</h1>
 
-  <div class="summary" id="summary-box" style="display: none;">
-    <strong>📊 Twój aktywny plan:</strong>
-    <p id="plan-summary"></p>
-  </div>
-
   <div class="plan-container">
     <div class="plan">
       <h2>🎾 Plan Start</h2>
       <p>100 wiadomości</p>
       <p>9 zł</p>
-      <button id="btn-start" onclick="kupPlan('start')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
+      <button onclick="kupPlan('start')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
     </div>
     <div class="plan">
       <h2>🔥 Plan PRO</h2>
       <p>500 wiadomości</p>
       <p>29 zł</p>
-      <button id="btn-pro" onclick="kupPlan('pro')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
+      <button onclick="kupPlan('pro')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
     </div>
     <div class="plan">
       <h2>👑 Plan Mistrz</h2>
       <p>2000 wiadomości</p>
       <p>89 zł</p>
-      <button id="btn-mistrz" onclick="kupPlan('mistrz')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
+      <button onclick="kupPlan('mistrz')">🔥 KUPUJĘ I TRENUJĘ 🔥</button>
     </div>
   </div>
 
@@ -112,14 +93,12 @@
 
     const supabase = createClient(
       "https://lmussgaiutaldicolyba.supabase.co",
-      "public-anon-key"
+      "public-anon-key" // 🟡 tu możesz wpisać jawnie swój anon key, lub pozostawić jak jest
     );
 
     async function kupPlan(planName) {
-      const btn = document.getElementById(`btn-${planName}`);
-      btn.classList.add("loading");
-
       const { data: { session } } = await supabase.auth.getSession();
+
       if (!session) {
         alert("Musisz być zalogowany, aby kupić plan.");
         window.location.href = "logowanie.html";
@@ -141,7 +120,6 @@
 
         if (!response.ok) {
           alert("Wystąpił błąd podczas zakupu planu: " + (result.error || response.statusText));
-          btn.classList.remove("loading");
           return;
         }
 
@@ -149,35 +127,10 @@
       } catch (error) {
         console.error("❌ Błąd połączenia z funkcją:", error);
         alert("Błąd połączenia z serwerem.");
-        btn.classList.remove("loading");
       }
     }
 
     window.kupPlan = kupPlan;
-
-    // 📊 Sekcja podsumowania aktywnego planu
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const userId = session.user.id;
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("plan_name, end_date")
-        .eq("user_id", userId)
-        .order("end_date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!error && data) {
-        const summaryBox = document.getElementById("summary-box");
-        const summaryText = document.getElementById("plan-summary");
-
-        const end = data.end_date ? new Date(data.end_date).toISOString().split("T")[0] : "brak daty";
-        summaryText.textContent = `${data.plan_name.toUpperCase()} – aktywny do: ${end}`;
-        summaryBox.style.display = "block";
-      }
-    })();
   </script>
 </body>
 </html>
