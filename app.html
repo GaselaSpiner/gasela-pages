@@ -1,82 +1,59 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gasela Spiner – Chat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f7f7f7;
-    }
-    header {
-      background-color: #222;
-      color: white;
-      padding: 12px 20px;
-      text-align: center;
-      font-size: 20px;
-    }
-    main {
+      background: #f9f9f9;
       padding: 20px;
     }
     #chatUI {
       display: none;
-    }
-    .limit-warning {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      padding: 16px;
-      border-radius: 12px;
       margin-top: 20px;
     }
-    .buy-plan-button {
-      background-color: #28a745;
-      color: white;
-      border: none;
+    #aiOutput {
+      white-space: pre-wrap;
+      margin-top: 10px;
+    }
+    #buyPlanBtn {
       padding: 10px 20px;
-      margin-top: 12px;
+      font-size: 16px;
+      margin-top: 15px;
+      background-color: #ffcc00;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
     }
-    .buy-plan-button:hover {
-      background-color: #218838;
+    #buyPlanBtn:hover {
+      background-color: #ffaa00;
     }
   </style>
 </head>
 <body>
-  <header>Gasela Spiner – Chat</header>
-  <main>
-    <div id="welcome"></div>
-    <p id="statusMsg"></p>
-    <div id="chatUI">
-      <div id="chatBox">
-        <div id="aiOutput"></div>
-      </div>
-      <textarea id="userInput" rows="4" placeholder="Wpisz wiadomość..."></textarea><br>
-      <button onclick="handleSendMessage()">Wyślij</button>
-    </div>
-  </main>
+  <h1 id="welcome">Witaj!</h1>
+  <p id="statusMsg">⏳ Ładowanie planu...</p>
 
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    const supabase = createClient("https://lmussgaiutaldicolyba.supabase.co", "public-anon-key");
+  <div id="chatUI">
+    <textarea id="userInput" rows="3" placeholder="Wpisz wiadomość..." maxlength="600"></textarea><br>
+    <button onclick="handleChat()">Wyślij</button>
+    <pre id="aiOutput"></pre>
+  </div>
 
-    const welcome = document.getElementById("welcome");
-    const statusMsg = document.getElementById("statusMsg");
-    const aiOutput = document.getElementById("aiOutput");
-    const chatUI = document.getElementById("chatUI");
-    const userInput = document.getElementById("userInput");
-
-    let jwt = null;
+  <script>
+    const supabase = supabase.createClient(
+      'https://lmussgaiutaldicolyba.supabase.co',
+      'public-anon-key' // lub zamień na process.env jeśli zabezpieczone
+    );
 
     async function checkSessionAndPlan() {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) return;
 
-      jwt = session.access_token;
+      const jwt = session.access_token;
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
 
@@ -97,15 +74,13 @@
         .maybeSingle();
 
       if (!planActive && pending) {
-        await fetch("https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${jwt}`
-          }
+        await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${jwt}` }
         });
       }
 
-      const { data: subNow } = await supabase
+      const { data: subNow, error: subErrorNow } = await supabase
         .from('subscriptions')
         .select('plan_name, end_date')
         .eq('user_id', userId)
@@ -113,19 +88,19 @@
         .limit(1)
         .maybeSingle();
 
-      if (!subNow) {
-        statusMsg.textContent = "❌ Nie znaleziono aktywnego planu.";
+      if (subErrorNow || !subNow) {
+        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
         return;
       }
 
-      const { data: limitData } = await supabase
+      const { data: limitData, error: limitError } = await supabase
         .from('message_limits')
         .select('total_limit, used_messages')
         .eq('user_id', userId)
         .single();
 
-      if (!limitData) {
-        statusMsg.textContent = "❌ Nie znaleziono limitów wiadomości.";
+      if (limitError || !limitData) {
+        statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
         return;
       }
 
@@ -141,38 +116,49 @@
       await fetchPrompts(jwt);
     }
 
-    async function fetchPrompts(jwt) {
-      // Możesz uzupełnić – pobieranie promptów systemowych
-    }
+    async function handleChat() {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) return;
+      const jwt = session.access_token;
 
-    async function handleSendMessage() {
-      const input = userInput.value.trim();
-      if (!input) return;
-
-      const verifyResponse = await fetch("https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+      const verifyResponse = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${jwt}` }
       });
 
       if (verifyResponse.status === 403) {
         aiOutput.innerHTML = `
-          <div class="limit-warning">
-            <p>❌ Twój limit wiadomości został wyczerpany.</p>
-            <p>Aby kontynuować rozmowę, wybierz jeden z dostępnych planów.</p>
-            <button id="buyPlanBtn" class="buy-plan-button">🛒 Kup plan</button>
-          </div>
+          ❌ Nie możesz wysłać wiadomości: Limit wiadomości został wyczerpany.
+          <br><br>
+          <button id="buyPlanBtn">Kup nowy plan</button>
         `;
-        document.getElementById("buyPlanBtn").addEventListener("click", () => {
+        document.getElementById("buyPlanBtn").onclick = () => {
           window.location.href = "kup-plan.html";
-        });
+        };
         return;
       }
 
-      // Tu umieść zapytanie do ask_openai i obsługę odpowiedzi AI
-      aiOutput.textContent = "⏳ Trwa generowanie odpowiedzi...";
-      // ...
+      const input = userInput.value.trim();
+      if (!input) return;
+
+      const askResponse = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_input: input })
+      });
+
+      const result = await askResponse.json();
+      aiOutput.textContent = result.output || '⚠️ Brak odpowiedzi AI.';
+    }
+
+    async function fetchPrompts(jwt) {
+      await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
     }
 
     checkSessionAndPlan();
