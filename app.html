@@ -169,7 +169,7 @@
         const data = await res.json();
         appendMessage(data.reply, 'ai');
 
-        await updateMessageLimit(jwt, userId); // 🟢 Aktualizacja licznika po wysłaniu
+        await updateMessageLimit(jwt, userId);
       } catch (error) {
         appendMessage(`❌ Błąd połączenia: ${error.message}`, 'ai');
       }
@@ -203,6 +203,14 @@
       const jwt = session.access_token;
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+
+      // 🧩 Spróbuj aktywować plan przy pierwszym logowaniu
+      await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        }
+      });
 
       const { data: subData, error: subError } = await supabase
         .from('subscriptions')
