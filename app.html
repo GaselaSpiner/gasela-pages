@@ -3,51 +3,195 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gasela Spiner – Chat</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Gasela Spiner – Czat Trenera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <style>
     body {
+      margin: 0;
       font-family: 'Montserrat', sans-serif;
+      background: #ffffff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+    .logo {
+      max-width: 120px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      color: #f6b500;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 700px;
       background: #f9f9f9;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
       padding: 20px;
+      min-height: 400px;
     }
-    #chatUI {
-      display: none;
-      margin-top: 20px;
+    .info {
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #444;
+      white-space: pre-line;
     }
-    #aiOutput {
-      white-space: pre-wrap;
-      margin-top: 10px;
-    }
-    #buyPlanBtn {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 15px;
-      background-color: #ffcc00;
+    .logout-btn {
+      margin-top: 30px;
+      padding: 10px 18px;
+      background-color: #f6b500;
+      color: #000;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
     }
-    #buyPlanBtn:hover {
-      background-color: #ffaa00;
+    .logout-btn:hover {
+      background-color: #e3a700;
     }
   </style>
 </head>
 <body>
-  <h1 id="welcome">Witaj!</h1>
-  <p id="statusMsg">⏳ Ładowanie planu...</p>
+  <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo" />
+  <h1 id="welcome">Witaj w systemie Gasela Spiner</h1>
 
-  <div id="chatUI">
-    <textarea id="userInput" rows="3" placeholder="Wpisz wiadomość..." maxlength="600"></textarea><br>
-    <button onclick="handleChat()">Wyślij</button>
-    <pre id="aiOutput"></pre>
+  <div class="chat-container">
+    <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
+
+    <div id="chat-ui" style="display: none;">
+      <label for="promptSelector">🎯 Wybierz temat:</label>
+      <select id="promptSelector">
+        <option value="">— wybierz temat —</option>
+      </select>
+
+      <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
+
+      <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px;"></textarea>
+      <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
+    </div>
   </div>
 
+  <button class="logout-btn" onclick="logout()">Wyloguj się</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = supabase.createClient(
+    const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'public-anon-key' // lub zamień na process.env jeśli zabezpieczone
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
     );
+
+    const statusMsg = document.getElementById('status-msg');
+    const welcome = document.getElementById('welcome');
+    const chatUI = document.getElementById("chat-ui");
+    const messagesDiv = document.getElementById("messages");
+    const userInput = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    const promptSelector = document.getElementById("promptSelector");
+
+    function appendMessage(text, sender) {
+      const messageEl = document.createElement("div");
+      messageEl.style.marginBottom = "10px";
+      messageEl.innerHTML = `<strong>${sender === 'user' ? 'Ty' : 'AI'}:</strong> ${text}`;
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function fetchPrompts(jwt) {
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+
+      const { prompts } = await res.json();
+      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
+      prompts.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.prompt_key;
+        opt.textContent = p.description;
+        promptSelector.appendChild(opt);
+      });
+    }
+
+    async function updateMessageLimit(jwt, userId) {
+      const { data: limitData, error } = await supabase
+        .from('message_limits')
+        .select('total_limit, used_messages')
+        .eq('user_id', userId)
+        .single();
+
+      if (!limitData || error) {
+        statusMsg.textContent = '❓ Nie udało się pobrać limitu wiadomości.';
+        return;
+      }
+
+      const remaining = limitData.total_limit - limitData.used_messages;
+      statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+    }
+
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      const promptKey = promptSelector.value;
+
+      if (!message || !promptKey) {
+        alert("Wpisz wiadomość i wybierz temat!");
+        return;
+      }
+
+      if (message.length > window.maxInputLength) {
+        alert(`Wiadomość za długa. Limit: ${window.maxInputLength} znaków.`);
+        return;
+      }
+
+      appendMessage(message, 'user');
+      userInput.value = "";
+
+      const session = (await supabase.auth.getSession()).data.session;
+      const jwt = session.access_token;
+      const userId = session.user.id;
+
+      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!verifyRes.ok) {
+        const { error } = await verifyRes.json();
+        appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+        return;
+      }
+
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`
+        },
+        body: JSON.stringify({
+          prompt_key: promptKey,
+          user_input: message
+        })
+      });
+
+      const data = await res.json();
+      appendMessage(data.reply, 'ai');
+
+      await updateMessageLimit(jwt, userId);
+    });
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = 'logowanie.html';
+    }
 
     async function checkSessionAndPlan() {
       const session = (await supabase.auth.getSession()).data.session;
@@ -65,7 +209,7 @@
         .limit(1)
         .maybeSingle();
 
-      const planActive = subData && new Date(subData.end_date) > new Date();
+      const planActive = subData && subData.end_date && new Date(subData.end_date) > new Date();
 
       const { data: pending } = await supabase
         .from('pending_plans')
@@ -73,14 +217,14 @@
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (!planActive && pending) {
+      if (!planActive && pending?.plan_name) {
         await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
           method: 'POST',
           headers: { Authorization: `Bearer ${jwt}` }
         });
       }
 
-      const { data: subNow, error: subErrorNow } = await supabase
+      const { data: subNow } = await supabase
         .from('subscriptions')
         .select('plan_name, end_date')
         .eq('user_id', userId)
@@ -88,18 +232,18 @@
         .limit(1)
         .maybeSingle();
 
-      if (subErrorNow || !subNow) {
+      if (!subNow) {
         statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
         return;
       }
 
-      const { data: limitData, error: limitError } = await supabase
+      const { data: limitData } = await supabase
         .from('message_limits')
         .select('total_limit, used_messages')
         .eq('user_id', userId)
         .single();
 
-      if (limitError || !limitData) {
+      if (!limitData) {
         statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
         return;
       }
@@ -114,51 +258,6 @@
       userInput.setAttribute("maxlength", window.maxInputLength);
 
       await fetchPrompts(jwt);
-    }
-
-    async function handleChat() {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) return;
-      const jwt = session.access_token;
-
-      const verifyResponse = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
-
-      if (verifyResponse.status === 403) {
-        aiOutput.innerHTML = `
-          ❌ Nie możesz wysłać wiadomości: Limit wiadomości został wyczerpany.
-          <br><br>
-          <button id="buyPlanBtn">Kup nowy plan</button>
-        `;
-        document.getElementById("buyPlanBtn").onclick = () => {
-          window.location.href = "kup-plan.html";
-        };
-        return;
-      }
-
-      const input = userInput.value.trim();
-      if (!input) return;
-
-      const askResponse = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ user_input: input })
-      });
-
-      const result = await askResponse.json();
-      aiOutput.textContent = result.output || '⚠️ Brak odpowiedzi AI.';
-    }
-
-    async function fetchPrompts(jwt) {
-      await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
     }
 
     checkSessionAndPlan();
