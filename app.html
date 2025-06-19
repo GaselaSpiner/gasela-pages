@@ -94,8 +94,28 @@
   margin-right: auto;
 }
 
+.message-bubble h1, .message-bubble h2, .message-bubble h3 {
+  margin: 0.5em 0 0.3em;
+  font-size: 1.2rem;
+  color: #000;
+}
+
+.message-bubble p {
+  margin: 0.3em 0;
+}
+
+.message-bubble ul {
+  padding-left: 1.2em;
+  margin: 0.3em 0;
+}
+
+.message-bubble li {
+  margin-bottom: 0.2em;
+}
 
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 </head>
 <body>
   <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo" />
@@ -140,13 +160,17 @@ function appendMessage(text, sender) {
 
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
-  bubble.textContent = text;
+
+  if (sender === 'ai') {
+    bubble.innerHTML = marked.parse(text); // ✅ konwersja markdown → HTML
+  } else {
+    bubble.textContent = text; // dla użytkownika zostaje tekst
+  }
 
   wrapper.appendChild(bubble);
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
-
 
 
     async function fetchPrompts(jwt) {
