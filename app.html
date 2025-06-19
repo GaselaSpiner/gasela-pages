@@ -57,6 +57,39 @@
     .logout-btn:hover {
       background-color: #e3a700;
     }
+
+    .message {
+  display: flex;
+  margin: 6px 0;
+}
+
+.message-user {
+  justify-content: flex-end;
+}
+
+.message-ai {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.message-user .message-bubble {
+  background-color: #eee;
+  color: #000;
+  border-radius: 16px 16px 0 16px;
+}
+
+.message-ai .message-bubble {
+  background: none;
+  color: #000;
+}
+
   </style>
 </head>
 <body>
@@ -96,13 +129,18 @@
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
 
-    function appendMessage(text, sender) {
-      const messageEl = document.createElement("div");
-      messageEl.style.marginBottom = "10px";
-      messageEl.innerHTML = `<strong>${sender === 'user' ? 'Ty' : 'AI'}:</strong> ${text}`;
-      messagesDiv.appendChild(messageEl);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+   function appendMessage(text, sender) {
+  const messageEl = document.createElement("div");
+  messageEl.classList.add("message", sender === 'user' ? 'message-user' : 'message-ai');
+
+  const bubble = document.createElement("div");
+  bubble.classList.add("message-bubble");
+  bubble.textContent = text;
+
+  messageEl.appendChild(bubble);
+  messagesDiv.appendChild(messageEl);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
 
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
