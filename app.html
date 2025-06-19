@@ -329,52 +329,53 @@ function appendMessage(text, sender) {
 
     checkSessionAndPlan();
 
-   function trimToFullSentence(text) {
+  function trimToFullSentence(text) {
   if (!text || typeof text !== "string") return "";
 
   text = text.trim();
 
-  // Jeśli kończy się pełnym znakiem interpunkcyjnym – zwróć bez zmian
-  const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\"", "']"];
-  if (goodEndings.some(ending => text.endsWith(ending))) {
+  const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
+  const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
+
+  // Jeśli kończy się sensownym znakiem – OK
+  if (goodEndings.some(end => text.endsWith(end))) {
     return text;
   }
 
-  // Jeśli kończy się urwanym wzorcem – usuń go i dodaj "..."
-  const brokenPatterns = [
-    /###?\s*[0-9]?[.)]?\s*$/,       // urwane nagłówki
-    /\*\*\s*$/,                    // urwane pogrubienia
-    /-\s*$/,                       // myślnik na końcu
-    /[:;]$/,                       // dwukropek, średnik
-    /\(\s*$/,                      // niedomknięty nawias
-    /[a-ząćęłńóśźż]+\s+[a-ząćęłńóśźż]+\s*$/i // dwa luźne słowa
-  ];
+  // Jeśli kończy się na słowo łączące lub przecinek – nie kończymy
+  const lastWords = text.split(/\s+/);
+  const lastWord = lastWords[lastWords.length - 1].toLowerCase();
+  if (softEndings.includes(lastWord) || text.endsWith(',')) {
+    return text + "...";
+  }
 
+  // Utnij znane niepełne końcówki
+  const brokenPatterns = [
+    /###?\s*[0-9]?[.)]?\s*$/,
+    /-\s*$/,
+    /[:;]$/,
+    /\(\s*$/,
+    /\*\*\s*$/
+  ];
   if (brokenPatterns.some(p => p.test(text))) {
     return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
   }
 
-  // Jeśli kończy się niedokończonym nagłówkiem punktu listy (np. "2. **Coś tam:**")
-  const listPointPattern = /\n?\d+\.\s+\*\*[^\n]{0,30}\*\*\s*:?$/;
-  if (listPointPattern.test(text)) {
-    return text.replace(listPointPattern, '').trim() + "...";
-  }
-
-  // Spróbuj znaleźć ostatni znak kończący zdanie
+  // Odetnij do ostatniego znaku interpunkcyjnego
   const lastPunctuation = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('!'),
     text.lastIndexOf('?'),
     text.lastIndexOf('…')
   );
-
-  if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.6) {
-    return text.slice(0, lastPunctuation + 1).trim();
+  if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.5) {
+    return text.slice(0, lastPunctuation + 1);
   }
 
-  // W ostateczności – dodaj "..."
+  // W ostateczności – dodaj "..." ale nie brutalnie
   return text + "...";
 }
+
 
 
   </script>
