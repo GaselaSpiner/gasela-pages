@@ -330,19 +330,47 @@ function appendMessage(text, sender) {
     checkSessionAndPlan();
 
     function trimToFullSentence(text) {
+  if (!text || typeof text !== "string") return "";
+
+  // Usuń spacje z końca
+  text = text.trim();
+
+  // Jeśli już zakończone sensownym znakiem – nic nie rób
+  const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\"", "']"];
+  if (goodEndings.some(ending => text.endsWith(ending))) {
+    return text;
+  }
+
+  // Jeśli urwane na znanym wzorcu – utnij go
+  const brokenPatterns = [
+    /###?\s*[0-9]?[.)]?\s*$/,
+    /\*\*\s*$/,
+    /-\s*$/,
+    /[:;]$/,
+    /\(\s*$/,
+    /[a-ząćęłńóśźż]+\s+[a-ząćęłńóśźż]+\s*$/i
+  ];
+
+  if (brokenPatterns.some(p => p.test(text))) {
+    return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
+  }
+
+  // Odetnij do ostatniego pełnego znaku interpunkcyjnego
   const lastPunctuation = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('!'),
-    text.lastIndexOf('?')
+    text.lastIndexOf('?'),
+    text.lastIndexOf('…')
   );
 
-  if (lastPunctuation !== -1 && lastPunctuation > text.length - 100) {
+  if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.6) {
     return text.slice(0, lastPunctuation + 1);
-  } else {
-    // Gdy nie ma żadnego zakończenia zdania – obetnij do ostatniego pełnego słowa
-    return text.trim().replace(/\s+\S*$/, '') + '...';
   }
+
+  // W ostateczności – dodaj "..."
+  return text.trim() + "...";
 }
+
 
   </script>
 </body>
