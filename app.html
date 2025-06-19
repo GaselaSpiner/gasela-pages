@@ -338,9 +338,14 @@ function appendMessage(text, sender) {
   const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
 
   // Jeśli kończy się sensownym znakiem – OK
-  if (goodEndings.some(end => text.endsWith(end))) {
+ // Jeśli kończy się sensownym znakiem, ale nie numerkiem punktu
+if (goodEndings.some(end => text.endsWith(end))) {
+  const lastToken = text.split(/\s+/).pop();
+  const orphanListItemPattern = /^\d{1,2}[.)]$/;
+  if (!orphanListItemPattern.test(lastToken)) {
     return text;
   }
+}
 
   // Jeśli kończy się na słowo łączące lub przecinek – nie kończymy
   const lastWords = text.split(/\s+/);
