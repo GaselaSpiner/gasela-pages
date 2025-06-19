@@ -72,25 +72,27 @@
 }
 
 .message-bubble {
-  max-width: 70%;
+  max-width: 75%;
   padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 0.95rem;
+  border-radius: 12px;
+  margin-bottom: 10px;
   line-height: 1.4;
-  text-align: left; /* 👈 DODAJ TO */
-  word-break: break-word; /* 👈 NA DŁUGIE ZDANIA */
+  word-wrap: break-word;
 }
 
 
-.message-user .message-bubble {
-  background-color: #eee;
-  color: #000;
-  border-radius: 16px 16px 0 16px;
+.message-user {
+  background-color: #e5e5e5;
+  align-self: flex-end;
+  text-align: left;
+  margin-left: auto;
 }
 
-.message-ai .message-bubble {
-  background: none;
-  color: #000;
+.message-ai {
+  background-color: transparent;
+  align-self: flex-start;
+  text-align: left;
+  margin-right: auto;
 }
 
   </style>
@@ -132,18 +134,14 @@
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
 
-   function appendMessage(text, sender) {
+function appendMessage(text, sender) {
   const messageEl = document.createElement("div");
-  messageEl.classList.add("message", sender === 'user' ? 'message-user' : 'message-ai');
-
-  const bubble = document.createElement("div");
-  bubble.classList.add("message-bubble");
-  bubble.textContent = text;
-
-  messageEl.appendChild(bubble);
+  messageEl.className = `${sender === 'user' ? 'message-user' : 'message-ai'} message-bubble`;
+  messageEl.textContent = text;
   messagesDiv.appendChild(messageEl);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
 
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
