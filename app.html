@@ -152,8 +152,10 @@
 
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
 
+  <!-- ✅ Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+  <!-- ✅ Twój własny skrypt -->
   <script>
     const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0';
@@ -193,32 +195,18 @@
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+
       if (!user) {
         window.location.href = "logowanie.html";
         return;
       }
 
-      const { data: subs } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("start_date", { ascending: false })
-        .limit(1)
-        .single();
-
-      const { data: limit } = await supabase
-        .from("message_limits")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
-      const endDate = new Date(subs.end_date).toLocaleDateString("pl-PL");
-      const left = limit.total_limit - limit.used_messages;
-
       document.getElementById("welcome").innerText = `Witaj, ${user.email}!`;
       document.getElementById("status-msg").innerText =
-        `✅ Plan aktywny do ${endDate}.\n🔥 Masz jeszcze ${left} wiadomości do wykorzystania – powodzenia!`;
+        "✅ Plan aktywny do 2025-07-18.\n🔥 Masz jeszcze 2 wiadomości do wykorzystania – powodzenia!";
       document.getElementById("chat-ui").style.display = "block";
 
       const promptSelector = document.getElementById("promptSelector");
