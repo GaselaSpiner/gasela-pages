@@ -337,15 +337,14 @@ function appendMessage(text, sender) {
   const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
   const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
 
-  // Jeśli kończy się sensownym znakiem – OK
- // Jeśli kończy się sensownym znakiem, ale nie numerkiem punktu
-if (goodEndings.some(end => text.endsWith(end))) {
-  const lastToken = text.split(/\s+/).pop();
-  const orphanListItemPattern = /^\d{1,2}[.)]$/;
-  if (!orphanListItemPattern.test(lastToken)) {
-    return text;
+  // Jeśli kończy się sensownym znakiem, ale nie numerkiem listy
+  if (goodEndings.some(end => text.endsWith(end))) {
+    const lastToken = text.split(/\s+/).pop();
+    const orphanListItemPattern = /^\d{1,2}[.)]$/;
+    if (!orphanListItemPattern.test(lastToken)) {
+      return text;
+    }
   }
-}
 
   // Jeśli kończy się na słowo łączące lub przecinek – nie kończymy
   const lastWords = text.split(/\s+/);
@@ -366,13 +365,7 @@ if (goodEndings.some(end => text.endsWith(end))) {
     return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
   }
 
-  // Utnij osierocone numerki typu "4." lub "7)"
-  const orphanListItemPattern = /\d{1,2}[.)]\s*$/;
-  if (orphanListItemPattern.test(text)) {
-    return text.replace(orphanListItemPattern, '').trim() + "...";
-  }
-
-  // Odetnij do ostatniego znaku interpunkcyjnego
+  // Odetnij do ostatniego znaku interpunkcyjnego, jeśli wystarczająco daleko
   const lastPunctuation = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('!'),
@@ -386,11 +379,6 @@ if (goodEndings.some(end => text.endsWith(end))) {
   // W ostateczności – dodaj "..."
   return text + "...";
 }
-
-
-
-
-
 
   </script>
 </body>
