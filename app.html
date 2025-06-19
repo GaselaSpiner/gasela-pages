@@ -248,7 +248,9 @@ function appendMessage(text, sender) {
       });
 
       const data = await res.json();
-      appendMessage(data.reply, 'ai');
+      const trimmed = trimToFullSentence(data.reply);  // ✂️ Przytnij odpowiedź
+      appendMessage(trimmed, 'ai');                    // 📩 Wyświetl czatowi
+
 
       await updateMessageLimit(jwt, userId);
     });
@@ -326,6 +328,22 @@ function appendMessage(text, sender) {
     }
 
     checkSessionAndPlan();
+
+    function trimToFullSentence(text) {
+  const lastPunctuation = Math.max(
+    text.lastIndexOf('.'),
+    text.lastIndexOf('!'),
+    text.lastIndexOf('?')
+  );
+
+  if (lastPunctuation !== -1 && lastPunctuation > text.length - 100) {
+    return text.slice(0, lastPunctuation + 1);
+  } else {
+    // Gdy nie ma żadnego zakończenia zdania – obetnij do ostatniego pełnego słowa
+    return text.trim().replace(/\s+\S*$/, '') + '...';
+  }
+}
+
   </script>
 </body>
 </html>
