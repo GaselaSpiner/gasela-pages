@@ -58,42 +58,42 @@
       background-color: #e3a700;
     }
 
-    .message {
+   .message {
   display: flex;
   margin: 6px 0;
-}
-
-.message-user {
-  justify-content: flex-end;
-}
-
-.message-ai {
-  justify-content: flex-start;
+  width: 100%;
 }
 
 .message-bubble {
   max-width: 75%;
   padding: 10px 14px;
   border-radius: 12px;
-  margin-bottom: 10px;
   line-height: 1.4;
   word-wrap: break-word;
+  white-space: pre-wrap;
+  text-align: left; /* ✅ tekst w chmurce zawsze do lewej */
 }
 
-
 .message-user {
+  justify-content: flex-end;
+}
+
+.message-user .message-bubble {
   background-color: #e5e5e5;
   align-self: flex-end;
-  text-align: left;
   margin-left: auto;
 }
 
 .message-ai {
+  justify-content: flex-start;
+}
+
+.message-ai .message-bubble {
   background-color: transparent;
   align-self: flex-start;
-  text-align: left;
   margin-right: auto;
 }
+
 
   </style>
 </head>
