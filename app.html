@@ -135,12 +135,18 @@
     const promptSelector = document.getElementById("promptSelector");
 
 function appendMessage(text, sender) {
-  const messageEl = document.createElement("div");
-  messageEl.className = `${sender === 'user' ? 'message-user' : 'message-ai'} message-bubble`;
-  messageEl.textContent = text;
-  messagesDiv.appendChild(messageEl);
+  const wrapper = document.createElement("div");
+  wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+  bubble.textContent = text;
+
+  wrapper.appendChild(bubble);
+  messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
 
 
     async function fetchPrompts(jwt) {
