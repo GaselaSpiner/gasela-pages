@@ -332,64 +332,56 @@ function appendMessage(text, sender) {
     function trimToFullSentence(text) {
   if (!text || typeof text !== "string") return "";
 
-  // Usuń spacje z końca
   text = text.trim();
 
-  const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\"", "']"];
-  if (goodEndings.some(ending => text.endsWith(ending))) {
+  const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
+  const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
+
+  // Jeśli kończy się sensownym znakiem – OK
+  if (goodEndings.some(end => text.endsWith(end))) {
     return text;
   }
 
-  // Nowy wzorzec: urwana lista numerowana lub z nagłówkiem
-  const brokenListPattern = /^(\d+\.|\*|-|\+)\s*(\*\*.*)?$/m;
-  if (brokenListPattern.test(text.split('\n').slice(-1)[0])) {
-    return text.split('\n').slice(0, -1).join('\n').trim() + "...";
+  // Jeśli kończy się na słowo łączące lub przecinek – nie kończymy
+  const lastWords = text.split(/\s+/);
+  const lastWord = lastWords[lastWords.length - 1].toLowerCase();
+  if (softEndings.includes(lastWord) || text.endsWith(',')) {
+    return text + "...";
   }
 
-  // Stare brokenPatterns
+  // Utnij znane niepełne końcówki
   const brokenPatterns = [
     /###?\s*[0-9]?[.)]?\s*$/,
-    /\*\*\s*$/,
     /-\s*$/,
     /[:;]$/,
     /\(\s*$/,
-    /[a-ząćęłńóśźż]+\s+[a-ząćęłńóśźż]+\s*$/i
+    /\*\*\s*$/
   ];
-
   if (brokenPatterns.some(p => p.test(text))) {
     return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
   }
 
-  // Jeśli końcówka wygląda jak niedokończony czasownik
-  const incompleteVerbEnding = /\b([a-ząćęłńóśźż]{3,})$/i;
-  const match = text.match(incompleteVerbEnding);
-  if (match && text.length > 40 && !text.endsWith('.')) {
-    const lastPunct = Math.max(
-      text.lastIndexOf('.'),
-      text.lastIndexOf('!'),
-      text.lastIndexOf('?'),
-      text.lastIndexOf('…')
-    );
-    if (lastPunct !== -1) {
-      return text.slice(0, lastPunct + 1).trim();
-    }
-    return text.replace(match[0], '').trim() + "...";
+  // NOWOŚĆ: Utnij numerowane markdownowe punkty np. "3. **Rozgrzewka**..."
+  const markdownHeaderPattern = /\d+[.)]\s+\*\*.+?\*\*\s*\.{0,3}$/;
+  if (markdownHeaderPattern.test(text)) {
+    return text.replace(markdownHeaderPattern, '').trim() + "...";
   }
 
-  // Szukaj ostatniego mocnego znaku interpunkcyjnego
+  // Odetnij do ostatniego znaku interpunkcyjnego
   const lastPunctuation = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('!'),
     text.lastIndexOf('?'),
     text.lastIndexOf('…')
   );
-
-  if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.6) {
-    return text.slice(0, lastPunctuation + 1).trim();
+  if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.5) {
+    return text.slice(0, lastPunctuation + 1);
   }
 
-  return text.trim() + "...";
+  // W ostateczności – dodaj "..." ale nie brutalnie
+  return text + "...";
 }
+
 
 
 
