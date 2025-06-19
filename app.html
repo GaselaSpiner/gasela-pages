@@ -349,11 +349,12 @@ function appendMessage(text, sender) {
     return text + "...";
   }
 
-  // Usuń końcowy numer punktu listy, np. "3." lub "4)"
-  const listPointPattern = /\s*\d+[.)]\s*$/;
-  if (listPointPattern.test(text)) {
-    return text.replace(listPointPattern, '').trim() + "...";
-  }
+ // Usuń końcowy numer punktu listy, np. "3." lub "4)", także bez spacji
+const listPointPattern = /\s*\d+[.)]?\.?\s*$/;
+if (listPointPattern.test(text)) {
+  return text.replace(listPointPattern, '').trim() + "...";
+}
+
 
   // Utnij znane niepełne końcówki
   const brokenPatterns = [
