@@ -335,7 +335,7 @@ function appendMessage(text, sender) {
   // Usuń spacje z końca
   text = text.trim();
 
-  // Jeśli już zakończone sensownym znakiem – nic nie rób
+  // Jeśli zakończone sensownym znakiem – zostaw
   const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\"", "']"];
   if (goodEndings.some(ending => text.endsWith(ending))) {
     return text;
@@ -355,7 +355,23 @@ function appendMessage(text, sender) {
     return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
   }
 
-  // Odetnij do ostatniego pełnego znaku interpunkcyjnego
+  // NOWOŚĆ: jeśli kończy się pojedynczym czasownikiem – utnij to
+  const incompleteVerbEnding = /\b([a-ząćęłńóśźż]{3,})$/i;
+  const match = text.match(incompleteVerbEnding);
+  if (match && text.length > 40 && !text.endsWith('.')) {
+    const lastPunct = Math.max(
+      text.lastIndexOf('.'),
+      text.lastIndexOf('!'),
+      text.lastIndexOf('?'),
+      text.lastIndexOf('…')
+    );
+    if (lastPunct !== -1) {
+      return text.slice(0, lastPunct + 1).trim();
+    }
+    return text.replace(match[0], '').trim() + "...";
+  }
+
+  // Spróbuj odciąć do ostatniego znaku interpunkcyjnego (jeśli nie za wcześnie)
   const lastPunctuation = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('!'),
@@ -364,12 +380,13 @@ function appendMessage(text, sender) {
   );
 
   if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.6) {
-    return text.slice(0, lastPunctuation + 1);
+    return text.slice(0, lastPunctuation + 1).trim();
   }
 
   // W ostateczności – dodaj "..."
   return text.trim() + "...";
 }
+
 
 
   </script>
