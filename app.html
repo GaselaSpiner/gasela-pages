@@ -168,7 +168,7 @@
   const { error } = await verifyRes.json();
 
   // Sprawdź, czy to błąd limitu wiadomości
-  if (error === "Limit wiadomości został wyczerpany") {
+  if (error === "Aby kontynuować, wybierz kolejny plan treningowy.") {
     messagesDiv.innerHTML += `
       <div style="color: red; margin-top: 1em;">
         ❌ Nie możesz wysłać wiadomości: ${error}
@@ -181,7 +181,7 @@
     return;
   }
 
-  appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+  appendMessage(`🥇 Gra trwa dalej! ${error}`, 'ai');
   return;
 }
 
