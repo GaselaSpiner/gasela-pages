@@ -335,13 +335,18 @@ function appendMessage(text, sender) {
   // Usuń spacje z końca
   text = text.trim();
 
-  // Jeśli zakończone sensownym znakiem – zostaw
   const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\"", "']"];
   if (goodEndings.some(ending => text.endsWith(ending))) {
     return text;
   }
 
-  // Jeśli urwane na znanym wzorcu – utnij go
+  // Nowy wzorzec: urwana lista numerowana lub z nagłówkiem
+  const brokenListPattern = /^(\d+\.|\*|-|\+)\s*(\*\*.*)?$/m;
+  if (brokenListPattern.test(text.split('\n').slice(-1)[0])) {
+    return text.split('\n').slice(0, -1).join('\n').trim() + "...";
+  }
+
+  // Stare brokenPatterns
   const brokenPatterns = [
     /###?\s*[0-9]?[.)]?\s*$/,
     /\*\*\s*$/,
@@ -355,7 +360,7 @@ function appendMessage(text, sender) {
     return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
   }
 
-  // NOWOŚĆ: jeśli kończy się pojedynczym czasownikiem – utnij to
+  // Jeśli końcówka wygląda jak niedokończony czasownik
   const incompleteVerbEnding = /\b([a-ząćęłńóśźż]{3,})$/i;
   const match = text.match(incompleteVerbEnding);
   if (match && text.length > 40 && !text.endsWith('.')) {
@@ -371,7 +376,7 @@ function appendMessage(text, sender) {
     return text.replace(match[0], '').trim() + "...";
   }
 
-  // Spróbuj odciąć do ostatniego znaku interpunkcyjnego (jeśli nie za wcześnie)
+  // Szukaj ostatniego mocnego znaku interpunkcyjnego
   const lastPunctuation = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('!'),
@@ -383,9 +388,9 @@ function appendMessage(text, sender) {
     return text.slice(0, lastPunctuation + 1).trim();
   }
 
-  // W ostateczności – dodaj "..."
   return text.trim() + "...";
 }
+
 
 
 
