@@ -329,7 +329,7 @@ function appendMessage(text, sender) {
 
     checkSessionAndPlan();
 
-  function trimToFullSentence(text) {
+ function trimToFullSentence(text) {
   if (!text || typeof text !== "string") return "";
 
   text = text.trim();
@@ -347,6 +347,12 @@ function appendMessage(text, sender) {
   const lastWord = lastWords[lastWords.length - 1].toLowerCase();
   if (softEndings.includes(lastWord) || text.endsWith(',')) {
     return text + "...";
+  }
+
+  // Usuń końcowy numer punktu listy, np. "3." lub "4)"
+  const listPointPattern = /\s*\d+[.)]\s*$/;
+  if (listPointPattern.test(text)) {
+    return text.replace(listPointPattern, '').trim() + "...";
   }
 
   // Utnij znane niepełne końcówki
