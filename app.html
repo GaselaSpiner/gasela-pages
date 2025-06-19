@@ -170,12 +170,14 @@
   // Sprawdź, czy to błąd limitu wiadomości
   if (error === "Limit wiadomości został wyczerpany") {
     messagesDiv.innerHTML += `
-      <div style="color: red; margin-top: 1em;">
-        🦌 Gasela zatrzymała się na chwilę. Odblokuj kolejny bieg!
+      <div style="margin-top: 1.5em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <div style="color: red; margin-bottom: 1em;">
+          🦌 Gasela zatrzymała się na chwilę.<br/>Odblokuj kolejny bieg!
+        </div>
+        <button onclick="window.location.href='kup-plan.html'" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          Kup nowy plan
+        </button>
       </div>
-      <button onclick="window.location.href='kup-plan.html'" style="margin-top: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
-        Kup nowy plan
-      </button>
     `;
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
     return;
@@ -184,6 +186,7 @@
   appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
   return;
 }
+
 
       
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
