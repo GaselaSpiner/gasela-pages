@@ -164,14 +164,14 @@
         }
       });
 
-     if (!verifyRes.ok) {
+      if (!verifyRes.ok) {
   const { error } = await verifyRes.json();
 
   // Sprawdź, czy to błąd limitu wiadomości
-  if (error === "Aby kontynuować, wybierz kolejny plan treningowy.") {
+  if (error === "Limit wiadomości został wyczerpany") {
     messagesDiv.innerHTML += `
       <div style="color: red; margin-top: 1em;">
-        🥇 Gra trwa dalej!: ${error}
+        🦌 Gasela zatrzymała się na chwilę. Odblokuj kolejny bieg!
       </div>
       <button onclick="window.location.href='kup-plan.html'" style="margin-top: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
         Kup nowy plan
@@ -181,10 +181,11 @@
     return;
   }
 
-  appendMessage(`🥇 Gra trwa dalej! ${error}`, 'ai');
+  appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
   return;
 }
 
+      
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
         headers: {
