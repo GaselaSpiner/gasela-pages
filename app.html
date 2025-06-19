@@ -73,7 +73,7 @@
         height: 100vh;
         z-index: 9999;
         background: white;
-        padding-bottom: 70px;
+        padding: 0;
         overflow-y: auto;
       }
       .chat-expand-btn {
@@ -122,6 +122,9 @@
         font-weight: bold;
         cursor: pointer;
       }
+      #status-msg, #promptSelector, label[for="promptSelector"] {
+        display: none !important;
+      }
     }
   </style>
 </head>
@@ -158,6 +161,7 @@
     const statusMsg = document.getElementById('status-msg');
     const welcome = document.getElementById('welcome');
     const chatUI = document.getElementById("chat-ui");
+    const promptSelector = document.getElementById("promptSelector");
 
     async function checkSessionAndPlan() {
       const session = (await supabase.auth.getSession()).data.session;
@@ -219,6 +223,21 @@
       statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
 
       chatUI.style.display = 'block';
+      loadPrompts(subNow.plan_name);
+    }
+
+    async function loadPrompts(planName) {
+      const { data: prompts } = await supabase
+        .from('prompts_by_plan')
+        .select('prompt_key, description')
+        .eq('plan_name', planName);
+
+      prompts?.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.prompt_key;
+        option.textContent = p.description;
+        promptSelector.appendChild(option);
+      });
     }
 
     checkSessionAndPlan();
