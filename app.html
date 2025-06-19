@@ -361,10 +361,10 @@ function appendMessage(text, sender) {
     return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
   }
 
-  // NOWOŚĆ: Utnij numerowane markdownowe punkty np. "3. **Rozgrzewka**..."
-  const markdownHeaderPattern = /\d+[.)]\s+\*\*.+?\*\*\s*\.{0,3}$/;
-  if (markdownHeaderPattern.test(text)) {
-    return text.replace(markdownHeaderPattern, '').trim() + "...";
+  // Utnij osierocone numerki typu "4." lub "7)"
+  const orphanListItemPattern = /\d{1,2}[.)]\s*$/;
+  if (orphanListItemPattern.test(text)) {
+    return text.replace(orphanListItemPattern, '').trim() + "...";
   }
 
   // Odetnij do ostatniego znaku interpunkcyjnego
@@ -378,9 +378,10 @@ function appendMessage(text, sender) {
     return text.slice(0, lastPunctuation + 1);
   }
 
-  // W ostateczności – dodaj "..." ale nie brutalnie
+  // W ostateczności – dodaj "..."
   return text + "...";
 }
+
 
 
 
