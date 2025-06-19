@@ -59,12 +59,6 @@
       background-color: #e3a700;
     }
     @media (max-width: 600px) {
-      .chat-container {
-        background: transparent;
-        border-radius: 0;
-        box-shadow: none;
-        padding: 10px;
-      }
       .chat-container.expanded {
         position: fixed;
         top: 0;
@@ -73,8 +67,17 @@
         height: 100vh;
         z-index: 9999;
         background: white;
-        padding: 0;
+        padding: 10px;
         overflow-y: auto;
+      }
+      .chat-container.expanded .info,
+      .chat-container.expanded label,
+      .chat-container.expanded select,
+      .chat-container.expanded textarea,
+      .chat-container.expanded button.logout-btn,
+      .chat-container.expanded h1,
+      .chat-container.expanded .logout-btn {
+        display: none !important;
       }
       .chat-expand-btn {
         position: fixed;
@@ -122,9 +125,6 @@
         font-weight: bold;
         cursor: pointer;
       }
-      #status-msg, #promptSelector, label[for="promptSelector"] {
-        display: none !important;
-      }
     }
   </style>
 </head>
@@ -137,6 +137,7 @@
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
 
     <div id="chat-ui" style="display: none; text-align: center;">
+      <div id="plan-status" class="info"></div>
       <label for="promptSelector">🎯 Wybierz temat:</label>
       <select id="promptSelector">
         <option value="">— wybierz temat —</option>
@@ -151,100 +152,9 @@
 
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
-    );
-
-    const statusMsg = document.getElementById('status-msg');
-    const welcome = document.getElementById('welcome');
-    const chatUI = document.getElementById("chat-ui");
-    const promptSelector = document.getElementById("promptSelector");
-
-    async function checkSessionAndPlan() {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) return;
-
-      const jwt = session.access_token;
-      const userId = session.user.id;
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
-
-      const { data: subData } = await supabase
-        .from('subscriptions')
-        .select('plan_name, end_date')
-        .eq('user_id', userId)
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const planActive = subData && subData.end_date && new Date(subData.end_date) > new Date();
-
-      const { data: pending } = await supabase
-        .from('pending_plans')
-        .select('plan_name')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (!planActive && pending?.plan_name) {
-        await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${jwt}` }
-        });
-      }
-
-      const { data: subNow } = await supabase
-        .from('subscriptions')
-        .select('plan_name, end_date')
-        .eq('user_id', userId)
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!subNow) {
-        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
-        return;
-      }
-
-      const { data: limitData } = await supabase
-        .from('message_limits')
-        .select('total_limit, used_messages')
-        .eq('user_id', userId)
-        .single();
-
-      if (!limitData) {
-        statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
-        return;
-      }
-
-      const remaining = limitData.total_limit - limitData.used_messages;
-      const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
-      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
-
-      chatUI.style.display = 'block';
-      loadPrompts(subNow.plan_name);
-    }
-
-    async function loadPrompts(planName) {
-      const { data: prompts } = await supabase
-        .from('prompts_by_plan')
-        .select('prompt_key, description')
-        .eq('plan_name', planName);
-
-      prompts?.forEach(p => {
-        const option = document.createElement('option');
-        option.value = p.prompt_key;
-        option.textContent = p.description;
-        promptSelector.appendChild(option);
-      });
-    }
-
-    checkSessionAndPlan();
-
     function expandChat() {
       document.querySelector('.chat-container').classList.add('expanded');
-
       const inputBar = document.createElement('div');
       inputBar.className = 'chat-input-bar';
       inputBar.innerHTML = `
@@ -253,8 +163,8 @@
       `;
       document.body.appendChild(inputBar);
 
-      document.getElementById('userInput').style.display = 'none';
-      document.getElementById('sendButton').style.display = 'none';
+      // Ustaw focus na pole po 100ms, aby działało z mobilną klawiaturą
+      setTimeout(() => document.getElementById("mobileUserInput").focus(), 100);
     }
 
     async function sendMobileMessage() {
