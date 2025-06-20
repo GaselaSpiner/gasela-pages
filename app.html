@@ -303,10 +303,10 @@ function appendMessage(text, sender) {
       const planActive = subData && subData.end_date && new Date(subData.end_date) > new Date();
 
       const { data: pending } = await supabase
-        .from('pending_plans')
-        .select('plan_name')
-        .eq('user_id', userId)
-        .maybeSingle();
+  .from('pending_plans')
+  .select('plan_name')
+  .eq('email', session.user.email)
+  .maybeSingle();
 
       if (!planActive && pending?.plan_name) {
         await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
