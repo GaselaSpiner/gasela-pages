@@ -19,7 +19,6 @@
       justify-content: center;
       min-height: 100vh;
       padding: 20px;
-      box-sizing: border-box;
     }
     img.logo {
       max-width: 120px;
@@ -27,7 +26,6 @@
     }
     h1 {
       font-size: 1.5rem;
-      color: #000000;
       margin-bottom: 10px;
       text-align: center;
     }
@@ -57,7 +55,6 @@
       font-weight: bold;
       font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
     }
     button:hover {
       background-color: #e3a700;
@@ -66,7 +63,6 @@
       font-weight: bold;
       text-align: center;
       margin-bottom: 20px;
-      color: #444;
       max-width: 400px;
     }
     .login-link {
@@ -100,7 +96,113 @@
     Masz już konto? <a id="login-link" href="logowanie.html">Zaloguj się</a>
   </div>
 
-  <!-- 🔐 Supabase + logika w oddzielnym pliku JS -->
-  <script src="rejestracja-logika.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const supabaseUrl = 'https://lmussgaiutaldicolyba.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJI...'; // skrócone dla bezpieczeństwa
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const form = document.getElementById('register-form');
+    const statusDiv = document.getElementById('supabase-status');
+
+    function getPlanFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('plan');
+    }
+
+    async function zapiszPlanDoPending(email) {
+      const plan = getPlanFromURL();
+      if (!plan) return;
+      try {
+        const response = await fetch('https://api.gaselaspiner.pl/api/zapisz_plan.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, plan_name: plan }),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          console.error('❌ Błąd zapisu planu:', result.error);
+        } else {
+          console.log('✅ Plan zapisany:', result.message);
+        }
+      } catch (err) {
+        console.error('❌ Błąd API:', err);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (password.length < 6) {
+        statusDiv.textContent = '❌ Hasło musi mieć co najmniej 6 znaków.';
+        return;
+      }
+
+      statusDiv.textContent = '⏳ Sprawdzanie adresu e-mail...';
+
+      try {
+        const res = await fetch('https://api.gaselaspiner.pl/api/sprawdz_email.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const { user } = await res.json();
+
+        if (user) {
+          const confirmed = user.email_confirmed_at !== null;
+          statusDiv.innerHTML = confirmed
+            ? `🔐 To konto już istnieje i jest aktywne. <a href="logowanie.html" style="color:#f6b500;font-weight:bold;">Zaloguj się</a>`
+            : `🕒 Konto istnieje, ale nie zostało aktywowane. Sprawdź e-mail lub <a href="#" id="reset-link" style="color:#f6b500;font-weight:bold;">zresetuj hasło</a>`;
+          if (!confirmed) {
+            document.getElementById('reset-link').onclick = async () => {
+              await supabase.auth.resetPasswordForEmail(email);
+              statusDiv.innerHTML = `📬 Link resetujący hasło wysłany na <b>${email}</b>.`;
+            };
+          }
+          return;
+        }
+
+        statusDiv.textContent = '⏳ Rejestracja...';
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: 'https://app.gaselaspiner.pl/potwierdzenie.html'
+          }
+        });
+
+        if (error) {
+          statusDiv.textContent = '❌ Rejestracja nie powiodła się: ' + error.message;
+          return;
+        }
+
+        console.log('✅ Rejestracja zakończona:', data);
+        await zapiszPlanDoPending(email);
+
+        statusDiv.innerHTML = `✅ Rejestracja zakończona.<br>
+        📩 Sprawdź e-mail, aby potwierdzić konto.<br>
+        ⏳ Przekierowanie za 10 sekund...`;
+
+        form.reset();
+        form.style.display = 'none';
+        document.querySelector('.login-link')?.remove();
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Przejdź do logowania';
+        btn.onclick = () => window.location.href = 'logowanie.html';
+        document.body.appendChild(btn);
+
+        setTimeout(() => {
+          window.location.href = 'logowanie.html';
+        }, 10000);
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = '❌ Błąd systemowy: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
