@@ -172,9 +172,21 @@
   }
 
   try {
-    // 🔎 Sprawdzenie, czy e-mail już istnieje
-    const { data: existingUser, error: checkError } = await supabase.auth.admin.getUserByEmail(email);
-
+   // 🔎 Wywołanie backendowej funkcji sprawdz_email.js
+let existingUser = null;
+try {
+  const response = await fetch('https://api.gaselaspiner.pl/api/sprawdz_email.js', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const result = await response.json();
+  existingUser = result.user;
+} catch (checkErr) {
+  console.error('❌ Błąd sprawdzania e-maila:', checkErr);
+  statusDiv.textContent = '❌ Nie udało się sprawdzić e-maila. Spróbuj ponownie.';
+  return;
+}
     if (existingUser) {
       const confirmed = existingUser.email_confirmed_at !== null;
 
