@@ -182,19 +182,19 @@ form.addEventListener('submit', async (e) => {
     const checkJson = await checkRes.json();
     const existingUser = checkJson.user;
 
-    if (existingUser && existingUser.email_confirmed_at) {
-      statusDiv.textContent = '❌ Konto z tym adresem e-mail już istnieje i jest aktywne. Zaloguj się.';
-      return;
-    }
-
-    if (existingUser && !existingUser.email_confirmed_at) {
-      statusDiv.innerHTML = `
-        ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
-        📩 Sprawdź swoją skrzynkę e-mail i kliknij link aktywacyjny.<br>
-        Jeśli nie możesz znaleźć maila, sprawdź folder SPAM lub użyj opcji przypomnienia hasła.
-      `;
-      return;
-    }
+   if (existingUser) {
+  if (existingUser.email_confirmed_at) {
+    statusDiv.textContent = '❌ Konto z tym adresem e-mail już istnieje i jest aktywne. Zaloguj się.';
+    return;
+  } else {
+    statusDiv.innerHTML = `
+      ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
+      📩 Sprawdź swoją skrzynkę e-mail i kliknij link aktywacyjny.<br>
+      Jeśli nie możesz znaleźć maila, sprawdź folder SPAM lub użyj opcji przypomnienia hasła.
+    `;
+    return;
+  }
+}
 
     // ✅ Kontynuuj rejestrację
     statusDiv.textContent = '⏳ Rejestracja...';
