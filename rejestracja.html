@@ -173,7 +173,7 @@ form.addEventListener('submit', async (e) => {
 
   try {
     // 🔍 Sprawdź czy email istnieje
-    const checkRes = await fetch('https://api.gaselaspiner.pl/api/sprawdz_email.js', {
+    const checkRes = await fetch('https://api.gaselaspiner.pl/api/public/sprawdz_email.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
