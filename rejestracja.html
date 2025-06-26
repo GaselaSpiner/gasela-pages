@@ -224,7 +224,7 @@ async function zapiszPlanDoPending(email) {
   const plan = urlParams.get('plan') || 'start';
 
   try {
-    const response = await fetch('https://api.gaselaspiner.pl/api/zapisz_plan.js', {
+    const response = await fetch('https://api.gaselaspiner.pl/api/public/zapisz_plan.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, plan_name: plan }),
