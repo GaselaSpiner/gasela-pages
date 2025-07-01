@@ -5,15 +5,57 @@
   <title>Ustaw nowe hasło – Gasela Spiner</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
-    input, button { padding: 12px; margin-top: 10px; width: 250px; }
-    button { background-color: #f6b500; border: none; color: #000; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
-    button:hover { background-color: #e3a700; }
-    h2 { text-align: center; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background-color: #ffffff;
+      color: #000000;
+    }
+    img.logo {
+      max-width: 120px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    p.description {
+      text-align: center;
+      margin-bottom: 20px;
+      max-width: 300px;
+    }
+    input, button {
+      padding: 12px;
+      margin-top: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #f6b500;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #e3a700;
+    }
   </style>
 </head>
 <body>
+  <img src="Gaselas.png" alt="Logo Gasela Spiner" class="logo" />
+
   <h2>Ustaw nowe hasło</h2>
+  <p class="description">Podaj nowe hasło, aby ponownie cieszyć się grą w Gasela Spiner. Pamiętaj, że musi mieć co najmniej 6 znaków.</p>
+
   <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" required />
   <button onclick="updatePassword()">Ustaw nowe hasło</button>
 
