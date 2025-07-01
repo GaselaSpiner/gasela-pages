@@ -136,14 +136,7 @@
       <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
     </div>
   </div>
-<div style="margin-top: 40px; width: 100%; max-width: 400px;">
-  <h3 style="text-align: center; color: #000;">🔒 Zmień hasło</h3>
-  <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
-  <button onclick="changePassword()" style="width: 100%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Zmień hasło</button>
-  <div id="change-status" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
-</div>
 
-  
   <button class="logout-btn" onclick="logout()">Wyloguj się</button>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -360,34 +353,6 @@ function appendMessage(text, sender) {
 
     checkSessionAndPlan();
 
-    async function changePassword() {
-  const newPassword = document.getElementById('new-password').value.trim();
-  const statusDiv = document.getElementById('change-status');
-
-  if (newPassword.length < 6) {
-    statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
-    statusDiv.style.color = "red";
-    return;
-  }
-
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-  if (error) {
-    console.error('❌ Błąd zmiany hasła:', error.message);
-    statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
-    statusDiv.style.color = "red";
-  } else {
-    statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
-    statusDiv.style.color = "green";
-    document.getElementById('new-password').value = "";
-  }
-}
-
-function trimToFullSentence(text) {
-  // ...
-}
-
-    
     function trimToFullSentence(text) {
   if (!text || typeof text !== "string") return "";
 
@@ -438,6 +403,44 @@ function trimToFullSentence(text) {
   // W ostateczności – dodaj "..."
   return text + "...";
 }
+<!-- 🔥 Sidebar -->
+<div id="sidebar" style="
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #f9f9f9;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+">
+  <a href="javascript:void(0)" onclick="closeSidebar()" style="
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 36px;
+    text-decoration: none;
+    color: #000;">&times;</a>
+
+  <div style="padding: 20px; text-align: center;">
+    <h3>🔒 Zmień hasło</h3>
+    <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+    <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Zmień hasło</button>
+    <div id="change-status" style="margin-top: 15px; font-weight: bold;"></div>
+  </div>
+</div>
+
+<!-- 🔥 Ikona otwierająca sidebar -->
+<img src="Gaselas.png" alt="Menu" style="
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+" onclick="openSidebar()">
 
   </script>
 </body>
