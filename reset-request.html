@@ -76,10 +76,13 @@
       });
 
       if (error) {
-        alert("❌ Nie udało się wysłać linku: " + error.message);
-      } else {
-        alert("✅ Wysłaliśmy link do zmiany hasła. Sprawdź skrzynkę e-mail (i folder SPAM).");
-      }
+  document.getElementById('status').innerHTML = "❌ Nie udało się wysłać linku: " + error.message;
+  document.getElementById('status').style.color = "red";
+} else {
+  document.getElementById('status').innerHTML = "✅ Wysłaliśmy link do zmiany hasła. Sprawdź skrzynkę e-mail (i folder SPAM).";
+  document.getElementById('status').style.color = "green";
+}
+
     }
   </script>
 </body>
