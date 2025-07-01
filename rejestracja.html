@@ -172,11 +172,13 @@ if (existingUser) {
     form.reset();
     return;
   } else {
-    statusDiv.innerHTML = `
+  statusDiv.innerHTML = `
   ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
   📩 Sprawdź swoją skrzynkę e-mail i kliknij link aktywacyjny.<br>
   Jeśli nie możesz znaleźć maila, sprawdź folder SPAM lub skorzystaj z poniższego przycisku, aby wysłać link ponownie.
 `;
+
+form.style.display = "none"; // 🔥 Ukrywamy formularz rejestracji
 
 if (!document.getElementById('resend-btn')) {
   const resendBtn = document.createElement("button");
@@ -188,8 +190,20 @@ if (!document.getElementById('resend-btn')) {
   statusDiv.appendChild(resendBtn);
 }
 
+if (!document.getElementById('go-to-login-btn')) {
+  const loginBtn = document.createElement('button');
+  loginBtn.id = 'go-to-login-btn';
+  loginBtn.textContent = 'Przejdź do logowania';
+  loginBtn.style.marginTop = '10px';
+  loginBtn.onclick = () => {
+    window.location.href = 'logowanie.html';
+  };
+  statusDiv.appendChild(loginBtn);
+}
+
 form.reset();
 return;
+
 
   }
 }
