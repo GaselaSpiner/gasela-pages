@@ -169,8 +169,35 @@ const existingUser = checkJson.user;
 if (existingUser) {
   if (existingUser.email_confirmed_at) {
     statusDiv.textContent = '❌ Konto z tym adresem e-mail już istnieje i jest aktywne. Zaloguj się.';
-    form.reset();
-    return;
+
+form.style.display = "none";
+
+const loginLinkDiv = document.querySelector('.login-link');
+if (loginLinkDiv) {
+  loginLinkDiv.style.display = "none";
+}
+
+// 🔥 Tworzymy kontener na przycisk
+const buttonContainer = document.createElement("div");
+buttonContainer.style.textAlign = "center";
+buttonContainer.style.marginTop = "20px";
+
+if (!document.getElementById('go-to-login-btn')) {
+  const loginBtn = document.createElement('button');
+  loginBtn.id = 'go-to-login-btn';
+  loginBtn.textContent = 'Przejdź do logowania';
+  loginBtn.style.marginTop = '10px';
+  loginBtn.onclick = () => {
+    window.location.href = 'logowanie.html';
+  };
+
+  buttonContainer.appendChild(loginBtn);
+  statusDiv.appendChild(buttonContainer);
+}
+
+form.reset();
+return;
+
   } else {
 statusDiv.innerHTML = `
   ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
