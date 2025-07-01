@@ -30,19 +30,19 @@
     .chat-container {
       width: 100%;
       max-width: 700px;
-      background: #f9f9f9	;
+      background: #f9f9f9;
       border-radius: 12px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
       padding: 20px;
       min-height: 400px;
     }
-     .info {
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-  color: #444;
-  white-space: pre-line;
-  text-align: center;           /* ⬅ dodane */
-}
+    .info {
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #444;
+      white-space: pre-line;
+      text-align: center;
+    }
     .logout-btn {
       margin-top: 30px;
       padding: 10px 18px;
@@ -57,65 +57,38 @@
     .logout-btn:hover {
       background-color: #e3a700;
     }
-
-   .message {
-  display: flex;
-  margin: 6px 0;
-  width: 100%;
-}
-
-.message-bubble {
-  max-width: 75%;
-  padding: 10px 14px;
-  border-radius: 12px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  text-align: left; /* ✅ tekst w chmurce zawsze do lewej */
-}
-
-.message-user {
-  justify-content: flex-end;
-}
-
-.message-user .message-bubble {
-  background-color: #e5e5e5;
-  align-self: flex-end;
-  margin-left: auto;
-}
-
-.message-ai {
-  justify-content: flex-start;
-}
-
-.message-ai .message-bubble {
-  background-color: transparent;
-  align-self: flex-start;
-  margin-right: auto;
-}
-
-.message-bubble h1, .message-bubble h2, .message-bubble h3 {
-  margin: 0.5em 0 0.3em;
-  font-size: 1.2rem;
-  color: #000;
-}
-
-.message-bubble p {
-  margin: 0.3em 0;
-}
-
-.message-bubble ul {
-  padding-left: 1.2em;
-  margin: 0.3em 0;
-}
-
-.message-bubble li {
-  margin-bottom: 0.2em;
-}
-
+    .message {
+      display: flex;
+      margin: 6px 0;
+      width: 100%;
+    }
+    .message-bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+    .message-user {
+      justify-content: flex-end;
+    }
+    .message-user .message-bubble {
+      background-color: #e5e5e5;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+    .message-ai {
+      justify-content: flex-start;
+    }
+    .message-ai .message-bubble {
+      background-color: transparent;
+      align-self: flex-start;
+      margin-right: auto;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 </head>
 <body>
   <img src="Gaselas.png" alt="Gasela Spiner Logo" class="logo" />
@@ -123,7 +96,6 @@
 
   <div class="chat-container">
     <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
-
     <div id="chat-ui" style="display: none; text-align: center;">
       <label for="promptSelector">🎯 Wybierz temat:</label>
       <select id="promptSelector">
@@ -154,31 +126,22 @@
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
 
-function appendMessage(text, sender) {
-  const wrapper = document.createElement("div");
-  wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
-
-  const bubble = document.createElement("div");
-  bubble.className = "message-bubble";
-
-  if (sender === 'ai') {
-    bubble.innerHTML = marked.parse(text); // ✅ konwersja markdown → HTML
-  } else {
-    bubble.textContent = text; // dla użytkownika zostaje tekst
-  }
-
-  wrapper.appendChild(bubble);
-  messagesDiv.appendChild(wrapper);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
+    function appendMessage(text, sender) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.innerHTML = sender === 'ai' ? marked.parse(text) : text;
+      wrapper.appendChild(bubble);
+      messagesDiv.appendChild(wrapper);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
 
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
         method: 'GET',
         headers: { Authorization: `Bearer ${jwt}` }
       });
-
       const { prompts } = await res.json();
       promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
       prompts.forEach(p => {
@@ -195,12 +158,10 @@ function appendMessage(text, sender) {
         .select('total_limit, used_messages')
         .eq('user_id', userId)
         .single();
-
       if (!limitData || error) {
         statusMsg.textContent = '❓ Nie udało się pobrać limitu wiadomości.';
         return;
       }
-
       const remaining = limitData.total_limit - limitData.used_messages;
       statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
     }
@@ -208,17 +169,14 @@ function appendMessage(text, sender) {
     sendButton.addEventListener("click", async () => {
       const message = userInput.value.trim();
       const promptKey = promptSelector.value;
-
       if (!message || !promptKey) {
         alert("Wpisz wiadomość i wybierz temat!");
         return;
       }
-
       if (message.length > window.maxInputLength) {
         alert(`Wiadomość za długa. Limit: ${window.maxInputLength} znaków.`);
         return;
       }
-
       appendMessage(message, 'user');
       userInput.value = "";
 
@@ -228,54 +186,30 @@ function appendMessage(text, sender) {
 
       const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${jwt}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' }
       });
 
       if (!verifyRes.ok) {
-  const { error } = await verifyRes.json();
+        const { error } = await verifyRes.json();
+        if (error === "Limit wiadomości został wyczerpany") {
+          messagesDiv.innerHTML += `<div style="margin-top: 1.5em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <div style="color: red; margin-bottom: 1em;">🦌 Gasela zatrzymała się na chwilę.<br/>Odblokuj kolejny bieg!</div>
+            <button onclick="window.location.href='kup-plan.html'" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">Kup nowy plan</button>
+          </div>`;
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          return;
+        }
+        appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+        return;
+      }
 
-  // Sprawdź, czy to błąd limitu wiadomości
-  if (error === "Limit wiadomości został wyczerpany") {
-    messagesDiv.innerHTML += `
-      <div style="margin-top: 1.5em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-        <div style="color: red; margin-bottom: 1em;">
-          🦌 Gasela zatrzymała się na chwilę.<br/>Odblokuj kolejny bieg!
-        </div>
-        <button onclick="window.location.href='kup-plan.html'" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
-          Kup nowy plan
-        </button>
-      </div>
-    `;
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    return;
-  }
-
-  appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
-  return;
-}
-
-
-      
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({
-          prompt_key: promptKey,
-          user_input: message
-        })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ prompt_key: promptKey, user_input: message })
       });
-
       const data = await res.json();
-      const trimmed = trimToFullSentence(data.reply);  // ✂️ Przytnij odpowiedź
-      appendMessage(trimmed, 'ai');                    // 📩 Wyświetl czatowi
-
-
+      appendMessage(trimToFullSentence(data.reply), 'ai');
       await updateMessageLimit(jwt, userId);
     });
 
@@ -287,33 +221,9 @@ function appendMessage(text, sender) {
     async function checkSessionAndPlan() {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) return;
-
       const jwt = session.access_token;
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
-
-      const { data: subData } = await supabase
-        .from('subscriptions')
-        .select('plan_name, end_date')
-        .eq('user_id', userId)
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const planActive = subData && subData.end_date && new Date(subData.end_date) > new Date();
-
-      const { data: pending } = await supabase
-  .from('pending_plans')
-  .select('plan_name')
-  .eq('email', session.user.email)
-  .maybeSingle();
-
-      if (!planActive && pending?.plan_name) {
-        await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${jwt}` }
-        });
-      }
 
       const { data: subNow } = await supabase
         .from('subscriptions')
@@ -322,162 +232,83 @@ function appendMessage(text, sender) {
         .order('end_date', { ascending: false })
         .limit(1)
         .maybeSingle();
-
       if (!subNow) {
         statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
         return;
       }
-
       const { data: limitData } = await supabase
         .from('message_limits')
         .select('total_limit, used_messages')
         .eq('user_id', userId)
         .single();
-
       if (!limitData) {
         statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
         return;
       }
-
       const remaining = limitData.total_limit - limitData.used_messages;
       const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
       statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
-
       chatUI.style.display = 'block';
-      const plan = subNow.plan_name;
-      window.maxInputLength = plan === 'pro' ? 800 : plan === 'mistrz' ? 1000 : 600;
+      window.maxInputLength = subNow.plan_name === 'pro' ? 800 : subNow.plan_name === 'mistrz' ? 1000 : 600;
       userInput.setAttribute("maxlength", window.maxInputLength);
-
       await fetchPrompts(jwt);
     }
 
     checkSessionAndPlan();
 
     function openSidebar() {
-  document.getElementById("sidebar").style.width = "300px";
-}
-
-function closeSidebar() {
-  document.getElementById("sidebar").style.width = "0";
-}
-
-async function changePassword() {
-  const newPassword = document.getElementById('new-password').value.trim();
-  const statusDiv = document.getElementById('change-status');
-
-  if (newPassword.length < 6) {
-    statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
-    statusDiv.style.color = "red";
-    return;
-  }
-
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-  if (error) {
-    console.error('❌ Błąd zmiany hasła:', error.message);
-    statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
-    statusDiv.style.color = "red";
-  } else {
-    statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
-    statusDiv.style.color = "green";
-    document.getElementById('new-password').value = "";
-  }
-}
-
-function trimToFullSentence(text) {
-  // ...
-}
-
-    
-    function trimToFullSentence(text) {
-  if (!text || typeof text !== "string") return "";
-
-  text = text.trim();
-
-  const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
-  const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
-
-  // Jeśli kończy się sensownym znakiem, ale nie numerkiem listy
-  if (goodEndings.some(end => text.endsWith(end))) {
-    const lastToken = text.split(/\s+/).pop();
-    const orphanListItemPattern = /^\d{1,2}[.)]$/;
-    if (!orphanListItemPattern.test(lastToken)) {
-      return text;
+      document.getElementById("sidebar").style.width = "300px";
     }
-  }
+    function closeSidebar() {
+      document.getElementById("sidebar").style.width = "0";
+    }
+    async function changePassword() {
+      const newPassword = document.getElementById('new-password').value.trim();
+      const statusDiv = document.getElementById('change-status');
+      if (newPassword.length < 6) {
+        statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
+        statusDiv.style.color = "red";
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
+        statusDiv.style.color = "red";
+      } else {
+        statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
+        statusDiv.style.color = "green";
+        document.getElementById('new-password').value = "";
+      }
+    }
 
-  // Jeśli kończy się na słowo łączące lub przecinek – nie kończymy
-  const lastWords = text.split(/\s+/);
-  const lastWord = lastWords[lastWords.length - 1].toLowerCase();
-  if (softEndings.includes(lastWord) || text.endsWith(',')) {
-    return text + "...";
-  }
-
-  // Utnij znane niepełne końcówki
-  const brokenPatterns = [
-    /###?\s*[0-9]?[.)]?\s*$/,
-    /-\s*$/,
-    /[:;]$/,
-    /\(\s*$/,
-    /\*\*\s*$/
-  ];
-  if (brokenPatterns.some(p => p.test(text))) {
-    return text.replace(brokenPatterns.find(p => p.test(text)), '').trim() + "...";
-  }
-
-  // Odetnij do ostatniego znaku interpunkcyjnego, jeśli wystarczająco daleko
-  const lastPunctuation = Math.max(
-    text.lastIndexOf('.'),
-    text.lastIndexOf('!'),
-    text.lastIndexOf('?'),
-    text.lastIndexOf('…')
-  );
-  if (lastPunctuation !== -1 && lastPunctuation > text.length * 0.5) {
-    return text.slice(0, lastPunctuation + 1);
-  }
-
-  // W ostateczności – dodaj "..."
-  return text + "...";
-}
-<!-- 🔥 Sidebar -->
-<div id="sidebar" style="
-  height: 100%;
-  width: 0;
-  position: fixed;
-  top: 0;
-  right: 0;
-  background-color: #f9f9f9;
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 60px;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-">
-  <a href="javascript:void(0)" onclick="closeSidebar()" style="
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    font-size: 36px;
-    text-decoration: none;
-    color: #000;">&times;</a>
-
-  <div style="padding: 20px; text-align: center;">
-    <h3>🔒 Zmień hasło</h3>
-    <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
-    <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Zmień hasło</button>
-    <div id="change-status" style="margin-top: 15px; font-weight: bold;"></div>
-  </div>
-</div>
-
-<!-- 🔥 Ikona otwierająca sidebar -->
-<img src="Gaselas.png" alt="Menu" style="
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-" onclick="openSidebar()">
-
+    function trimToFullSentence(text) {
+      if (!text || typeof text !== "string") return "";
+      text = text.trim();
+      const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
+      const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
+      if (goodEndings.some(end => text.endsWith(end))) {
+        const lastToken = text.split(/\s+/).pop();
+        if (!/^\d{1,2}[.)]$/.test(lastToken)) return text;
+      }
+      const lastWords = text.split(/\s+/);
+      const lastWord = lastWords[lastWords.length - 1].toLowerCase();
+      if (softEndings.includes(lastWord) || text.endsWith(',')) return text + "...";
+      return text + "...";
+    }
   </script>
+
+  <!-- 🔥 Sidebar -->
+  <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
+    <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
+    <div style="padding: 20px; text-align: center;">
+      <h3>🔒 Zmień hasło</h3>
+      <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+      <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Zmień hasło</button>
+      <div id="change-status" style="margin-top: 15px; font-weight: bold;"></div>
+    </div>
+  </div>
+
+  <!-- 🔥 Ikona otwierająca sidebar -->
+  <img src="Gaselas.png" alt="Menu" style="position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; cursor: pointer;" onclick="openSidebar()">
 </body>
 </html>
