@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ustaw nowe hasło – Gasela Spiner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
+    input, button { padding: 12px; margin-top: 10px; width: 250px; }
+    button { background-color: #f6b500; border: none; color: #000; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+    button:hover { background-color: #e3a700; }
+    h2 { text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Ustaw nowe hasło</h2>
+  <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" required />
+  <button onclick="updatePassword()">Ustaw nowe hasło</button>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient('https://lmussgaiutaldicolyba.supabase.co', 'twój_anon_key');
+
+    async function updatePassword() {
+      const newPassword = document.getElementById('new-password').value.trim();
+      if (newPassword.length < 6) {
+        alert("❌ Hasło musi mieć co najmniej 6 znaków.");
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        alert("❌ Nie udało się ustawić nowego hasła: " + error.message);
+      } else {
+        alert("✅ Hasło zostało zmienione. Możesz się teraz zalogować.");
+        window.location.href = "logowanie.html";
+      }
+    }
+  </script>
+</body>
+</html>
