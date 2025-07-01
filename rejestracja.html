@@ -139,79 +139,84 @@ form.addEventListener('submit', async (e) => {
   }
 
   try {
-    // 🔍 Sprawdź czy email istnieje
-    const checkRes = await fetch('https://api.gaselaspiner.pl/api/public/sprawdz_email.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
+ 
+// 🔍 Sprawdź czy email istnieje
+const checkRes = await fetch('https://api.gaselaspiner.pl/api/public/sprawdz_email.js', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email })
+});
 
-    const checkJson = await checkRes.json();
-    const existingUser = checkJson.user;
+const checkJson = await checkRes.json();
+const existingUser = checkJson.user;
 
-   if (existingUser) {
+if (existingUser) {
   if (existingUser.email_confirmed_at) {
     statusDiv.textContent = '❌ Konto z tym adresem e-mail już istnieje i jest aktywne. Zaloguj się.';
-    return;
+    form.reset();       // Możesz wyczyścić formularz (opcjonalnie)
+    return;            // ⬅️ KLUCZOWE: STOP — NIE idziemy dalej
   } else {
     statusDiv.innerHTML = `
       ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
       📩 Sprawdź swoją skrzynkę e-mail i kliknij link aktywacyjny.<br>
       Jeśli nie możesz znaleźć maila, sprawdź folder SPAM lub użyj opcji przypomnienia hasła.
     `;
-    return;
+    form.reset();       // Opcjonalnie
+    return;            // ⬅️ KLUCZOWE: STOP — NIE idziemy dalej
   }
 }
 
-    // ✅ Kontynuuj rejestrację
-    statusDiv.textContent = '⏳ Rejestracja...';
+// ✅ Kontynuuj rejestrację
+statusDiv.textContent = '⏳ Rejestracja...';
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: 'https://app.gaselaspiner.pl/potwierdzenie.html'
-      }
-    });
+const { data, error } = await supabase.auth.signUp({
+  email,
+  password,
+  options: {
+    emailRedirectTo: 'https://app.gaselaspiner.pl/potwierdzenie.html'
+  }
+});
 
-    if (error) {
-      console.error('❌ Błąd rejestracji:', error.message);
-      statusDiv.textContent = '❌ Nie udało się założyć konta';
-    } else {
-      console.log('✅ Rejestracja zakończona:', data);
+if (error) {
+  console.error('❌ Błąd rejestracji:', error.message);
+  statusDiv.textContent = '❌ Nie udało się założyć konta';
+} else {
+  console.log('✅ Rejestracja zakończona:', data);
 
-      // 🔁 Zapisz plan do pending_plans
-      await zapiszPlanDoPending(email);
+  // 🔁 Zapisz plan do pending_plans
+  await zapiszPlanDoPending(email);
 
-      statusDiv.innerHTML = `
-        <div style="color:green; font-weight:bold; text-align:center;">
-          ✅ Rejestracja zakończona.<br>
-          📩 Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.<br>
-          ⏳ Nastąpi przekierowanie do logowania za 10 sekund...
-        </div>
-      `;
+  statusDiv.innerHTML = `
+    <div style="color:green; font-weight:bold; text-align:center;">
+      ✅ Rejestracja zakończona.<br>
+      📩 Sprawdź swoją skrzynkę e-mail i kliknij link potwierdzający, aby aktywować konto.<br>
+      ⏳ Nastąpi przekierowanie do logowania za 10 sekund...
+    </div>
+  `;
 
-      form.reset();
-      form.style.display = 'none';
+  form.reset();
+  form.style.display = 'none';
 
-      const loginLinkDiv = document.querySelector('.login-link');
-      if (loginLinkDiv) loginLinkDiv.remove();
+  const loginLinkDiv = document.querySelector('.login-link');
+  if (loginLinkDiv) loginLinkDiv.remove();
 
-      if (!document.getElementById('go-to-login-btn')) {
-        const loginBtn = document.createElement('button');
-        loginBtn.id = 'go-to-login-btn';
-        loginBtn.textContent = 'Przejdź do logowania';
-        loginBtn.style.marginTop = '20px';
-        loginBtn.onclick = () => {
-          window.location.href = 'logowanie.html';
-        };
-        document.body.appendChild(loginBtn);
-      }
+  if (!document.getElementById('go-to-login-btn')) {
+    const loginBtn = document.createElement('button');
+    loginBtn.id = 'go-to-login-btn';
+    loginBtn.textContent = 'Przejdź do logowania';
+    loginBtn.style.marginTop = '20px';
+    loginBtn.onclick = () => {
+      window.location.href = 'logowanie.html';
+    };
+    document.body.appendChild(loginBtn);
+  }
 
-      setTimeout(() => {
-        window.location.href = 'logowanie.html';
-      }, 10000);
-    }
+  setTimeout(() => {
+    window.location.href = 'logowanie.html';
+  }, 10000);
+}
+
+    
   } catch (err) {
     console.error('❌ Wyjątek:', err);
     statusDiv.textContent = '❌ Błąd wewnętrzny: ' + err.message;
