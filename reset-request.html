@@ -1,1 +1,43 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reset hasła – Gasela Spiner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
+    input, button { padding: 12px; margin-top: 10px; width: 250px; }
+    button { background-color: #f6b500; border: none; color: #000; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+    button:hover { background-color: #e3a700; }
+    h2 { text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Reset hasła</h2>
+  <input type="email" id="email" placeholder="Podaj swój email" required />
+  <button onclick="sendReset()">Wyślij link do resetu</button>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient('https://lmussgaiutaldicolyba.supabase.co', 'twój_anon_key');
+
+    async function sendReset() {
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        alert("❌ Podaj email.");
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://app.gaselaspiner.pl/reset.html"
+      });
+
+      if (error) {
+        alert("❌ Nie udało się wysłać linku: " + error.message);
+      } else {
+        alert("✅ Wysłaliśmy link do zmiany hasła. Sprawdź skrzynkę e-mail (i folder SPAM).");
+      }
+    }
+  </script>
+</body>
+</html>
