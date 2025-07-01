@@ -58,6 +58,8 @@
 
   <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" required />
   <button onclick="updatePassword()">Ustaw nowe hasło</button>
+  <div id="status" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -72,12 +74,17 @@
 
       const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-      if (error) {
-        alert("❌ Nie udało się ustawić nowego hasła: " + error.message);
-      } else {
-        alert("✅ Hasło zostało zmienione. Możesz się teraz zalogować.");
-        window.location.href = "logowanie.html";
-      }
+     if (error) {
+  document.getElementById('status').innerHTML = "❌ Nie udało się ustawić nowego hasła: " + error.message;
+  document.getElementById('status').style.color = "red";
+} else {
+  document.getElementById('status').innerHTML = "✅ Hasło zostało zmienione. Możesz się teraz zalogować.";
+  document.getElementById('status').style.color = "green";
+
+  setTimeout(() => {
+    window.location.href = "logowanie.html";
+  }, 3000); // ⏳ Czekamy 3 sekundy, żeby użytkownik przeczytał komunikat
+}
     }
   </script>
 </body>
