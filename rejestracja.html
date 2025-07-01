@@ -148,21 +148,27 @@ const checkRes = await fetch('https://api.gaselaspiner.pl/api/public/sprawdz_ema
 });
 
 const checkJson = await checkRes.json();
+
+if (checkJson.error) {
+  statusDiv.textContent = `❌ Błąd weryfikacji e-maila: ${checkJson.error}`;
+  return; // ⬅️ Zatrzymuje proces!
+}
+
 const existingUser = checkJson.user;
 
 if (existingUser) {
   if (existingUser.email_confirmed_at) {
     statusDiv.textContent = '❌ Konto z tym adresem e-mail już istnieje i jest aktywne. Zaloguj się.';
-    form.reset();       // Możesz wyczyścić formularz (opcjonalnie)
-    return;            // ⬅️ KLUCZOWE: STOP — NIE idziemy dalej
+    form.reset();
+    return;
   } else {
     statusDiv.innerHTML = `
       ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
       📩 Sprawdź swoją skrzynkę e-mail i kliknij link aktywacyjny.<br>
       Jeśli nie możesz znaleźć maila, sprawdź folder SPAM lub użyj opcji przypomnienia hasła.
     `;
-    form.reset();       // Opcjonalnie
-    return;            // ⬅️ KLUCZOWE: STOP — NIE idziemy dalej
+    form.reset();
+    return;
   }
 }
 
