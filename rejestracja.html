@@ -172,29 +172,24 @@ if (existingUser) {
     form.reset();
     return;
   } else {
-  statusDiv.innerHTML = `
+statusDiv.innerHTML = `
   ❗ To konto już istnieje, ale nie zostało jeszcze aktywowane.<br>
   📩 Sprawdź swoją skrzynkę e-mail i kliknij link aktywacyjny.<br>
-  Jeśli nie możesz znaleźć maila, sprawdź folder SPAM lub skorzystaj z poniższego przycisku, aby wysłać link ponownie.
+  Jeśli nie możesz znaleźć maila, sprawdź folder SPAM.
 `;
 
-form.style.display = "none"; // 🔥 Ukrywamy formularz rejestracji
+form.style.display = "none";
 
-if (!document.getElementById('resend-btn')) {
-  const resendBtn = document.createElement("button");
-  resendBtn.id = "resend-btn";
-  resendBtn.textContent = "Wyślij ponownie link aktywacyjny";
-  resendBtn.style.marginTop = "15px";
-  resendBtn.onclick = () => resendActivation(email);
-
-  statusDiv.appendChild(resendBtn);
+const loginLinkDiv = document.querySelector('.login-link');
+if (loginLinkDiv) {
+  loginLinkDiv.style.display = "none";
 }
 
 if (!document.getElementById('go-to-login-btn')) {
   const loginBtn = document.createElement('button');
   loginBtn.id = 'go-to-login-btn';
   loginBtn.textContent = 'Przejdź do logowania';
-  loginBtn.style.marginTop = '10px';
+  loginBtn.style.marginTop = '15px';
   loginBtn.onclick = () => {
     window.location.href = 'logowanie.html';
   };
