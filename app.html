@@ -36,6 +36,13 @@
       padding: 20px;
       min-height: 400px;
     }
+    .info {
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #444;
+      white-space: pre-line;
+      text-align: center;
+    }
     .logout-btn {
       margin-top: 30px;
       padding: 10px 18px;
@@ -103,6 +110,7 @@
   <h1 id="welcome">Witaj w systemie Gasela Spiner</h1>
 
   <div class="chat-container">
+    <p class="info" id="status-msg">💬 Czat trenera pojawi się tutaj po aktywacji planu...</p>
     <div id="chat-ui" style="display: none; text-align: center;">
       <label for="promptSelector">🎯 Wybierz temat:</label>
       <select id="promptSelector">
@@ -123,6 +131,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
     );
 
+    const statusMsg = document.getElementById('status-msg');
     const welcome = document.getElementById('welcome');
     const chatUI = document.getElementById("chat-ui");
     const messagesDiv = document.getElementById("messages");
@@ -156,7 +165,19 @@
       });
     }
 
-    async function updateMessageLimit(jwt, userId) {}
+    async function updateMessageLimit(jwt, userId) {
+      const { data: limitData, error } = await supabase
+        .from('message_limits')
+        .select('total_limit, used_messages')
+        .eq('user_id', userId)
+        .single();
+      if (!limitData || error) {
+        statusMsg.textContent = '❓ Nie udało się pobrać limitu wiadomości.';
+        return;
+      }
+      const remaining = limitData.total_limit - limitData.used_messages;
+      statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+    }
 
     sendButton.addEventListener("click", async () => {
       const message = userInput.value.trim();
@@ -174,6 +195,26 @@
 
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
+      const userId = session.user.id;
+
+      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' }
+      });
+
+      if (!verifyRes.ok) {
+        const { error } = await verifyRes.json();
+        if (error === "Limit wiadomości został wyczerpany") {
+          messagesDiv.innerHTML += `<div style="margin-top: 1.5em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <div style="color: red; margin-bottom: 1em;">🦌 Gasela zatrzymała się na chwilę.<br/>Odblokuj kolejny bieg!</div>
+            <button onclick="window.location.href='kup-plan.html'" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">Kup nowy plan</button>
+          </div>`;
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          return;
+        }
+        appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
+        return;
+      }
 
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
@@ -182,6 +223,7 @@
       });
       const data = await res.json();
       appendMessage(trimToFullSentence(data.reply), 'ai');
+      await updateMessageLimit(jwt, userId);
     });
 
     async function logout() {
@@ -221,7 +263,7 @@
         .limit(1)
         .maybeSingle();
       if (!subNow) {
-        document.getElementById("user-info").innerHTML = "❌ Nie znaleziono aktywnego planu.";
+        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
         return;
       }
       const { data: limitData } = await supabase
@@ -230,19 +272,18 @@
         .eq('user_id', userId)
         .single();
       if (!limitData) {
-        document.getElementById("user-info").innerHTML = "❌ Nie znaleziono limitów wiadomości.";
+        statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
         return;
       }
       const remaining = limitData.total_limit - limitData.used_messages;
       const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
-
+      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
       document.getElementById("user-info").innerHTML = `
         <strong>Email:</strong> ${session.user.email}<br>
         <strong>Plan:</strong> ${subNow.plan_name}<br>
         <strong>Do:</strong> ${endDate}<br>
         <strong>Pozostałe wiadomości:</strong> ${remaining}
       `;
-      
       chatUI.style.display = 'block';
       window.maxInputLength = subNow.plan_name === 'pro' ? 800 : subNow.plan_name === 'mistrz' ? 1000 : 600;
       userInput.setAttribute("maxlength", window.maxInputLength);
@@ -255,7 +296,14 @@
       if (!text || typeof text !== "string") return "";
       text = text.trim();
       const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
-      if (goodEndings.some(end => text.endsWith(end))) return text;
+      const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
+      if (goodEndings.some(end => text.endsWith(end))) {
+        const lastToken = text.split(/\s+/).pop();
+        if (!/^\d{1,2}[.)]$/.test(lastToken)) return text;
+      }
+      const lastWords = text.split(/\s+/);
+      const lastWord = lastWords[lastWords.length - 1].toLowerCase();
+      if (softEndings.includes(lastWord) || text.endsWith(',')) return text + "...";
       return text + "...";
     }
 
@@ -265,6 +313,39 @@
     function closeSidebar() {
       document.getElementById("sidebar").style.width = "0";
     }
+    function showChangePasswordForm() {
+      document.getElementById('password-form').style.display = 'block';
+    }
+
+    async function changePassword() {
+      const newPassword = document.getElementById('new-password').value.trim();
+      const repeatPassword = document.getElementById('repeat-password').value.trim();
+      const statusDiv = document.getElementById('change-status');
+
+      if (newPassword.length < 6) {
+        statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      if (newPassword !== repeatPassword) {
+        statusDiv.innerHTML = "❌ Hasła nie są takie same.";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
+        statusDiv.style.color = "red";
+      } else {
+        statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
+        statusDiv.style.color = "green";
+        document.getElementById('new-password').value = "";
+        document.getElementById('repeat-password').value = "";
+      }
+    }
   </script>
 
   <!-- 🔥 Sidebar -->
@@ -273,6 +354,15 @@
     <div style="padding: 20px; text-align: center;">
       <h3>⚙️ Moje konto</h3>
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;"></div>
+
+      <button onclick="showChangePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
+
+      <div id="password-form" style="display: none; margin-top: 15px;">
+        <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Potwierdź zmianę</button>
+        <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+      </div>
 
       <button onclick="logout()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
       <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
