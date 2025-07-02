@@ -249,47 +249,58 @@
       }
     }
 
-    async function checkSessionAndPlan() {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) return;
-      const jwt = session.access_token;
-      const userId = session.user.id;
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+   async function checkSessionAndPlan() {
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) return;
 
-      const { data: subNow } = await supabase
-        .from('subscriptions')
-        .select('plan_name, end_date')
-        .eq('user_id', userId)
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (!subNow) {
-        statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
-        return;
-      }
-      const { data: limitData } = await supabase
-        .from('message_limits')
-        .select('total_limit, used_messages')
-        .eq('user_id', userId)
-        .single();
-      if (!limitData) {
-        statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
-        return;
-      }
-      const remaining = limitData.total_limit - limitData.used_messages;
-      const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
-      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
-      document.getElementById("user-info").innerHTML = `
-        <strong>Email:</strong> ${session.user.email}<br>
-        <strong>Plan:</strong> ${subNow.plan_name}<br>
-        <strong>Do:</strong> ${endDate}<br>
-        <strong>Pozostałe wiadomości:</strong> ${remaining}
-      `;
-      chatUI.style.display = 'block';
-      window.maxInputLength = subNow.plan_name === 'pro' ? 800 : subNow.plan_name === 'mistrz' ? 1000 : 600;
-      userInput.setAttribute("maxlength", window.maxInputLength);
-      await fetchPrompts(jwt);
-    }
+  const jwt = session.access_token;
+  const userId = session.user.id;
+  welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+
+  const { data: subNow } = await supabase
+    .from('subscriptions')
+    .select('plan_name, end_date')
+    .eq('user_id', userId)
+    .order('end_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!subNow) {
+    statusMsg.textContent = '❌ Nie znaleziono aktywnego planu.';
+    return;
+  }
+
+  const { data: limitData } = await supabase
+    .from('message_limits')
+    .select('total_limit, used_messages')
+    .eq('user_id', userId)
+    .single();
+
+  if (!limitData) {
+    statusMsg.textContent = '❌ Nie znaleziono limitów wiadomości.';
+    return;
+  }
+
+  const remaining = limitData.total_limit - limitData.used_messages;
+  const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
+
+  // 🔥 Ukryj komunikat statusu w container
+  statusMsg.style.display = "none";
+
+  // Wyświetl dane w sidebarze
+  document.getElementById("user-info").innerHTML = `
+    <strong>Email:</strong> ${session.user.email}<br>
+    <strong>Plan:</strong> ${subNow.plan_name}<br>
+    <strong>Do:</strong> ${endDate}<br>
+    <strong>Pozostałe wiadomości:</strong> ${remaining}
+  `;
+
+  chatUI.style.display = 'block';
+  window.maxInputLength = subNow.plan_name === 'pro' ? 800 : subNow.plan_name === 'mistrz' ? 1000 : 600;
+  userInput.setAttribute("maxlength", window.maxInputLength);
+  await fetchPrompts(jwt);
+}
+
 
     checkSessionAndPlan();
 
