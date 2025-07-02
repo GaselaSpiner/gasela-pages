@@ -176,7 +176,7 @@
         return;
       }
       const remaining = limitData.total_limit - limitData.used_messages;
-      statusMsg.textContent = `🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+      statusMsg.textContent = "";
     }
 
     sendButton.addEventListener("click", async () => {
