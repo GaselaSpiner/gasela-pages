@@ -201,11 +201,48 @@
     });
 
     async function checkSessionAndPlan() {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) return;
-      const jwt = session.access_token;
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
-      await fetchPrompts(jwt);
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) return;
+  const jwt = session.access_token;
+  const userId = session.user.id;
+
+  welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+  await fetchPrompts(jwt);
+
+  // Pobranie subskrypcji
+  const { data: subNow } = await supabase
+    .from('subscriptions')
+    .select('plan_name, end_date')
+    .eq('user_id', userId)
+    .order('end_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Pobranie limitów wiadomości
+  const { data: limitData } = await supabase
+    .from('message_limits')
+    .select('total_limit, used_messages')
+    .eq('user_id', userId)
+    .single();
+
+  // Przygotowanie informacji
+  let planInfo = "";
+  if (subNow) {
+    const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
+    planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
+    planInfo += `<strong>Do:</strong> ${endDate}<br>`;
+  }
+  if (limitData) {
+    const remaining = limitData.total_limit - limitData.used_messages;
+    planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
+  }
+
+  document.getElementById("user-info").innerHTML = `
+    <strong>Email:</strong> ${session.user.email}<br>
+    ${planInfo}
+  `;
+}
+
 
       document.getElementById("user-info").innerHTML = `
         <strong>Email:</strong> ${session.user.email}<br>
