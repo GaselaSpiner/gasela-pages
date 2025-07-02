@@ -264,6 +264,13 @@
       const remaining = limitData.total_limit - limitData.used_messages;
       const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
       statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+      document.getElementById("user-info").innerHTML = `
+  <strong>Email:</strong> ${session.user.email}<br>
+  <strong>Plan:</strong> ${subNow.plan_name}<br>
+  <strong>Do:</strong> ${endDate}<br>
+  <strong>Pozostałe wiadomości:</strong> ${remaining}
+`;
+
       chatUI.style.display = 'block';
       window.maxInputLength = subNow.plan_name === 'pro' ? 800 : subNow.plan_name === 'mistrz' ? 1000 : 600;
       userInput.setAttribute("maxlength", window.maxInputLength);
