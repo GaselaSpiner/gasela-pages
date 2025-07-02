@@ -80,12 +80,6 @@
       align-self: flex-start;
       margin-right: auto;
     }
-    @media (max-width: 600px) {
-      #promptSelector {
-        font-size: 1rem;
-        padding: 12px;
-      }
-    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -109,15 +103,14 @@
   <h1 id="welcome">Witaj w systemie Gasela Spiner</h1>
 
   <div class="chat-container">
-    <div style="width: 100%; text-align: left; margin-bottom: 10px;">
+    <div id="chat-ui" style="display: none; text-align: center;">
       <label for="promptSelector">🎯 Wybierz temat:</label>
-      <select id="promptSelector" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc;">
+      <select id="promptSelector">
         <option value="">— wybierz temat —</option>
       </select>
-    </div>
 
-    <div id="chat-ui" style="text-align: center;">
       <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
+
       <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc;"></textarea>
       <button id="sendButton" class="logout-btn" style="margin-top: 10px;">Wyślij</button>
     </div>
@@ -163,13 +156,7 @@
       });
     }
 
-    async function updateMessageLimit(jwt, userId) {
-      const { data: limitData, error } = await supabase
-        .from('message_limits')
-        .select('total_limit, used_messages')
-        .eq('user_id', userId)
-        .single();
-    }
+    async function updateMessageLimit(jwt, userId) {}
 
     sendButton.addEventListener("click", async () => {
       const message = userInput.value.trim();
@@ -187,26 +174,6 @@
 
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
-      const userId = session.user.id;
-
-      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' }
-      });
-
-      if (!verifyRes.ok) {
-        const { error } = await verifyRes.json();
-        if (error === "Limit wiadomości został wyczerpany") {
-          messagesDiv.innerHTML += `<div style="margin-top: 1.5em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-            <div style="color: red; margin-bottom: 1em;">🦌 Gasela zatrzymała się na chwilę.<br/>Odblokuj kolejny bieg!</div>
-            <button onclick="window.location.href='kup-plan.html'" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">Kup nowy plan</button>
-          </div>`;
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
-          return;
-        }
-        appendMessage(`❌ Nie możesz wysłać wiadomości: ${error}`, 'ai');
-        return;
-      }
 
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
@@ -215,8 +182,29 @@
       });
       const data = await res.json();
       appendMessage(trimToFullSentence(data.reply), 'ai');
-      await updateMessageLimit(jwt, userId);
     });
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = 'logowanie.html';
+    }
+
+    async function deleteAccount() {
+      const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
+      if (!confirmed) return;
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) {
+        alert("❌ Brak aktywnej sesji.");
+        return;
+      }
+      const { error } = await supabase.auth.admin.deleteUser(session.user.id);
+      if (error) {
+        alert("❌ Nie udało się usunąć konta: " + error.message);
+      } else {
+        alert("✅ Konto zostało usunięte.");
+        window.location.href = 'logowanie.html';
+      }
+    }
 
     async function checkSessionAndPlan() {
       const session = (await supabase.auth.getSession()).data.session;
@@ -224,7 +212,40 @@
       const jwt = session.access_token;
       const userId = session.user.id;
       welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
-      window.maxInputLength = 600; // fallback
+
+      const { data: subNow } = await supabase
+        .from('subscriptions')
+        .select('plan_name, end_date')
+        .eq('user_id', userId)
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!subNow) {
+        document.getElementById("user-info").innerHTML = "❌ Nie znaleziono aktywnego planu.";
+        return;
+      }
+      const { data: limitData } = await supabase
+        .from('message_limits')
+        .select('total_limit, used_messages')
+        .eq('user_id', userId)
+        .single();
+      if (!limitData) {
+        document.getElementById("user-info").innerHTML = "❌ Nie znaleziono limitów wiadomości.";
+        return;
+      }
+      const remaining = limitData.total_limit - limitData.used_messages;
+      const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : 'brak daty';
+
+      document.getElementById("user-info").innerHTML = `
+        <strong>Email:</strong> ${session.user.email}<br>
+        <strong>Plan:</strong> ${subNow.plan_name}<br>
+        <strong>Do:</strong> ${endDate}<br>
+        <strong>Pozostałe wiadomości:</strong> ${remaining}
+      `;
+      
+      chatUI.style.display = 'block';
+      window.maxInputLength = subNow.plan_name === 'pro' ? 800 : subNow.plan_name === 'mistrz' ? 1000 : 600;
+      userInput.setAttribute("maxlength", window.maxInputLength);
       await fetchPrompts(jwt);
     }
 
@@ -234,14 +255,7 @@
       if (!text || typeof text !== "string") return "";
       text = text.trim();
       const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
-      const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
-      if (goodEndings.some(end => text.endsWith(end))) {
-        const lastToken = text.split(/\s+/).pop();
-        if (!/^\d{1,2}[.)]$/.test(lastToken)) return text;
-      }
-      const lastWords = text.split(/\s+/);
-      const lastWord = lastWords[lastWords.length - 1].toLowerCase();
-      if (softEndings.includes(lastWord) || text.endsWith(',')) return text + "...";
+      if (goodEndings.some(end => text.endsWith(end))) return text;
       return text + "...";
     }
 
@@ -258,8 +272,10 @@
     <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
     <div style="padding: 20px; text-align: center;">
       <h3>⚙️ Moje konto</h3>
-      <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta tutaj...</div>
+      <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;"></div>
+
       <button onclick="logout()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
+      <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
     </div>
   </div>
 </body>
