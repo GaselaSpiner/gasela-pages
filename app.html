@@ -15,7 +15,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 30px 20px;
     }
     h1 {
       color: #f6b500;
@@ -31,6 +31,15 @@
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
       padding: 20px;
       min-height: 400px;
+    }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
     }
     .message {
       display: flex;
@@ -51,7 +60,6 @@
     }
     .message-user .message-bubble {
       background-color: #e5e5e5;
-      align-self: flex-end;
       margin-left: auto;
     }
     .message-ai {
@@ -59,20 +67,42 @@
     }
     .message-ai .message-bubble {
       background-color: transparent;
-      align-self: flex-start;
       margin-right: auto;
     }
-    @media (max-width: 600px) {
-      .chat-container {
-        padding: 10px;
-      }
+    #userInput {
+      flex: 1;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      padding: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      height: 40px;
+      max-height: 80px;
+      overflow-y: auto;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #sendButton {
+      position: absolute;
+      right: 5px;
+      bottom: 5px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #f6b500;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-
-  <!-- 🔥 Ikona otwierająca sidebar (3 kropki) -->
+  <!-- 🔥 Ikona otwierająca sidebar -->
   <div id="menu-icon" onclick="openSidebar()" style="
     position: fixed;
     top: 20px;
@@ -91,151 +121,24 @@
   <h1 id="welcome">Witaj w systemie Gasela Spiner</h1>
 
   <div class="chat-container">
-    <div id="chat-ui" style="text-align: center;">
+    <div id="chat-ui" style="display: none; text-align: center;">
       <label for="promptSelector">🎯 Wybierz temat:</label>
       <select id="promptSelector">
         <option value="">— wybierz temat —</option>
       </select>
 
-      <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: #fff; border-radius: 8px;"></div>
+      <div id="messages"></div>
 
-      <textarea id="userInput" placeholder="Napisz swoje pytanie..." style="width: 100%; height: 80px; padding: 10px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc;"></textarea>
-      <button id="sendButton" style="margin-top: 10px; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px 18px; font-weight: bold; cursor: pointer;">Wyślij</button>
+      <div style="display: flex; align-items: flex-end; width: 100%; position: relative;">
+        <textarea id="userInput" placeholder="Napisz wiadomość..." style="padding-right: 50px;"></textarea>
+        <button id="sendButton">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 24 24">
+            <path d="M12 2l-1.41 1.41 7.3 7.3H2v2h15.89l-7.3 7.3L12 22l10-10z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabase = window.supabase.createClient(
-      'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
-    );
-
-    const welcome = document.getElementById('welcome');
-    const messagesDiv = document.getElementById("messages");
-    const userInput = document.getElementById("userInput");
-    const sendButton = document.getElementById("sendButton");
-    const promptSelector = document.getElementById("promptSelector");
-
-    function appendMessage(text, sender) {
-      const wrapper = document.createElement("div");
-      wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
-      const bubble = document.createElement("div");
-      bubble.className = "message-bubble";
-      bubble.innerHTML = sender === 'ai' ? marked.parse(text) : text;
-      wrapper.appendChild(bubble);
-      messagesDiv.appendChild(wrapper);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    async function fetchPrompts(jwt) {
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
-      const { prompts } = await res.json();
-      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
-      prompts.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.prompt_key;
-        opt.textContent = p.description;
-        promptSelector.appendChild(opt);
-      });
-    }
-
-    sendButton.addEventListener("click", async () => {
-      const message = userInput.value.trim();
-      const promptKey = promptSelector.value;
-      if (!message || !promptKey) {
-        alert("Wpisz wiadomość i wybierz temat!");
-        return;
-      }
-      appendMessage(message, 'user');
-      userInput.value = "";
-
-      const session = (await supabase.auth.getSession()).data.session;
-      const jwt = session.access_token;
-      const userId = session.user.id;
-
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ prompt_key: promptKey, user_input: message })
-      });
-      const data = await res.json();
-      appendMessage(data.reply, 'ai');
-    });
-
-    async function logout() {
-      await supabase.auth.signOut();
-      window.location.href = 'logowanie.html';
-    }
-
-    async function deleteAccount() {
-      const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto?");
-      if (!confirmed) return;
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) {
-        alert("❌ Brak aktywnej sesji.");
-        return;
-      }
-      const { error } = await supabase.auth.admin.deleteUser(session.user.id);
-      if (error) {
-        alert("❌ Nie udało się usunąć konta: " + error.message);
-      } else {
-        alert("✅ Konto zostało usunięte.");
-        window.location.href = 'logowanie.html';
-      }
-    }
-
-    async function checkSessionAndPlan() {
-      const session = (await supabase.auth.getSession()).data.session;
-      if (!session) return;
-      const jwt = session.access_token;
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
-      await fetchPrompts(jwt);
-    }
-
-    checkSessionAndPlan();
-
-    function openSidebar() {
-      document.getElementById("sidebar").style.width = "300px";
-    }
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
-    function togglePasswordForm() {
-      const form = document.getElementById('password-form');
-      form.style.display = form.style.display === 'block' ? 'none' : 'block';
-    }
-
-    async function changePassword() {
-      const newPassword = document.getElementById('new-password').value.trim();
-      const repeatPassword = document.getElementById('repeat-password').value.trim();
-      const statusDiv = document.getElementById('change-status');
-
-      if (newPassword.length < 6) {
-        statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
-        statusDiv.style.color = "red";
-        return;
-      }
-      if (newPassword !== repeatPassword) {
-        statusDiv.innerHTML = "❌ Hasła nie są takie same.";
-        statusDiv.style.color = "red";
-        return;
-      }
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) {
-        statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
-        statusDiv.style.color = "red";
-      } else {
-        statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
-        statusDiv.style.color = "green";
-        document.getElementById('new-password').value = "";
-        document.getElementById('repeat-password').value = "";
-      }
-    }
-  </script>
 
   <!-- 🔥 Sidebar -->
   <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
@@ -244,7 +147,7 @@
       <h3>⚙️ Moje konto</h3>
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;"></div>
 
-      <button onclick="togglePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
+      <button onclick="showChangePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
 
       <div id="password-form" style="display: none; margin-top: 15px;">
         <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
@@ -257,5 +160,9 @@
       <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
     </div>
   </div>
+
+  <script>
+    // Tu wklejasz swój JavaScript (logika Supabase itd.) bez zmian.
+  </script>
 </body>
 </html>
