@@ -15,7 +15,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 20px;
+      padding: 20px;
     }
     h1 {
       color: #f6b500;
@@ -59,16 +59,10 @@
     }
     .message-user .message-bubble {
       background-color: #e5e5e5;
-      align-self: flex-end;
       margin-left: auto;
     }
     .message-ai {
       justify-content: flex-start;
-    }
-    .message-ai .message-bubble {
-      background-color: transparent;
-      align-self: flex-start;
-      margin-right: auto;
     }
     .input-wrapper {
       display: flex;
@@ -85,15 +79,22 @@
       font-size: 1rem;
       height: 40px;
       max-height: 80px;
-      overflow-y: auto;
+      border-radius: 20px;
       outline: none;
     }
     #sendButton {
-      background: none;
+      background-color: #f6b500;
       border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
       cursor: pointer;
-      padding: 10px;
+      color: #fff;
       font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     select {
       width: 100%;
@@ -134,7 +135,7 @@
 
     <div class="input-wrapper">
       <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
-      <button id="sendButton">🚀</button>
+      <button id="sendButton">➤</button>
     </div>
   </div>
 
@@ -142,7 +143,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0'
+      'twój_publiczny_anon_key'
     );
 
     const welcome = document.getElementById("welcome");
@@ -190,46 +191,26 @@
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
 
-      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' }
-      });
-
-      if (!verifyRes.ok) {
-        appendMessage(`❌ Nie możesz wysłać wiadomości`, 'ai');
-        return;
-      }
-
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ prompt_key: promptKey, user_input: message })
       });
       const data = await res.json();
-      appendMessage(trimToFullSentence(data.reply), 'ai');
+      appendMessage(data.reply, 'ai');
     });
-
-    function trimToFullSentence(text) {
-      if (!text || typeof text !== "string") return "";
-      text = text.trim();
-      const goodEndings = [".", "!", "?", "…", "”", ")", "}", ">", "\""];
-      const softEndings = [",", "lub", "albo", "czy", "i", "oraz"];
-      if (goodEndings.some(end => text.endsWith(end))) {
-        const lastToken = text.split(/\s+/).pop();
-        if (!/^\d{1,2}[.)]$/.test(lastToken)) return text;
-      }
-      const lastWords = text.split(/\s+/);
-      const lastWord = lastWords[lastWords.length - 1].toLowerCase();
-      if (softEndings.includes(lastWord) || text.endsWith(',')) return text + "...";
-      return text + "...";
-    }
 
     async function checkSessionAndPlan() {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) return;
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
       const jwt = session.access_token;
+      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
       await fetchPrompts(jwt);
+
+      document.getElementById("user-info").innerHTML = `
+        <strong>Email:</strong> ${session.user.email}<br>
+        <strong>ID:</strong> ${session.user.id}
+      `;
     }
 
     checkSessionAndPlan();
@@ -240,6 +221,36 @@
     function closeSidebar() {
       document.getElementById("sidebar").style.width = "0";
     }
+    function togglePasswordForm() {
+      const form = document.getElementById('password-form');
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    }
+    async function changePassword() {
+      const newPassword = document.getElementById('new-password').value.trim();
+      const repeatPassword = document.getElementById('repeat-password').value.trim();
+      const statusDiv = document.getElementById('change-status');
+
+      if (newPassword.length < 6) {
+        statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
+        statusDiv.style.color = "red";
+        return;
+      }
+      if (newPassword !== repeatPassword) {
+        statusDiv.innerHTML = "❌ Hasła nie są takie same.";
+        statusDiv.style.color = "red";
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
+        statusDiv.style.color = "red";
+      } else {
+        statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
+        statusDiv.style.color = "green";
+        document.getElementById('new-password').value = "";
+        document.getElementById('repeat-password').value = "";
+      }
+    }
   </script>
 
   <!-- 🔥 Sidebar -->
@@ -248,6 +259,15 @@
     <div style="padding: 20px; text-align: center;">
       <h3>⚙️ Moje konto</h3>
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta będą tutaj</div>
+      <button onclick="togglePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
+      <div id="password-form" style="display: none; margin-top: 15px;">
+        <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Potwierdź zmianę</button>
+        <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+      </div>
+      <button onclick="logout()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
+      <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
     </div>
   </div>
 </body>
