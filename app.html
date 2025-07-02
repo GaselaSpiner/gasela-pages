@@ -176,7 +176,8 @@
         return;
       }
       const remaining = limitData.total_limit - limitData.used_messages;
-      statusMsg.textContent = "";
+      statusMsg.textContent = `✅ Plan aktywny do ${endDate}.\n\n🔥 Masz jeszcze ${remaining} wiadomości do wykorzystania – powodzenia!`;
+
     }
 
     sendButton.addEventListener("click", async () => {
