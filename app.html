@@ -316,6 +316,36 @@
     function showChangePasswordForm() {
       document.getElementById('password-form').style.display = 'block';
     }
+
+    async function changePassword() {
+      const newPassword = document.getElementById('new-password').value.trim();
+      const repeatPassword = document.getElementById('repeat-password').value.trim();
+      const statusDiv = document.getElementById('change-status');
+
+      if (newPassword.length < 6) {
+        statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      if (newPassword !== repeatPassword) {
+        statusDiv.innerHTML = "❌ Hasła nie są takie same.";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
+        statusDiv.style.color = "red";
+      } else {
+        statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
+        statusDiv.style.color = "green";
+        document.getElementById('new-password').value = "";
+        document.getElementById('repeat-password').value = "";
+      }
+    }
   </script>
 
   <!-- 🔥 Sidebar -->
