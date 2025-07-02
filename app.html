@@ -312,16 +312,41 @@
       return text + "...";
     }
   </script>
+<!-- 🔥 Sidebar -->
+<div id="sidebar" style="
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #f9f9f9;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+">
+  <a href="javascript:void(0)" onclick="closeSidebar()" style="
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 36px;
+    text-decoration: none;
+    color: #000;">&times;</a>
 
-  <!-- 🔥 Sidebar -->
-  <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
-    <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
-    <div style="padding: 20px; text-align: center;">
-      <h3>🔒 Zmień hasło</h3>
-      <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
-      <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Zmień hasło</button>
-      <div id="change-status" style="margin-top: 15px; font-weight: bold;"></div>
-    </div>
+  <div style="padding: 20px; text-align: center;">
+    <h3>⚙️ Moje konto</h3>
+    <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;"></div>
+
+    <h4 style="margin-top: 30px;">🔒 Zmień hasło</h4>
+    <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+    <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Zmień hasło</button>
+    <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <button onclick="logout()" style="width: 80%; margin-top: 20px; background-color: #000; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Wyloguj się</button>
+
+    <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
   </div>
+</div>
+
 </body>
 </html>
