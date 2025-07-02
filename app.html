@@ -311,6 +311,63 @@
       if (softEndings.includes(lastWord) || text.endsWith(',')) return text + "...";
       return text + "...";
     }
+
+    function openSidebar() {
+  document.getElementById("sidebar").style.width = "300px";
+}
+
+function closeSidebar() {
+  document.getElementById("sidebar").style.width = "0";
+}
+
+async function changePassword() {
+  const newPassword = document.getElementById('new-password').value.trim();
+  const statusDiv = document.getElementById('change-status');
+
+  if (newPassword.length < 6) {
+    statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
+    statusDiv.style.color = "red";
+    return;
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+  if (error) {
+    statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
+    statusDiv.style.color = "red";
+  } else {
+    statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
+    statusDiv.style.color = "green";
+    document.getElementById('new-password').value = "";
+  }
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  window.location.href = 'logowanie.html';
+}
+
+async function deleteAccount() {
+  const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
+
+  if (!confirmed) return;
+
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) {
+    alert("❌ Brak aktywnej sesji.");
+    return;
+  }
+
+  const { error } = await supabase.auth.admin.deleteUser(session.user.id);
+
+  if (error) {
+    alert("❌ Nie udało się usunąć konta: " + error.message);
+  } else {
+    alert("✅ Konto zostało usunięte.");
+    window.location.href = 'logowanie.html';
+  }
+}
+
   </script>
 <!-- 🔥 Sidebar -->
 <div id="sidebar" style="
