@@ -188,38 +188,55 @@
   appendMessage(message, 'user');
   userInput.value = "";
 
-  const session = (await supabase.auth.getSession()).data.session;
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    appendMessage("❌ Brak aktywnej sesji. Zaloguj się ponownie.", 'ai');
+    return;
+  }
   const jwt = session.access_token;
 
-  // ✅ Wywołanie verify_and_increment (z logiem)
+  // ✅ Wywołanie verify_and_increment z body i logami
+  console.log("➡️ Wywołanie verify_and_increment...");
   const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${jwt}`,
       'Content-Type': 'application/json'
-    }
+    },
+    body: JSON.stringify({}) // ⚠️ DODANE
   });
 
+  const verifyData = await verifyRes.json();
+  console.log("🔎 verify_and_increment response:", verifyData);
+
   if (!verifyRes.ok) {
-    appendMessage(`❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd.`, 'ai');
-    console.log("⚠️ verify_and_increment response NOT ok");
+    appendMessage(`❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd: ${verifyData.error || "Nieznany błąd."}`, 'ai');
+    console.log("⚠️ verify_and_increment NOT ok");
     return;
   }
 
   console.log("✅ verify_and_increment success");
 
-  // 🟡 Teraz dopiero ask_openai
+  // 🟡 Teraz ask_openai
+  console.log("➡️ Wywołanie ask_openai...");
   const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwt}`
+    },
     body: JSON.stringify({ prompt_key: promptKey, user_input: message })
   });
+
   const data = await res.json();
+  console.log("🟢 ask_openai response:", data);
   appendMessage(data.reply, 'ai');
 
   // ✅ Odśwież limit w sidebarze
-  checkSessionAndPlan();
+  await checkSessionAndPlan();
 });
+
 
 
    async function checkSessionAndPlan() {
