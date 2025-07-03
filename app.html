@@ -388,19 +388,36 @@ async function initApp() {
 }
 
 async function confirmDeleteAccount() {
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
+  const password = document.getElementById('confirm-password').value.trim();
   const statusDiv = document.getElementById('delete-status');
 
+  if (!password) {
+    statusDiv.innerHTML = "❌ Wpisz swoje hasło, aby potwierdzić.";
+    statusDiv.style.color = "red";
+    return;
+  }
+
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
   if (!session) {
     statusDiv.innerHTML = "❌ Brak aktywnej sesji.";
     statusDiv.style.color = "red";
     return;
   }
 
-  const jwt = session.access_token;
-  const userId = session.user.id;
   const email = session.user.email;
+
+  // Spróbuj zalogować się ponownie (re-auth) w celu weryfikacji hasła
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (signInError) {
+    statusDiv.innerHTML = "❌ Nieprawidłowe hasło. Spróbuj ponownie.";
+    statusDiv.style.color = "red";
+    return;
+  }
+
+  const jwt = (await supabase.auth.getSession()).data.session.access_token;
+  const userId = session.user.id;
 
   console.log("➡️ Wywołanie funkcji delete_account...");
 
@@ -428,15 +445,13 @@ async function confirmDeleteAccount() {
   statusDiv.innerHTML = "✅ Konto zostało usunięte. Przekierowanie...";
   statusDiv.style.color = "green";
 
-  // Ukryj potwierdzenie
-  document.getElementById('confirm-delete').style.display = 'none';
+  // Ukryj formularz hasła
+  document.getElementById('password-confirm').style.display = 'none';
 
-  // ⏰ Tutaj zmień czas przekierowania
   setTimeout(() => {
     window.location.href = 'logowanie.html';
-  }, 5000); // np. 5000 = 5 sekund
+  }, 5000);
 }
-
 
   </script>
 
