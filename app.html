@@ -380,53 +380,13 @@ async function initApp() {
       await supabase.auth.signOut();
       window.location.href = 'logowanie.html';
     }
-   async function deleteAccount() {
- 
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
+  function deleteAccount() {
+  const confirmDiv = document.getElementById('confirm-delete');
+  confirmDiv.style.display = 'block';
   const statusDiv = document.getElementById('delete-status');
-  statusDiv.innerHTML = ""; // czyść poprzedni status
-
-  if (!session) {
-    statusDiv.innerHTML = "❌ Brak aktywnej sesji.";
-    statusDiv.style.color = "red";
-    return;
-  }
-
-  const jwt = session.access_token;
-  const userId = session.user.id;
-  const email = session.user.email;
-
-  console.log("➡️ Wywołanie funkcji delete_account...");
-
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/delete_account', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      user_id: userId,
-      email: email
-    })
-  });
-
-  const data = await res.json();
-  console.log("🔎 delete_account response:", data);
-
-  if (!res.ok) {
-    statusDiv.innerHTML = "❌ Nie udało się usunąć konta: " + (data.error || "Nieznany błąd");
-    statusDiv.style.color = "red";
-    return;
-  }
-
-  statusDiv.innerHTML = "✅ Konto zostało usunięte. Przekierowanie...";
-  statusDiv.style.color = "green";
-
-  setTimeout(() => {
-    window.location.href = 'logowanie.html';
-  }, 2000);
+  statusDiv.innerHTML = ""; // wyczyść poprzedni status
 }
+
 
 
   </script>
