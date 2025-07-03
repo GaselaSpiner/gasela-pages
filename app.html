@@ -143,7 +143,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'twój_anon_key'
+      'twój_publiczny_anon_key'
     );
 
     const welcome = document.getElementById("welcome");
@@ -154,7 +154,7 @@
 
     function appendMessage(text, sender) {
       const wrapper = document.createElement("div");
-      wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+      wrapper.className = message ${sender === 'user' ? 'message-user' : 'message-ai'};
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
       bubble.innerHTML = sender === 'ai' ? marked.parse(text) : text;
@@ -166,10 +166,10 @@
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
         method: 'GET',
-        headers: { Authorization: `Bearer ${jwt}` }
+        headers: { Authorization: Bearer ${jwt} }
       });
       const { prompts } = await res.json();
-      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
+      promptSelector.innerHTML = <option value="">— wybierz temat —</option>;
       prompts.forEach(p => {
         const opt = document.createElement("option");
         opt.value = p.prompt_key;
@@ -191,94 +191,67 @@
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
 
-      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${jwt}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!verifyRes.ok) {
-        appendMessage(`❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd.`, 'ai');
-        return;
-      }
-
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        headers: { 'Content-Type': 'application/json', Authorization: Bearer ${jwt} },
         body: JSON.stringify({ prompt_key: promptKey, user_input: message })
       });
       const data = await res.json();
       appendMessage(data.reply, 'ai');
-      checkSessionAndPlan();
     });
 
     async function checkSessionAndPlan() {
-      const sessionRes = await supabase.auth.getSession();
-      const session = sessionRes.data.session;
-      if (!session) return;
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) return;
+  const jwt = session.access_token;
+  const userId = session.user.id;
 
-      const jwt = session.access_token;
-      const userId = session.user.id;
+  welcome.textContent = Witaj, ${session.user.email || 'Zawodniku'}!;
+  await fetchPrompts(jwt);
 
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
-      await fetchPrompts(jwt);
+  // Pobranie subskrypcji
+  const { data: subNow } = await supabase
+    .from('subscriptions')
+    .select('plan_name, end_date')
+    .eq('user_id', userId)
+    .order('end_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-      const { data: subNow } = await supabase
-        .from('subscriptions')
-        .select('plan_name, end_date')
-        .eq('user_id', userId)
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+  // Pobranie limitów wiadomości
+  const { data: limitData } = await supabase
+    .from('message_limits')
+    .select('total_limit, used_messages')
+    .eq('user_id', userId)
+    .single();
 
-      const { data: limitData } = await supabase
-        .from('message_limits')
-        .select('total_limit, used_messages')
-        .eq('user_id', userId)
-        .single();
+  // Przygotowanie informacji
+  let planInfo = "";
+  if (subNow) {
+    const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
+    planInfo += <strong>Plan:</strong> ${subNow.plan_name}<br>;
+    planInfo += <strong>Do:</strong> ${endDate}<br>;
+  }
+  if (limitData) {
+    const remaining = limitData.total_limit - limitData.used_messages;
+    planInfo += <strong>Pozostałe wiadomości:</strong> ${remaining};
+  }
 
-      let planInfo = "";
-      if (subNow) {
-        const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
-        planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
-        planInfo += `<strong>Do:</strong> ${endDate}<br>`;
-      }
-      if (limitData) {
-        const remaining = limitData.total_limit - limitData.used_messages;
-        planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
-      }
+  document.getElementById("user-info").innerHTML = 
+    <strong>Email:</strong> ${session.user.email}<br>
+    ${planInfo}
+  ;
+}
 
-      document.getElementById("user-info").innerHTML = `
-        <strong>Email:</strong> ${session.user.email}<br>
-        ${planInfo}
-      `;
-    }
 
     checkSessionAndPlan();
-    
-    let sidebarOpen = false;
-    let sidebarInterval;
 
     function openSidebar() {
-      sidebarOpen = true;
       document.getElementById("sidebar").style.width = "300px";
-      checkSessionAndPlan();
-
-      sidebarInterval = setInterval(() => {
-        if (sidebarOpen) {
-          checkSessionAndPlan();
-        }
-      }, 5000);
     }
-
     function closeSidebar() {
-      sidebarOpen = false;
       document.getElementById("sidebar").style.width = "0";
-      clearInterval(sidebarInterval);
     }
-
     function togglePasswordForm() {
       const form = document.getElementById('password-form');
       form.style.display = form.style.display === 'block' ? 'none' : 'block';
@@ -307,29 +280,6 @@
         statusDiv.style.color = "green";
         document.getElementById('new-password').value = "";
         document.getElementById('repeat-password').value = "";
-      }
-    }
-    async function logout() {
-      await supabase.auth.signOut();
-      window.location.href = 'logowanie.html';
-    }
-    async function deleteAccount() {
-      const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
-      if (!confirmed) return;
-
-      const sessionRes = await supabase.auth.getSession();
-      const session = sessionRes.data.session;
-      if (!session) {
-        alert("❌ Brak aktywnej sesji.");
-        return;
-      }
-
-      const { error } = await supabase.auth.admin.deleteUser(session.user.id);
-      if (error) {
-        alert("❌ Nie udało się usunąć konta: " + error.message);
-      } else {
-        alert("✅ Konto zostało usunięte.");
-        window.location.href = 'logowanie.html';
       }
     }
   </script>
