@@ -107,7 +107,17 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <div id="menu-icon" onclick="openSidebar()" style="position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+  <!-- 🔥 Ikona otwierająca sidebar -->
+  <div id="menu-icon" onclick="openSidebar()" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  ">
     <span style="width: 8px; height: 8px; background-color: #f6b500; border-radius: 50%;"></span>
     <span style="width: 8px; height: 8px; background-color: #f6b500; border-radius: 50%;"></span>
     <span style="width: 8px; height: 8px; background-color: #f6b500; border-radius: 50%;"></span>
@@ -133,7 +143,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'twój_anon_key' // <-- Twój anon public key
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
     );
 
     const welcome = document.getElementById("welcome");
@@ -144,7 +154,7 @@
 
     function appendMessage(text, sender) {
       const wrapper = document.createElement("div");
-      wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+      wrapper.className = message ${sender === 'user' ? 'message-user' : 'message-ai'};
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
       bubble.innerHTML = sender === 'ai' ? marked.parse(text) : text;
@@ -156,10 +166,10 @@
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
         method: 'GET',
-        headers: { Authorization: `Bearer ${jwt}` }
+        headers: { Authorization: Bearer ${jwt} }
       });
       const { prompts } = await res.json();
-      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
+      promptSelector.innerHTML = <option value="">— wybierz temat —</option>;
       prompts.forEach(p => {
         const opt = document.createElement("option");
         opt.value = p.prompt_key;
@@ -168,29 +178,51 @@
       });
     }
 
-    async function activatePlanIfPending(session) {
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      const promptKey = promptSelector.value;
+      if (!message || !promptKey) {
+        alert("Wpisz wiadomość i wybierz temat!");
+        return;
+      }
+      appendMessage(message, 'user');
+      userInput.value = "";
+
+      const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
-      await fetch("https://lmussgaiutaldicolyba.functions.supabase.co/aktywuj_plan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ email: session.user.email, user_id: session.user.id })
-      });
+
+      // ⬇️ verify_and_increment
+  const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+    method: 'POST',
+    headers: {
+      'Authorization': Bearer ${jwt},
+      'Content-Type': 'application/json'
     }
+  });
+
+  if (!verifyRes.ok) {
+    appendMessage(❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd., 'ai');
+    return;
+  }
+       // ⬇️ ask_openai
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: Bearer ${jwt} },
+        body: JSON.stringify({ prompt_key: promptKey, user_input: message })
+      });
+      const data = await res.json();
+      appendMessage(data.reply, 'ai');
+    });
 
     async function checkSessionAndPlan() {
       const sessionRes = await supabase.auth.getSession();
       const session = sessionRes.data.session;
       if (!session) return;
 
-      await activatePlanIfPending(session);
-
       const jwt = session.access_token;
       const userId = session.user.id;
 
-      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
+      welcome.textContent = Witaj, ${session.user.email || 'Zawodniku'}!;
       await fetchPrompts(jwt);
 
       const { data: subNow } = await supabase
@@ -210,42 +242,78 @@
       let planInfo = "";
       if (subNow) {
         const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
-        planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
-        planInfo += `<strong>Do:</strong> ${endDate}<br>`;
+        planInfo += <strong>Plan:</strong> ${subNow.plan_name}<br>;
+        planInfo += <strong>Do:</strong> ${endDate}<br>;
       }
       if (limitData) {
         const remaining = limitData.total_limit - limitData.used_messages;
-        planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
+        planInfo += <strong>Pozostałe wiadomości:</strong> ${remaining};
       }
 
-      document.getElementById("user-info").innerHTML = `
+      document.getElementById("user-info").innerHTML = 
         <strong>Email:</strong> ${session.user.email}<br>
         ${planInfo}
-      `;
+      ;
     }
 
     checkSessionAndPlan();
-
+    
     let sidebarOpen = false;
-    let sidebarInterval;
+let sidebarInterval;
 
-    function openSidebar() {
-      sidebarOpen = true;
-      document.getElementById("sidebar").style.width = "300px";
+function openSidebar() {
+  sidebarOpen = true;
+  document.getElementById("sidebar").style.width = "300px";
+  checkSessionAndPlan(); // pierwszy odśwież od razu
+
+  // Start odświeżania co 5 sekund
+  sidebarInterval = setInterval(() => {
+    if (sidebarOpen) {
       checkSessionAndPlan();
-      sidebarInterval = setInterval(() => {
-        if (sidebarOpen) {
-          checkSessionAndPlan();
-        }
-      }, 5000);
     }
+  }, 5000);
+}
 
-    function closeSidebar() {
-      sidebarOpen = false;
-      document.getElementById("sidebar").style.width = "0";
-      clearInterval(sidebarInterval);
+function closeSidebar() {
+  sidebarOpen = false;
+  document.getElementById("sidebar").style.width = "0";
+  clearInterval(sidebarInterval);
+}
+
+    function togglePasswordForm() {
+      const form = document.getElementById('password-form');
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';
     }
+    async function changePassword() {
+      const newPassword = document.getElementById('new-password').value.trim();
+      const repeatPassword = document.getElementById('repeat-password').value.trim();
+      const statusDiv = document.getElementById('change-status');
 
+      if (newPassword.length < 6) {
+        statusDiv.innerHTML = "❌ Hasło musi mieć co najmniej 6 znaków.";
+        statusDiv.style.color = "red";
+        return;
+      }
+      if (newPassword !== repeatPassword) {
+        statusDiv.innerHTML = "❌ Hasła nie są takie same.";
+        statusDiv.style.color = "red";
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        statusDiv.innerHTML = "❌ Nie udało się zmienić hasła: " + error.message;
+        statusDiv.style.color = "red";
+      } else {
+        statusDiv.innerHTML = "✅ Hasło zostało zmienione!";
+        statusDiv.style.color = "green";
+        document.getElementById('new-password').value = "";
+        document.getElementById('repeat-password').value = "";
+      }
+    }
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = 'logowanie.html';
+    }
     async function deleteAccount() {
       const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
       if (!confirmed) return;
@@ -257,24 +325,12 @@
         return;
       }
 
-      const jwt = session.access_token;
-
-      const res = await fetch("https://lmussgaiutaldicolyba.functions.supabase.co/delete_account", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ user_id: session.user.id, email: session.user.email })
-      });
-
-      if (res.ok) {
-        alert("✅ Konto zostało usunięte.");
-        await supabase.auth.signOut();
-        window.location.href = 'logowanie.html';
+      const { error } = await supabase.auth.admin.deleteUser(session.user.id);
+      if (error) {
+        alert("❌ Nie udało się usunąć konta: " + error.message);
       } else {
-        const data = await res.json();
-        alert("❌ Nie udało się usunąć konta: " + data.error);
+        alert("✅ Konto zostało usunięte.");
+        window.location.href = 'logowanie.html';
       }
     }
   </script>
@@ -285,6 +341,13 @@
     <div style="padding: 20px; text-align: center;">
       <h3>⚙️ Moje konto</h3>
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta będą tutaj</div>
+      <button onclick="togglePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
+      <div id="password-form" style="display: none; margin-top: 15px;">
+        <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Potwierdź zmianę</button>
+        <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+      </div>
       <button onclick="logout()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
       <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
     </div>
