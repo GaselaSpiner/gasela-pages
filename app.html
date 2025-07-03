@@ -257,14 +257,29 @@
     }
 
     checkSessionAndPlan();
+    
+    let sidebarOpen = false;
+let sidebarInterval;
 
-    function openSidebar() {
+function openSidebar() {
+  sidebarOpen = true;
+  document.getElementById("sidebar").style.width = "300px";
+  checkSessionAndPlan(); // pierwszy odśwież od razu
+
+  // Start odświeżania co 5 sekund
+  sidebarInterval = setInterval(() => {
+    if (sidebarOpen) {
       checkSessionAndPlan();
-      document.getElementById("sidebar").style.width = "300px";
     }
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
+  }, 5000);
+}
+
+function closeSidebar() {
+  sidebarOpen = false;
+  document.getElementById("sidebar").style.width = "0";
+  clearInterval(sidebarInterval);
+}
+
     function togglePasswordForm() {
       const form = document.getElementById('password-form');
       form.style.display = form.style.display === 'block' ? 'none' : 'block';
