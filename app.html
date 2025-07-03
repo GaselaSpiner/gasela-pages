@@ -178,27 +178,49 @@
       });
     }
 
-    sendButton.addEventListener("click", async () => {
-      const message = userInput.value.trim();
-      const promptKey = promptSelector.value;
-      if (!message || !promptKey) {
-        alert("Wpisz wiadomość i wybierz temat!");
-        return;
-      }
-      appendMessage(message, 'user');
-      userInput.value = "";
+   sendButton.addEventListener("click", async () => {
+  const message = userInput.value.trim();
+  const promptKey = promptSelector.value;
+  if (!message || !promptKey) {
+    alert("Wpisz wiadomość i wybierz temat!");
+    return;
+  }
+  appendMessage(message, 'user');
+  userInput.value = "";
 
-      const session = (await supabase.auth.getSession()).data.session;
-      const jwt = session.access_token;
+  const session = (await supabase.auth.getSession()).data.session;
+  const jwt = session.access_token;
 
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ prompt_key: promptKey, user_input: message })
-      });
-      const data = await res.json();
-      appendMessage(data.reply, 'ai');
-    });
+  // ✅ Wywołanie verify_and_increment (z logiem)
+  const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!verifyRes.ok) {
+    appendMessage(`❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd.`, 'ai');
+    console.log("⚠️ verify_and_increment response NOT ok");
+    return;
+  }
+
+  console.log("✅ verify_and_increment success");
+
+  // 🟡 Teraz dopiero ask_openai
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+    body: JSON.stringify({ prompt_key: promptKey, user_input: message })
+  });
+  const data = await res.json();
+  appendMessage(data.reply, 'ai');
+
+  // ✅ Odśwież limit w sidebarze
+  checkSessionAndPlan();
+});
+
 
    async function checkSessionAndPlan() {
   // Pobierz sesję
