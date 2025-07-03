@@ -212,6 +212,7 @@
       });
       const data = await res.json();
       appendMessage(data.reply, 'ai');
+      checkSessionAndPlan();
     });
 
     async function checkSessionAndPlan() {
