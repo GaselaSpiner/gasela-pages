@@ -381,9 +381,7 @@ async function initApp() {
       window.location.href = 'logowanie.html';
     }
    async function deleteAccount() {
-  const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
-  if (!confirmed) return;
-
+ 
   const sessionRes = await supabase.auth.getSession();
   const session = sessionRes.data.session;
   const statusDiv = document.getElementById('delete-status');
@@ -449,6 +447,11 @@ async function initApp() {
       <button onclick="logout()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
       <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
       <div id="delete-status" style="margin-top: 10px; font-weight: bold;"></div>
+      <div id="confirm-delete" style="margin-top: 10px; display: none;">
+  <p style="color: red;">⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!</p>
+  <button onclick="confirmDeleteAccount()" style="background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; margin-top: 5px; font-weight: bold; cursor: pointer;">Tak, usuń</button>
+</div>
+
 
     </div>
   </div>
