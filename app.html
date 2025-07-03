@@ -143,7 +143,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
+      'twój_anon_key'
     );
 
     const welcome = document.getElementById("welcome");
@@ -154,7 +154,7 @@
 
     function appendMessage(text, sender) {
       const wrapper = document.createElement("div");
-      wrapper.className = message ${sender === 'user' ? 'message-user' : 'message-ai'};
+      wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
       bubble.innerHTML = sender === 'ai' ? marked.parse(text) : text;
@@ -166,10 +166,10 @@
     async function fetchPrompts(jwt) {
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
         method: 'GET',
-        headers: { Authorization: Bearer ${jwt} }
+        headers: { Authorization: `Bearer ${jwt}` }
       });
       const { prompts } = await res.json();
-      promptSelector.innerHTML = <option value="">— wybierz temat —</option>;
+      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
       prompts.forEach(p => {
         const opt = document.createElement("option");
         opt.value = p.prompt_key;
@@ -191,27 +191,27 @@
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
 
-      // ⬇️ verify_and_increment
-  const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-    method: 'POST',
-    headers: {
-      'Authorization': Bearer ${jwt},
-      'Content-Type': 'application/json'
-    }
-  });
+      const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-  if (!verifyRes.ok) {
-    appendMessage(❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd., 'ai');
-    return;
-  }
-       // ⬇️ ask_openai
+      if (!verifyRes.ok) {
+        appendMessage(`❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd.`, 'ai');
+        return;
+      }
+
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: Bearer ${jwt} },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ prompt_key: promptKey, user_input: message })
       });
       const data = await res.json();
       appendMessage(data.reply, 'ai');
+      checkSessionAndPlan();
     });
 
     async function checkSessionAndPlan() {
@@ -222,7 +222,7 @@
       const jwt = session.access_token;
       const userId = session.user.id;
 
-      welcome.textContent = Witaj, ${session.user.email || 'Zawodniku'}!;
+      welcome.textContent = `Witaj, ${session.user.email || 'Zawodniku'}!`;
       await fetchPrompts(jwt);
 
       const { data: subNow } = await supabase
@@ -242,43 +242,42 @@
       let planInfo = "";
       if (subNow) {
         const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
-        planInfo += <strong>Plan:</strong> ${subNow.plan_name}<br>;
-        planInfo += <strong>Do:</strong> ${endDate}<br>;
+        planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
+        planInfo += `<strong>Do:</strong> ${endDate}<br>`;
       }
       if (limitData) {
         const remaining = limitData.total_limit - limitData.used_messages;
-        planInfo += <strong>Pozostałe wiadomości:</strong> ${remaining};
+        planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
       }
 
-      document.getElementById("user-info").innerHTML = 
+      document.getElementById("user-info").innerHTML = `
         <strong>Email:</strong> ${session.user.email}<br>
         ${planInfo}
-      ;
+      `;
     }
 
     checkSessionAndPlan();
     
     let sidebarOpen = false;
-let sidebarInterval;
+    let sidebarInterval;
 
-function openSidebar() {
-  sidebarOpen = true;
-  document.getElementById("sidebar").style.width = "300px";
-  checkSessionAndPlan(); // pierwszy odśwież od razu
-
-  // Start odświeżania co 5 sekund
-  sidebarInterval = setInterval(() => {
-    if (sidebarOpen) {
+    function openSidebar() {
+      sidebarOpen = true;
+      document.getElementById("sidebar").style.width = "300px";
       checkSessionAndPlan();
-    }
-  }, 5000);
-}
 
-function closeSidebar() {
-  sidebarOpen = false;
-  document.getElementById("sidebar").style.width = "0";
-  clearInterval(sidebarInterval);
-}
+      sidebarInterval = setInterval(() => {
+        if (sidebarOpen) {
+          checkSessionAndPlan();
+        }
+      }, 5000);
+    }
+
+    function closeSidebar() {
+      sidebarOpen = false;
+      document.getElementById("sidebar").style.width = "0";
+      clearInterval(sidebarInterval);
+    }
 
     function togglePasswordForm() {
       const form = document.getElementById('password-form');
