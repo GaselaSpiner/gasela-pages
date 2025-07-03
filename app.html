@@ -346,24 +346,46 @@
       window.location.href = 'logowanie.html';
     }
     async function deleteAccount() {
-      const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
-      if (!confirmed) return;
+  const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
+  if (!confirmed) return;
 
-      const sessionRes = await supabase.auth.getSession();
-      const session = sessionRes.data.session;
-      if (!session) {
-        alert("❌ Brak aktywnej sesji.");
-        return;
-      }
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    alert("❌ Brak aktywnej sesji.");
+    return;
+  }
 
-      const { error } = await supabase.auth.admin.deleteUser(session.user.id);
-      if (error) {
-        alert("❌ Nie udało się usunąć konta: " + error.message);
-      } else {
-        alert("✅ Konto zostało usunięte.");
-        window.location.href = 'logowanie.html';
-      }
-    }
+  const jwt = session.access_token;
+  const userId = session.user.id;
+  const email = session.user.email;
+
+  console.log("➡️ Wywołanie funkcji delete_account...");
+
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/delete_account', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      email: email
+    })
+  });
+
+  const data = await res.json();
+  console.log("🔎 delete_account response:", data);
+
+  if (!res.ok) {
+    alert("❌ Nie udało się usunąć konta: " + (data.error || "Nieznany błąd"));
+    return;
+  }
+
+  alert("✅ Konto zostało usunięte.");
+  window.location.href = 'logowanie.html';
+}
+
   </script>
 
   <!-- 🔥 Sidebar -->
