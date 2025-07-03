@@ -328,7 +328,7 @@ function closeSidebar() {
 
   const jwt = session.access_token;
 
-  const res = await fetch("https://lmussgaiutaldicolyba.functions.supabase.co/delete_account", {
+  const res = await fetch("https://lmussgaiutaldicolyba.supabase.co/functions/v1/delete_account", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
