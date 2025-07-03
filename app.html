@@ -238,6 +238,40 @@
   await checkSessionAndPlan();
 });
 
+async function initApp() {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak aktywnej sesji (initApp)");
+    return;
+  }
+
+  const jwt = session.access_token;
+  const userId = session.user.id;
+
+  // Sprawdź, czy użytkownik ma subskrypcję
+  const { data: subNow } = await supabase
+    .from('subscriptions')
+    .select('plan_name')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (!subNow) {
+    console.log("⚠️ Brak subskrypcji — wywołuję aktywuj_plan w initApp...");
+    await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log("✅ aktywuj_plan zakończone");
+  }
+
+  // Teraz załaduj sidebar i info o planie
+  await checkSessionAndPlan();
+}
 
 
    async function checkSessionAndPlan() {
@@ -253,18 +287,6 @@
   const userId = session.user.id;
   console.log("✅ user_id:", userId);
 
-     // ✅ Wywołanie funkcji aktywuj_plan
-console.log("➡️ Wywołanie funkcji aktywuj_plan...");
-await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${jwt}`,
-    'Content-Type': 'application/json'
-  }
-});
-console.log("✅ aktywuj_plan zakończone");
-
-     
   // Pobierz prompty
   await fetchPrompts(jwt);
 
@@ -314,7 +336,8 @@ console.log("✅ aktywuj_plan zakończone");
 }
 
 
-    checkSessionAndPlan();
+    initApp();
+
 
     function openSidebar() {
       checkSessionAndPlan();
