@@ -380,14 +380,18 @@ async function initApp() {
       await supabase.auth.signOut();
       window.location.href = 'logowanie.html';
     }
-    async function deleteAccount() {
+   async function deleteAccount() {
   const confirmed = confirm("⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!");
   if (!confirmed) return;
 
   const sessionRes = await supabase.auth.getSession();
   const session = sessionRes.data.session;
+  const statusDiv = document.getElementById('delete-status');
+  statusDiv.innerHTML = ""; // czyść poprzedni status
+
   if (!session) {
-    alert("❌ Brak aktywnej sesji.");
+    statusDiv.innerHTML = "❌ Brak aktywnej sesji.";
+    statusDiv.style.color = "red";
     return;
   }
 
@@ -413,13 +417,19 @@ async function initApp() {
   console.log("🔎 delete_account response:", data);
 
   if (!res.ok) {
-    alert("❌ Nie udało się usunąć konta: " + (data.error || "Nieznany błąd"));
+    statusDiv.innerHTML = "❌ Nie udało się usunąć konta: " + (data.error || "Nieznany błąd");
+    statusDiv.style.color = "red";
     return;
   }
 
-  alert("✅ Konto zostało usunięte.");
-  window.location.href = 'logowanie.html';
+  statusDiv.innerHTML = "✅ Konto zostało usunięte. Przekierowanie...";
+  statusDiv.style.color = "green";
+
+  setTimeout(() => {
+    window.location.href = 'logowanie.html';
+  }, 2000);
 }
+
 
   </script>
 
