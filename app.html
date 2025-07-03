@@ -478,7 +478,22 @@ async function confirmDeleteAccount() {
       <div id="delete-status" style="margin-top: 10px; font-weight: bold;"></div>
       <div id="confirm-delete" style="margin-top: 10px; display: none;">
   <p style="color: red;">⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!</p>
-   <button onclick="showPasswordConfirm()">Tak, usuń</button>
+   <button 
+  onclick="showPasswordConfirm()"
+  style="
+    width: 80%;
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;"
+>
+  ✅ Tak, usuń
+</button>
+
 </div>
       <div id="password-confirm" style="margin-top: 10px; display: none;">
   <p>Wpisz swoje hasło, aby potwierdzić usunięcie konta:</p>
