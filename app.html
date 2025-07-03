@@ -191,6 +191,20 @@
       const session = (await supabase.auth.getSession()).data.session;
       const jwt = session.access_token;
 
+      // ⬇️ verify_and_increment
+  const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!verifyRes.ok) {
+    appendMessage(`❌ Nie możesz wysłać wiadomości. Limit został wyczerpany lub błąd.`, 'ai');
+    return;
+  }
+       // ⬇️ ask_openai
       const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
