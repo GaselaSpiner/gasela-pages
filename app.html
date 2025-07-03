@@ -253,6 +253,18 @@
   const userId = session.user.id;
   console.log("✅ user_id:", userId);
 
+     // ✅ Wywołanie funkcji aktywuj_plan
+console.log("➡️ Wywołanie funkcji aktywuj_plan...");
+await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${jwt}`,
+    'Content-Type': 'application/json'
+  }
+});
+console.log("✅ aktywuj_plan zakończone");
+
+     
   // Pobierz prompty
   await fetchPrompts(jwt);
 
