@@ -211,7 +211,7 @@
   console.log("🔎 verify_and_increment response:", verifyData);
 
   if (!verifyRes.ok) {
-  appendMessage(`❌ ${verifyData.error || "Nieznany błąd."}`, 'ai');
+  appendMessage(`💬 ${verifyData.error || "Nieznany błąd."}`, 'ai');
   console.log("⚠️ verify_and_increment NOT ok");
   return;
 }
