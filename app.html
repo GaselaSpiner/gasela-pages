@@ -386,6 +386,11 @@ async function initApp() {
   const statusDiv = document.getElementById('delete-status');
   statusDiv.innerHTML = ""; // wyczyść poprzedni status
 }
+    function showPasswordConfirm() {
+  document.getElementById('confirm-delete').style.display = 'none';
+  document.getElementById('password-confirm').style.display = 'block';
+}
+
 
 async function confirmDeleteAccount() {
   const password = document.getElementById('confirm-password').value.trim();
