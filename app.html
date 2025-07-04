@@ -15,7 +15,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 0px;
     }
     h1 {
       color: #f6b500;
@@ -36,12 +36,14 @@
    #messages {
   height: 300px;
   overflow-y: auto;
-  padding: 10px;
+  padding: 10px 15px; /* gór/dół 10px, lewo/prawo 15px */
   background: #fff;
   flex: 1;
   padding-bottom: 100px;
-  padding-top: 60px; /* <--- DODAJ */
+  padding-top: 60px;
+  box-sizing: border-box; /* WAŻNE, żeby padding był wliczany w szerokość */
 }
+
    }
     .message {
       display: flex;
@@ -49,14 +51,15 @@
       width: 100%;
     }
     .message-bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      white-space: pre-wrap;
-      text-align: left;
-    }
+  max-width: 90%; /* dzięki temu na telefonach bańki będą szersze */
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
     .message-user {
       justify-content: flex-end;
     }
