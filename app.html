@@ -33,12 +33,6 @@
   display: flex;
   flex-direction: column;
 }
-.chat-box {
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
 
    #messages {
   height: 300px;
@@ -80,27 +74,26 @@
     }
 .input-wrapper {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  left: 0;
   width: 100%;
-  max-width: 700px;
   display: flex;
-  flex-direction: row;
+  flex-direction: row; /* teraz w jednej linii: textarea + przycisk */
   align-items: flex-end;
   padding: 8px;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
   gap: 8px;
   box-sizing: border-box;
 }
-
 /* Desktop */
 @media (min-width: 768px) {
   .input-wrapper {
     bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
     max-width: 700px;
     border-radius: 20px;
@@ -187,12 +180,12 @@
   </div>
 </div>
 
-  <div class="chat-container chat-box">
-
+  <div class="chat-container">
   
+
     <div id="messages"></div>
   </div>
-  <div class="input-wrapper chat-box">
+  <div class="input-wrapper">
   <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
   <button id="sendButton">➤</button>
 </div>
