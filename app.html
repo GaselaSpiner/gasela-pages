@@ -159,17 +159,9 @@
   <h1 id="welcome">Witaj w systemie Gasela Spiner</h1>
 
   <div class="chat-container">
-    <label for="promptSelector">🎯 Wybierz temat:</label>
-    <select id="promptSelector">
-      <option value="">— wybierz temat —</option>
-    </select>
-
-    <div id="messages"></div>
-  </div>
-  <div class="input-wrapper">
-  <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
-  <button id="sendButton">➤</button>
+  <div id="messages"></div>
 </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -503,6 +495,13 @@ async function confirmDeleteAccount() {
     <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
     <div style="padding: 20px; text-align: center;">
       <h3>⚙️ Moje konto</h3>
+      <div style="margin-top: 10px;">
+  <label for="promptSelector" style="display: block; margin-bottom: 5px;">🎯 Wybierz temat:</label>
+  <select id="promptSelector" style="width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+    <option value="">— wybierz temat —</option>
+  </select>
+</div>
+
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta będą tutaj</div>
       <button onclick="togglePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
       <div id="password-form" style="display: none; margin-top: 15px;">
