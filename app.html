@@ -547,18 +547,19 @@ async function confirmDeleteAccount() {
   <!-- 🔥 Sidebar -->
  <div id="sidebar" style="
   position: fixed;
-  top: 20px;                /* ← odstęp od góry */
+  top: 20px; /* odstęp od góry */
   right: 0;
-  height: calc(100% - 40px); /* ← odejmujemy górny i dolny margines (2 × 20px) */
+  height: calc(100% - 40px); /* uwzględnia top i bottom */
   width: 0;
   background-color: #f9f9f9;
   overflow-x: hidden;
-  transition: 0.5s;
+  transition: width 0.5s, border-radius 0.5s;
   padding-top: 60px;
   box-shadow: -2px 0 5px rgba(0,0,0,0.2);
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
 ">
+
 
 
     <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
