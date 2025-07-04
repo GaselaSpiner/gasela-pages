@@ -79,17 +79,18 @@
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
   gap: 8px;
 }
-
 @media (min-width: 768px) {
   .input-wrapper {
-    position: static;
+    bottom: 20px; /* lekko nad krawędzią */
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
     max-width: 700px;
-    margin: 20px auto 40px auto;
     border-radius: 20px;
     border: 1px solid #ddd;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   }
+
 }
     #userInput {
       flex: 1;
