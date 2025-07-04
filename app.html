@@ -176,6 +176,11 @@
     const welcome = document.getElementById("welcome");
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("userInput");
+    userInput.addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+});
+
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
 
