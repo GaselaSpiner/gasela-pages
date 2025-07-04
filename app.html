@@ -374,11 +374,11 @@ async function initApp() {
 
     initApp();
 
+  async function openSidebar() {
+  await checkSessionAndPlan();
+  document.getElementById("sidebar").style.width = "300px";
+}
 
-    function openSidebar() {
-      checkSessionAndPlan();
-      document.getElementById("sidebar").style.width = "300px";
-    }
     function closeSidebar() {
       document.getElementById("sidebar").style.width = "0";
     }
