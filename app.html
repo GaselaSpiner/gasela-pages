@@ -185,7 +185,7 @@
 
 
     const sendButton = document.getElementById("sendButton");
-    const promptSelector = document.getElementById("promptSelectorSidebar");
+    
 
 
     function appendMessage(text, sender) {
@@ -373,12 +373,14 @@ async function initApp() {
 
 
     initApp();
-
- async function openSidebar() {
+  async function openSidebar() {
   document.getElementById("sidebar").style.width = "300px";
+
+  // przypisz selektor dopiero teraz
+  promptSelector = document.getElementById("promptSelectorSidebar");
+
   await checkSessionAndPlan();
 }
-
 
     function closeSidebar() {
       document.getElementById("sidebar").style.width = "0";
