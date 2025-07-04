@@ -67,20 +67,15 @@
       justify-content: flex-start;
     }
  .input-wrapper {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
   display: flex;
   flex-direction: column;
   padding: 8px;
   background: #fff;
-  border-top: 1px solid #ddd;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   gap: 8px;
 }
-
 @media (min-width: 768px) {
   .input-wrapper {
     bottom: 20px;
@@ -96,19 +91,18 @@
 
     #userInput {
   width: 100%;
-  resize: none; /* wyłącz pasek przewijania */
-  border: 1px solid #ddd;
+  resize: none;
+  border: none;
   padding: 12px;
   font-family: 'Montserrat', sans-serif;
   font-size: 1rem;
   min-height: 48px;
-  max-height: 200px; /* ogranicz w razie potrzeby */
   border-radius: 12px;
   outline: none;
-  overflow: hidden; /* ukryj paski */
+  overflow: hidden;
 }
-    #sendButton {
-  align-self: flex-end; /* wyrównaj do prawej */
+  #sendButton {
+  align-self: flex-end;
   background-color: #f6b500;
   border: none;
   border-radius: 12px;
@@ -176,10 +170,11 @@
     const welcome = document.getElementById("welcome");
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("userInput");
-    userInput.addEventListener('input', function () {
+   userInput.addEventListener('input', function () {
   this.style.height = 'auto';
   this.style.height = (this.scrollHeight) + 'px';
 });
+
 
     const sendButton = document.getElementById("sendButton");
     const promptSelector = document.getElementById("promptSelector");
