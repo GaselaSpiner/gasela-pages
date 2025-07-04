@@ -409,20 +409,24 @@ async function initApp() {
 
 
     initApp();
- async function openSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.style.width = "300px";
-  sidebar.style.borderTopLeftRadius = "20px";
-  sidebar.style.borderBottomLeftRadius = "20px";
+  async function openSidebar() {
+  document.getElementById("sidebar").style.width = "300px";
+
+ 
   await checkSessionAndPlan();
 }
 
-function closeSidebar() {
+    function closeSidebar() {
+      document.getElementById("sidebar").style.width = "0";
+    }
+    async function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
-  sidebar.style.width = "0";
-  sidebar.style.borderTopLeftRadius = "0";
-  sidebar.style.borderBottomLeftRadius = "0";
-}
+  if (sidebar.style.width === "300px") {
+    closeSidebar();
+  } else {
+    sidebar.style.width = "300px";
+    await checkSessionAndPlan();
+  }
 }
 
     
@@ -541,20 +545,7 @@ async function confirmDeleteAccount() {
   </script>
 
   <!-- 🔥 Sidebar -->
-  <div id="sidebar" style="
-  height: 100%;
-  width: 0;
-  position: fixed;
-  top: 0;
-  right: 0;
-  background-color: #f9f9f9;
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 60px;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-">
+  <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
     <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
     <div style="padding: 20px; text-align: center;">
       <h3>⚙️ Moje konto</h3>
