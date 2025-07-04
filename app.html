@@ -23,16 +23,17 @@
       margin-bottom: 20px;
       text-align: center;
     }
-    .chat-container {
-      width: 100%;
-      max-width: 700px;
-      background: #f9f9f9;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+   .chat-container {
+  width: 100%;
+  max-width: 700px;
+  background: transparent; /* ← zmiana */
+  border-radius: 0;        /* ← zmiana */
+  box-shadow: none;       /* ← zmiana */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
    #messages {
   height: 300px;
   overflow-y: auto;
