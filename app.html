@@ -410,15 +410,20 @@ async function initApp() {
 
     initApp();
   async function openSidebar() {
-  document.getElementById("sidebar").style.width = "300px";
-
- 
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.width = "300px";
+  sidebar.style.borderTopLeftRadius = "20px";    // ← dodaj
+  sidebar.style.borderBottomLeftRadius = "20px"; // ← dodaj
   await checkSessionAndPlan();
 }
 
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
+function closeSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.width = "0";
+  sidebar.style.borderTopLeftRadius = "0";       // ← reset
+  sidebar.style.borderBottomLeftRadius = "0";    // ← reset
+}
+
     async function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   if (sidebar.style.width === "300px") {
