@@ -409,24 +409,20 @@ async function initApp() {
 
 
     initApp();
-  async function openSidebar() {
-  document.getElementById("sidebar").style.width = "300px";
-
- 
+ async function openSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.width = "300px";
+  sidebar.style.borderTopLeftRadius = "20px";
+  sidebar.style.borderBottomLeftRadius = "20px";
   await checkSessionAndPlan();
 }
 
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
-    async function toggleSidebar() {
+function closeSidebar() {
   const sidebar = document.getElementById("sidebar");
-  if (sidebar.style.width === "300px") {
-    closeSidebar();
-  } else {
-    sidebar.style.width = "300px";
-    await checkSessionAndPlan();
-  }
+  sidebar.style.width = "0";
+  sidebar.style.borderTopLeftRadius = "0";
+  sidebar.style.borderBottomLeftRadius = "0";
+}
 }
 
     
