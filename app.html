@@ -495,21 +495,16 @@ async function confirmDeleteAccount() {
   </script>
 
   <!-- 🔥 Sidebar -->
-  <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
-    <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
-    <div style="padding: 20px; text-align: center;">
-      <h3>⚙️ Moje konto</h3>
-     <div style="padding: 20px; text-align: center;">
-  <h3>⚙️ Moje konto</h3>
+ <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
+  <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
+  <div style="padding: 20px; text-align: center;">
+    <h3>⚙️ Moje konto</h3>
 
-  <label for="promptSelector" style="display: block; margin-top: 10px;">🎯 Wybierz temat:</label>
-  <select id="promptSelector" style="width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-    <option value="">— wybierz temat —</option>
-  </select>
+    <label for="promptSelector" style="display: block; margin-top: 10px;">🎯 Wybierz temat:</label>
+    <select id="promptSelector" style="width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+      <option value="">— wybierz temat —</option>
+    </select>
 
-  <div id="user-info" style="margin-top: 15px; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta będą tutaj</div>
-  ...
-</div>
 
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta będą tutaj</div>
       <button onclick="togglePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔒 Zmień hasło</button>
