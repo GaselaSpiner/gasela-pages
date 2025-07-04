@@ -67,20 +67,18 @@
       justify-content: flex-start;
     }
 .input-wrapper {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* zmieniamy z column na row */
+  align-items: center;
   padding: 8px;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   gap: 8px;
-  box-sizing: border-box; /* 💥 to poprawia pełną szerokość */
+  box-sizing: border-box;
 }
+
 
 /* Desktop */
 @media (min-width: 768px) {
