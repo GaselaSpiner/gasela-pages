@@ -200,27 +200,41 @@
     }
 
     async function fetchPrompts(jwt) {
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${jwt}` }
-      });
-      const { prompts } = await res.json();
-      promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
-      prompts.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.prompt_key;
-        opt.textContent = p.description;
-        promptSelector.appendChild(opt);
-      });
-    }
+  const promptSelector = document.getElementById("promptSelectorSidebar");
+  if (!promptSelector) {
+    console.log("⚠️ promptSelectorSidebar not found (probably sidebar not yet open)");
+    return;
+  }
+
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${jwt}` }
+  });
+  const { prompts } = await res.json();
+  promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
+  prompts.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.prompt_key;
+    opt.textContent = p.description;
+    promptSelector.appendChild(opt);
+  });
+}
+
 
    sendButton.addEventListener("click", async () => {
+  const promptSelector = document.getElementById("promptSelectorSidebar");
+  if (!promptSelector) {
+    alert("Sidebar nie jest jeszcze otwarty lub brak selektora!");
+    return;
+  }
+
   const message = userInput.value.trim();
   const promptKey = promptSelector.value;
   if (!message || !promptKey) {
     alert("Wpisz wiadomość i wybierz temat!");
     return;
   }
+  
   appendMessage(message, 'user');
   userInput.value = "";
 
@@ -376,9 +390,7 @@ async function initApp() {
   async function openSidebar() {
   document.getElementById("sidebar").style.width = "300px";
 
-  // przypisz selektor dopiero teraz
-  promptSelector = document.getElementById("promptSelectorSidebar");
-
+ 
   await checkSessionAndPlan();
 }
 
