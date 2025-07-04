@@ -80,20 +80,23 @@
     }
 .input-wrapper {
   position: fixed;
-  bottom: 0;
-  left: 0;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: 700px;
   display: flex;
-  flex-direction: row; /* teraz w jednej linii: textarea + przycisk */
+  flex-direction: row;
   align-items: flex-end;
   padding: 8px;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   gap: 8px;
   box-sizing: border-box;
 }
+
 /* Desktop */
 @media (min-width: 768px) {
   .input-wrapper {
