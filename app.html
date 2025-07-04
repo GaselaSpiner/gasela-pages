@@ -162,7 +162,7 @@
   <img src="Gaselas.png" alt="Gaselas" style="height: 30px;">
 
   <!-- Ikona trzech kropek -->
-  <div id="menu-icon" onclick="openSidebar()" style="
+  <div id="menu-icon" onclick="toggleSidebar()" style="
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -414,6 +414,17 @@ async function initApp() {
     function closeSidebar() {
       document.getElementById("sidebar").style.width = "0";
     }
+    async function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar.style.width === "300px") {
+    closeSidebar();
+  } else {
+    sidebar.style.width = "300px";
+    await checkSessionAndPlan();
+  }
+}
+
+    
     function togglePasswordForm() {
       const form = document.getElementById('password-form');
       form.style.display = form.style.display === 'block' ? 'none' : 'block';
