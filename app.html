@@ -95,7 +95,7 @@
   }
 }
 
-    #userInput {
+   #userInput {
   width: 100%;
   resize: none;
   border: none;
@@ -103,9 +103,11 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 1rem;
   min-height: 48px;
+  max-height: 200px; /* ewentualnie limit, można zmienić */
   border-radius: 12px;
   outline: none;
   overflow: hidden;
+  box-sizing: border-box; /* 💥 kluczowe — pilnuje paddingu! */
 }
   #sendButton {
   align-self: flex-end;
