@@ -229,6 +229,33 @@
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+    function appendStaticBubble(text) {
+  const wrapper = document.createElement("div");
+  wrapper.style.display = "flex";
+  wrapper.style.justifyContent = "center";
+  wrapper.style.width = "100%";
+
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+  bubble.textContent = text;
+
+  bubble.style.backgroundColor = "#ffcc00";
+  bubble.style.border = "none";
+  bubble.style.borderRadius = "25px";
+  bubble.style.padding = "12px 20px";
+  bubble.style.cursor = "default";
+  bubble.style.fontFamily = "'Montserrat', sans-serif";
+  bubble.style.fontWeight = "500";
+  bubble.style.fontSize = "0.95rem";
+  bubble.style.textAlign = "center";
+  bubble.style.display = "inline-block";
+  bubble.style.margin = "5px auto";
+
+  wrapper.appendChild(bubble);
+  messagesDiv.appendChild(wrapper);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
 
   function showWelcomeMessage(prompts) {
   const welcomeText = `
@@ -285,32 +312,16 @@ if (window.innerWidth >= 768) {
       button.style.transform = "scale(1)";
     };
 
-    button.onclick = async () => {
-      selectedPromptKey = p.prompt_key;
-      wrapper.remove();
+   button.onclick = async () => {
+  selectedPromptKey = p.prompt_key;
+  wrapper.remove();
 
-      const sessionRes = await supabase.auth.getSession();
-      const session = sessionRes.data.session;
-      if (!session) {
-        appendMessage("❌ Brak aktywnej sesji. Zaloguj się ponownie.", 'ai');
-        return;
-      }
-      const jwt = session.access_token;
+  // Dodaj statyczny bąbelek z wybranym tematem
+  appendStaticBubble(p.description);
 
-      console.log("➡️ Wywołanie ask_openai (auto start po wyborze)...");
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ prompt_key: selectedPromptKey, user_input: "" })
-      });
-
-      const data = await res.json();
-      console.log("🟢 ask_openai response:", data);
-      appendMessage(data.reply, 'ai');
-    };
+  // Komunikat zachęcający
+  appendMessage("🚀 Świetnie! Możesz teraz zadać pytanie związane z wybranym tematem, a Gasela Spiner odpowie!", 'ai');
+};
 
     wrapper.appendChild(button);
   });
