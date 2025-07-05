@@ -62,8 +62,10 @@
 }
 
     .message-user {
-      justify-content: flex-end;
-    }
+  display: flex;        /* 💥 Wymusza flex layout */
+  justify-content: flex-end; /* 💥 Wypycha do prawej */
+  width: 100%;
+}
     .message-user .message-bubble {
   background-color: #ffcc00;
   border: none;
