@@ -213,16 +213,25 @@
     
 
 
-    function appendMessage(text, sender) {
-      const wrapper = document.createElement("div");
-      wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
-      const bubble = document.createElement("div");
-      bubble.className = "message-bubble";
-      bubble.innerHTML = sender === 'ai' ? marked.parse(text) : text;
-      wrapper.appendChild(bubble);
-      messagesDiv.appendChild(wrapper);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+   function appendMessage(text, sender, isHtml = false) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+
+  if (isHtml) {
+    bubble.innerHTML = text; // ← gotowy HTML
+  } else if (sender === 'ai') {
+    bubble.innerHTML = marked.parse(text); // ← markdown od AI
+  } else {
+    bubble.textContent = text; // ← tekst użytkownika
+  }
+
+  wrapper.appendChild(bubble);
+  messagesDiv.appendChild(wrapper);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
 
     function showWelcomeMessage(prompts) {
   const welcomeText = `
