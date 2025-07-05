@@ -329,18 +329,7 @@ if (window.innerWidth >= 768) {
       const jwt = session.access_token;
 
       console.log("➡️ Wywołanie ask_openai (auto start po wyborze)...");
-      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ prompt_key: selectedPromptKey, user_input: "" })
-      });
-
-      const data = await res.json();
-      console.log("🟢 ask_openai response:", data);
-      appendMessage(data.reply, 'ai');
+    
     };
 
     wrapper.appendChild(button);
