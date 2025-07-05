@@ -48,25 +48,17 @@
    }
     .message {
   display: flex;
-  justify-content: flex-start; /* domyślnie bąbel AI z lewej */
-  align-items: flex-start; /* <<< DODAJ TO */
+  justify-content: flex-start;
+  align-items: flex-start;
   margin: 6px 0;
   width: 100%;
 }
-    .message-bubble {
-  max-width: max-content;
-  padding: 10px 14px;
-  border-radius: 12px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  text-align: left;
+
+.message-user {
+  justify-content: flex-end;
 }
 
-    .message-user {
-      justify-content: flex-end;
-    }
-    .message-user .message-bubble {
+.message-user .message-bubble {
   background-color: #ffcc00;
   margin-left: auto;
   text-align: center;
@@ -77,10 +69,11 @@
   font-family: 'Montserrat', sans-serif;
   font-weight: 500;
   font-size: 0.95rem;
-  color: #000; /* czarny tekst, jak w przyciskach */
+  color: #000;
   max-width: 100%;
   display: inline-block;
 }
+
 
     .message-ai {
       justify-content: flex-start;
