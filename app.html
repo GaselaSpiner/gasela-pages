@@ -15,202 +15,123 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0px;
+      padding: 0;
     }
-    h1 {
-      color: #f6b500;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      text-align: center;
+    .chat-container {
+      width: 100%;
+      max-width: 700px;
+      background: transparent;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
-   .chat-container {
-  width: 100%;
-  max-width: 700px;
-  background: transparent; /* ← zmiana */
-  border-radius: 0;        /* ← zmiana */
-  box-shadow: none;       /* ← zmiana */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-   #messages {
-  height: 300px;
-  overflow-y: auto;
-  padding: 10px 15px; /* gór/dół 10px, lewo/prawo 15px */
-  background: #fff;
-  flex: 1;
-  padding-bottom: 100px;
-  padding-top: 60px;
-  box-sizing: border-box; /* WAŻNE, żeby padding był wliczany w szerokość */
-}
-
-   }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px 15px;
+      background: #fff;
+      flex: 1;
+      padding-bottom: 100px;
+      padding-top: 60px;
+      box-sizing: border-box;
+    }
     .message {
       display: flex;
       margin: 6px 0;
       width: 100%;
     }
     .message-bubble {
-  max-width: max-content;
-  padding: 10px 14px;
-  border-radius: 12px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  text-align: left;
-}
-
-    .message-user {
-      justify-content: flex-end;
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      text-align: left;
     }
+    .message-user { justify-content: flex-end; }
     .message-user .message-bubble {
       background-color: #e5e5e5;
       margin-left: auto;
       text-align: right;
     }
-    .message-ai {
-      justify-content: flex-start;
+    .message-ai { justify-content: flex-start; }
+    .prompt-button {
+      background-color: #f6b500;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      margin: 5px 5px 0 0;
+      cursor: pointer;
+      font-weight: bold;
+      display: inline-block;
     }
-.input-wrapper {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: row; /* teraz w jednej linii: textarea + przycisk */
-  align-items: flex-end;
-  padding: 8px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
-  gap: 8px;
-  box-sizing: border-box;
-}
-/* Desktop */
-@media (min-width: 768px) {
-  .input-wrapper {
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 700px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-   #userInput {
-  width: 100%;
-  resize: none;
-  border: none;
-  padding: 12px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1rem;
-  min-height: 48px;
-  max-height: 200px; /* ewentualnie limit, można zmienić */
-  border-radius: 12px;
-  outline: none;
-  overflow: hidden;
-  box-sizing: border-box; /* 💥 kluczowe — pilnuje paddingu! */
-}
-#sendButton {
-  background-color: #f6b500;
-  border: none;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
-  color: #fff;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-  flex-shrink: 0; /* 💥 zapobiega rozciąganiu */
-}
-#sendButton:hover {
-  background-color: #dba900;
-}
-
-    select {
+    .input-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
       width: 100%;
+      display: flex;
+      align-items: flex-end;
       padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin: 10px 0;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+      gap: 8px;
+      box-sizing: border-box;
     }
+    #userInput {
+      width: 100%;
+      resize: none;
+      border: none;
+      padding: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      min-height: 48px;
+      max-height: 200px;
+      border-radius: 12px;
+      outline: none;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    #sendButton {
+      background-color: #f6b500;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    #sendButton:hover { background-color: #dba900; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <div id="container">
-    <div id="main-content">
-  <!-- Górny pasek -->
-<div id="top-bar" style="
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 50px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 15px;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  z-index: 1000;
-  box-sizing: border-box;
-">
-
-  <!-- Logo Gaselas -->
-  <img src="Gaselas.png" alt="Gaselas" style="height: 40px;">
-
-  <!-- Ikona trzech kropek -->
-  <div id="menu-icon" onclick="toggleSidebar()" style="
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-  ">
-    <span style="width: 8px; height: 8px; background-color: #f6b500; border-radius: 50%;"></span>
-    <span style="width: 8px; height: 8px; background-color: #f6b500; border-radius: 50%;"></span>
-    <span style="width: 8px; height: 8px; background-color: #f6b500; border-radius: 50%;"></span>
-  </div>
-</div>
-
   <div class="chat-container">
-  
-
     <div id="messages"></div>
   </div>
   <div class="input-wrapper">
-  <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
-  <button id="sendButton">➤</button>
-</div>
+    <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
+    <button id="sendButton">➤</button>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      'https://lmussgaiutaldicolyba.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
-    );
-
-    const welcome = document.getElementById("welcome");
+    const supabase = window.supabase.createClient('https://lmussgaiutaldicolyba.supabase.co', 'twój_anon_key');
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("userInput");
-   userInput.addEventListener('input', function () {
-  this.style.height = 'auto';
-  this.style.height = (this.scrollHeight) + 'px';
-});
-
-
     const sendButton = document.getElementById("sendButton");
-    
 
+    let currentPromptKey = null;
 
     function appendMessage(text, sender) {
       const wrapper = document.createElement("div");
@@ -223,215 +144,76 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    async function fetchPrompts(jwt) {
-  const promptSelector = document.getElementById("promptSelectorSidebar");
-  if (!promptSelector) {
-    console.log("⚠️ promptSelectorSidebar not found (probably sidebar not yet open)");
-    return;
-  }
+    function showPromptButtons(prompts) {
+      const promptDiv = document.createElement("div");
+      prompts.forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = "prompt-button";
+        btn.textContent = p.description;
+        btn.onclick = () => {
+          currentPromptKey = p.prompt_key;
+          appendMessage(`🎯 Wybrano temat: ${p.description}`, 'ai');
+          promptDiv.remove(); // usuń bąbelki po wyborze
+        };
+        promptDiv.appendChild(btn);
+      });
+      messagesDiv.appendChild(promptDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
 
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${jwt}` }
-  });
-  const { prompts } = await res.json();
-  promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
-  prompts.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.prompt_key;
-    opt.textContent = p.description;
-    promptSelector.appendChild(opt);
-  });
-}
-
-
-   sendButton.addEventListener("click", async () => {
-  const promptSelector = document.getElementById("promptSelectorSidebar");
-  if (!promptSelector) {
-    alert("Sidebar nie jest jeszcze otwarty lub brak selektora!");
-    return;
-  }
-
-  const message = userInput.value.trim();
-  const promptKey = promptSelector.value;
-  if (!message || !promptKey) {
-    alert("Wpisz wiadomość i wybierz temat!");
-    return;
-  }
-  
-  appendMessage(message, 'user');
-  userInput.value = "";
-
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
-  if (!session) {
-    appendMessage("❌ Brak aktywnej sesji. Zaloguj się ponownie.", 'ai');
-    return;
-  }
-  const jwt = session.access_token;
-
-  // ✅ Wywołanie verify_and_increment z body i logami
-  console.log("➡️ Wywołanie verify_and_increment...");
-  const verifyRes = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/verify_and_increment', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({}) // ⚠️ DODANE
-  });
-
-  const verifyData = await verifyRes.json();
-  console.log("🔎 verify_and_increment response:", verifyData);
-
-  if (!verifyRes.ok) {
-  appendMessage(`💬 ${verifyData.error || "Nieznany błąd."}`, 'ai');
-  console.log("⚠️ verify_and_increment NOT ok");
-  return;
-}
-
-
-  console.log("✅ verify_and_increment success");
-
-  // 🟡 Teraz ask_openai
-  console.log("➡️ Wywołanie ask_openai...");
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${jwt}`
-    },
-    body: JSON.stringify({ prompt_key: promptKey, user_input: message })
-  });
-
-  const data = await res.json();
-  console.log("🟢 ask_openai response:", data);
-  appendMessage(data.reply, 'ai');
-
-  // ✅ Odśwież limit w sidebarze
-  await checkSessionAndPlan();
-});
-
-async function initApp() {
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
-  if (!session) {
-    console.log("❌ Brak aktywnej sesji (initApp)");
-    return;
-  }
-
-  const jwt = session.access_token;
-  const userId = session.user.id;
-
-  // Sprawdź, czy użytkownik ma subskrypcję
-  const { data: subNow } = await supabase
-    .from('subscriptions')
-    .select('plan_name')
-    .eq('user_id', userId)
-    .limit(1)
-    .maybeSingle();
-
-  if (!subNow) {
-    console.log("⚠️ Brak subskrypcji — wywołuję aktywuj_plan w initApp...");
-    await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/aktywuj_plan', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${jwt}`,
-        'Content-Type': 'application/json'
+    async function initApp() {
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data.session;
+      if (!session) {
+        appendMessage("❌ Brak aktywnej sesji. Zaloguj się ponownie.", 'ai');
+        return;
       }
+      const jwt = session.access_token;
+
+      appendMessage(`<img src="Gaselas.png" alt="Gasela" style="height: 30px;"> Witaj w Gasela Spiner! Wybierz temat rozmowy poniżej, aby zacząć.`, 'ai');
+
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+      const { prompts } = await res.json();
+      showPromptButtons(prompts);
+    }
+
+    sendButton.addEventListener("click", async () => {
+      const message = userInput.value.trim();
+      if (!message || !currentPromptKey) {
+        alert("Wpisz wiadomość i wybierz temat!");
+        return;
+      }
+
+      appendMessage(message, 'user');
+      userInput.value = "";
+
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data.session;
+      if (!session) {
+        appendMessage("❌ Brak aktywnej sesji. Zaloguj się ponownie.", 'ai');
+        return;
+      }
+      const jwt = session.access_token;
+
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`
+        },
+        body: JSON.stringify({ prompt_key: currentPromptKey, user_input: message })
+      });
+
+      const data = await res.json();
+      appendMessage(data.reply, 'ai');
     });
-    console.log("✅ aktywuj_plan zakończone");
-  }
-
-  // Teraz załaduj sidebar i info o planie
-  await checkSessionAndPlan();
-}
-
-
-   async function checkSessionAndPlan() {
-  // Pobierz sesję
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
-  if (!session) {
-    console.log("❌ Brak aktywnej sesji");
-    return;
-  }
-
-  const jwt = session.access_token;
-  const userId = session.user.id;
-  console.log("✅ user_id:", userId);
-
-  // Pobierz prompty
-  await fetchPrompts(jwt);
-
-  // Pobierz subskrypcję
-  const { data: subNow, error: subError } = await supabase
-    .from('subscriptions')
-    .select('plan_name, end_date')
-    .eq('user_id', userId)
-    .order('end_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  console.log("📦 subNow:", subNow);
-  console.log("⚠️ subError:", subError);
-
-  // Pobierz limity wiadomości
-  const { data: limitData, error: limitError } = await supabase
-    .from('message_limits')
-    .select('total_limit, used_messages')
-    .eq('user_id', userId)
-    .single();
-
-  console.log("💬 limitData:", limitData);
-  console.log("⚠️ limitError:", limitError);
-
-  let planInfo = "";
-
-  if (subNow) {
-    const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
-    planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
-    planInfo += `<strong>Do:</strong> ${endDate}<br>`;
-  } else {
-    planInfo += `<strong>Plan:</strong> brak aktywnego planu<br>`;
-  }
-
-  if (limitData) {
-    const remaining = limitData.total_limit - limitData.used_messages;
-    planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
-  } else {
-    planInfo += `<br><strong>Limit wiadomości:</strong> brak danych`;
-  }
-
-  document.getElementById("user-info").innerHTML = `
-    <strong>Email:</strong> ${session.user.email}<br>
-    ${planInfo}
-  `;
-}
-
 
     initApp();
-  async function openSidebar() {
-  document.getElementById("sidebar").style.width = "300px";
 
- 
-  await checkSessionAndPlan();
-}
-
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
-    async function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar.style.width === "300px") {
-    closeSidebar();
-  } else {
-    sidebar.style.width = "300px";
-    await checkSessionAndPlan();
-  }
-}
-
-    
+    // ---------- Sidebar functions ----------
     function togglePasswordForm() {
       const form = document.getElementById('password-form');
       form.style.display = form.style.display === 'block' ? 'none' : 'block';
@@ -466,245 +248,107 @@ async function initApp() {
       await supabase.auth.signOut();
       window.location.href = 'logowanie.html';
     }
-  function deleteAccount() {
-  const confirmDiv = document.getElementById('confirm-delete');
-  confirmDiv.style.display = 'block';
-  const statusDiv = document.getElementById('delete-status');
-  statusDiv.innerHTML = ""; // wyczyść poprzedni status
-}
+    function deleteAccount() {
+      document.getElementById('confirm-delete').style.display = 'block';
+      document.getElementById('delete-status').innerHTML = "";
+    }
     function showPasswordConfirm() {
-  document.getElementById('confirm-delete').style.display = 'none';
-  document.getElementById('password-confirm').style.display = 'block';
-}
+      document.getElementById('confirm-delete').style.display = 'none';
+      document.getElementById('password-confirm').style.display = 'block';
+    }
+    async function confirmDeleteAccount() {
+      const password = document.getElementById('confirm-password').value.trim();
+      const statusDiv = document.getElementById('delete-status');
 
+      if (!password) {
+        statusDiv.innerHTML = "❌ Wpisz swoje hasło, aby potwierdzić.";
+        statusDiv.style.color = "red";
+        return;
+      }
 
-async function confirmDeleteAccount() {
-  const password = document.getElementById('confirm-password').value.trim();
-  const statusDiv = document.getElementById('delete-status');
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data.session;
+      if (!session) {
+        statusDiv.innerHTML = "❌ Brak aktywnej sesji.";
+        statusDiv.style.color = "red";
+        return;
+      }
 
-  if (!password) {
-    statusDiv.innerHTML = "❌ Wpisz swoje hasło, aby potwierdzić.";
-    statusDiv.style.color = "red";
-    return;
-  }
+      const email = session.user.email;
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
-  if (!session) {
-    statusDiv.innerHTML = "❌ Brak aktywnej sesji.";
-    statusDiv.style.color = "red";
-    return;
-  }
+      if (signInError) {
+        statusDiv.innerHTML = "❌ Nieprawidłowe hasło. Spróbuj ponownie.";
+        statusDiv.style.color = "red";
+        return;
+      }
 
-  const email = session.user.email;
+      const jwt = (await supabase.auth.getSession()).data.session.access_token;
+      const userId = session.user.id;
 
-  // Spróbuj zalogować się ponownie (re-auth) w celu weryfikacji hasła
-  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/delete_account', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: userId, email: email })
+      });
 
-  if (signInError) {
-    statusDiv.innerHTML = "❌ Nieprawidłowe hasło. Spróbuj ponownie.";
-    statusDiv.style.color = "red";
-    return;
-  }
+      const data = await res.json();
+      if (!res.ok) {
+        statusDiv.innerHTML = "❌ Nie udało się usunąć konta: " + (data.error || "Nieznany błąd");
+        statusDiv.style.color = "red";
+        return;
+      }
 
-  const jwt = (await supabase.auth.getSession()).data.session.access_token;
-  const userId = session.user.id;
+      statusDiv.innerHTML = "✅ Konto zostało usunięte. Przekierowanie...";
+      statusDiv.style.color = "green";
 
-  console.log("➡️ Wywołanie funkcji delete_account...");
+      document.getElementById('password-confirm').style.display = 'none';
 
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/delete_account', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      user_id: userId,
-      email: email
-    })
-  });
-
-  const data = await res.json();
-  console.log("🔎 delete_account response:", data);
-
-  if (!res.ok) {
-    statusDiv.innerHTML = "❌ Nie udało się usunąć konta: " + (data.error || "Nieznany błąd");
-    statusDiv.style.color = "red";
-    return;
-  }
-
-  statusDiv.innerHTML = "✅ Konto zostało usunięte. Przekierowanie...";
-  statusDiv.style.color = "green";
-
-  // Ukryj formularz hasła
-  document.getElementById('password-confirm').style.display = 'none';
-
-  setTimeout(() => {
-    window.location.href = 'logowanie.html';
-  }, 5000);
-}
-
+      setTimeout(() => {
+        window.location.href = 'logowanie.html';
+      }, 5000);
+    }
   </script>
-      
-<!-- 🔥 Sidebar -->
-<div id="sidebar" style="
-  height: 100%;
-  width: 0;
-  position: fixed;
-  top: 0;
-  right: 0;
-  background-color: #f9f9f9;
-  overflow-y: auto;
-  overflow-x: hidden;
-  transition: 0.5s;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-">
-  <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
 
-  <div style="
-    padding: 20px; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; 
-    height: 100vh; 
-    box-sizing: border-box; 
-    margin-top: 60px;">
-    
-    <div>
-      <h3 style="text-align: center;">⚙️ Moje konto</h3>
+  <!-- 🔥 Sidebar -->
+  <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-y: auto; overflow-x: hidden; transition: 0.5s; box-shadow: -2px 0 5px rgba(0,0,0,0.2); display: flex; flex-direction: column; padding-top: 60px;">
+    <a href="javascript:void(0)" onclick="document.getElementById('sidebar').style.width = '0';" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
 
-      <label for="promptSelectorSidebar" style="margin-top: 10px; display: block; text-align: center;">🎯 Wybierz temat:</label>
-      <select id="promptSelectorSidebar" style="
-        width: 90%;
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        margin: 10px auto 20px auto;
-        display: block;
-      ">
-        <option value="">— wybierz temat —</option>
-      </select>
+    <div style="padding: 20px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+      <div style="flex-grow: 1;">
+        <h3 style="text-align: center;">⚙️ Moje konto</h3>
 
-      <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
+        <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
 
-      <button onclick="togglePasswordForm()" style="
-  width: 90%;
-  background-color: #f6b500;
-  border: none;
-  border-radius: 6px;
-  padding: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 10px;
-  margin: 0 auto;
-  display: block;
-">🔒 Zmień hasło</button>
+        <button onclick="togglePasswordForm()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin: 0 auto; display: block;">🔒 Zmień hasło</button>
 
-<div id="password-form" style="display: none; width: 100%; margin-top: 10px; text-align: center;">
-  <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="
-    width: 90%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    display: block;
-    margin: 10px auto;
-  ">
-  <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="
-    width: 90%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    display: block;
-    margin: 10px auto;
-  ">
-  <button onclick="changePassword()" style="
-    width: 90%;
-    background-color: #f6b500;
-    border: none;
-    border-radius: 6px;
-    padding: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    margin: 0 auto;
-    display: block;
-  ">Potwierdź zmianę</button>
-  <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
-</div>
+        <div id="password-form" style="display: none; width: 100%; margin-top: 10px; text-align: center;">
+          <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 90%; padding: 10px; margin: 10px auto; border-radius: 6px; border: 1px solid #ccc; display: block;">
+          <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 90%; padding: 10px; margin: 10px auto; border-radius: 6px; border: 1px solid #ccc; display: block;">
+          <button onclick="changePassword()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin: 0 auto; display: block;">Potwierdź zmianę</button>
+          <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
 
-<button onclick="logout()" style="
-  width: 90%;
-  background-color: #f6b500;
-  border: none;
-  border-radius: 6px;
-  padding: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 20px auto 0 auto; /* <<< KLUCZOWA ZMIANA: większy odstęp u góry */
-  display: block;
-">Wyloguj się</button>
-    </div>
-
-    <div style="margin-top: 20px;">
-      <button onclick="deleteAccount()" style="
-        width: 90%;
-        background-color: #ff4d4d;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 12px;
-        font-weight: bold;
-        cursor: pointer;
-        margin: 0 auto;
-        display: block;
-      ">Usuń konto</button>
-      <div id="delete-status" style="margin-top: 10px; font-weight: bold; text-align: center;"></div>
-      <div id="confirm-delete" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
-        <p style="color: red;">⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!</p>
-        <button onclick="showPasswordConfirm()" style="
-          width: 90%;
-          background-color: #ff4d4d;
-          color: #fff;
-          border: none;
-          border-radius: 6px;
-          padding: 12px;
-          font-weight: bold;
-          cursor: pointer;
-          margin: 10px auto 0 auto;
-          display: block;
-        ">✅ Tak, usuń</button>
+        <button onclick="logout()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin: 20px auto 0 auto; display: block;">Wyloguj się</button>
       </div>
 
-      <div id="password-confirm" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
-        <p>Wpisz swoje hasło, aby potwierdzić usunięcie konta:</p>
-        <input type="password" id="confirm-password" placeholder="Hasło" style="
-          width: 90%;
-          padding: 8px;
-          margin-top: 5px;
-          border-radius: 6px;
-          border: 1px solid #ccc;
-          display: block;
-          margin: 10px auto;
-        ">
-        <button onclick="confirmDeleteAccount()" style="
-          width: 90%;
-          background-color: #ff4d4d;
-          color: #fff;
-          border: none;
-          border-radius: 6px;
-          padding: 12px;
-          margin: 5px auto 0 auto;
-          font-weight: bold;
-          cursor: pointer;
-          display: block;
-        ">Potwierdź</button>
+      <div style="margin-top: 20px;">
+        <button onclick="deleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin: 0 auto; display: block;">Usuń konto</button>
+        <div id="delete-status" style="margin-top: 10px; font-weight: bold; text-align: center;"></div>
+        <div id="confirm-delete" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
+          <p style="color: red;">⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!</p>
+          <button onclick="showPasswordConfirm()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin: 10px auto 0 auto; display: block;">✅ Tak, usuń</button>
+        </div>
+        <div id="password-confirm" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
+          <p>Wpisz swoje hasło, aby potwierdzić usunięcie konta:</p>
+          <input type="password" id="confirm-password" placeholder="Hasło" style="width: 90%; padding: 8px; margin: 10px auto; border-radius: 6px; border: 1px solid #ccc; display: block;">
+          <button onclick="confirmDeleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; margin: 5px auto 0 auto; font-weight: bold; cursor: pointer; display: block;">Potwierdź</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
 </body>
 </html>
