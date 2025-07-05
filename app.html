@@ -47,33 +47,28 @@
 
    }
     .message {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  margin: 6px 0;
-  width: 100%;
+      display: flex;
+      margin: 6px 0;
+      width: 100%;
+    }
+    .message-bubble {
+  max-width: max-content;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  text-align: left;
 }
 
-.message.message-user {
-  justify-content: flex-end;
-}
-
-.message-user .message-bubble {
-  background-color: #ffcc00;
-  margin-left: auto;
-  text-align: center;
-  border: none;
-  border-radius: 25px;
-  padding: 12px 20px;
-  cursor: default;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: #000;
-  max-width: 100%;
-  display: inline-block;
-}
-
+    .message-user {
+      justify-content: flex-end;
+    }
+    .message-user .message-bubble {
+      background-color: #ffcc00;
+      margin-left: auto;
+      text-align: right;
+    }
     .message-ai {
       justify-content: flex-start;
     }
