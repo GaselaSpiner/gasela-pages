@@ -247,7 +247,9 @@
   bubble.style.fontWeight = "500";
   bubble.style.fontSize = "0.95rem";
   bubble.style.textAlign = "center";
-  bubble.style.maxWidth = "100%";
+  bubble.style.display = "inline-block";
+  bubble.style.maxWidth = "90%"; // dodatkowo, żeby na mobile nie przekraczał, ale nie musi być — możesz całkiem usunąć
+
   bubble.style.margin = "5px auto";
 
   wrapper.appendChild(bubble);
