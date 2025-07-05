@@ -232,9 +232,9 @@
 
     function showWelcomeMessage(prompts) {
   const welcomeText = `
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <img src="Gaselas.png" alt="Gaselas" style="height: 40px;">
-      <strong>Witaj w czacie Gasela Spiner! Wybierz temat, który Cię interesuje:</strong>
+    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;">
+      <img src="Gaselas.png" alt="Gaselas" style="height: 50px;">
+      <strong style="font-size: 1.1rem; font-weight: 600;">Witaj w czacie Gasela Spiner! Wybierz temat, który Cię interesuje:</strong>
     </div>
   `;
 
@@ -242,22 +242,38 @@
 
   const wrapper = document.createElement("div");
   wrapper.className = "message message-ai";
+  wrapper.style.justifyContent = "center";
+  wrapper.style.flexWrap = "wrap";
 
   prompts.forEach(p => {
     const button = document.createElement("button");
     button.textContent = p.description;
     button.style = `
-      background-color: #f6b500;
+      background-color: #ffcc00; /* Jaśniejszy żółty */
       border: none;
-      border-radius: 20px;
-      padding: 10px 16px;
-      margin: 5px;
+      border-radius: 25px;
+      padding: 12px 20px;
+      margin: 8px;
       cursor: pointer;
-      font-weight: bold;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: background-color 0.3s, transform 0.1s;
     `;
+
+    // Hover efekt
+    button.onmouseover = () => {
+      button.style.backgroundColor = "#f6b500";
+      button.style.transform = "scale(1.05)";
+    };
+    button.onmouseout = () => {
+      button.style.backgroundColor = "#ffcc00";
+      button.style.transform = "scale(1)";
+    };
+
     button.onclick = async () => {
       selectedPromptKey = p.prompt_key;
-      wrapper.remove(); // usuń bąbelki
+      wrapper.remove();
 
       const sessionRes = await supabase.auth.getSession();
       const session = sessionRes.data.session;
@@ -281,6 +297,7 @@
       console.log("🟢 ask_openai response:", data);
       appendMessage(data.reply, 'ai');
     };
+
     wrapper.appendChild(button);
   });
 
