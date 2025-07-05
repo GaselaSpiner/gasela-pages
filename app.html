@@ -230,7 +230,7 @@
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-    function showWelcomeMessage(prompts) {
+  function showWelcomeMessage(prompts) {
   const welcomeText = `
     <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;">
       <img src="Gaselas.png" alt="Gaselas" style="height: 50px;">
@@ -242,8 +242,10 @@
 
   const wrapper = document.createElement("div");
   wrapper.className = "message message-ai";
-  wrapper.style.justifyContent = "center";
-  wrapper.style.flexWrap = "wrap";
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
+  wrapper.style.alignItems = "center";
+  wrapper.style.width = "100%";
 
   prompts.forEach(p => {
     const button = document.createElement("button");
@@ -253,11 +255,13 @@
       border: none;
       border-radius: 25px;
       padding: 12px 20px;
-      margin: 8px;
+      margin: 8px 0;
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
       font-weight: 500;
       font-size: 0.95rem;
+      width: 90%;
+      max-width: 300px;
       transition: background-color 0.3s, transform 0.1s;
     `;
 
