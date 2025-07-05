@@ -229,10 +229,11 @@
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
-    function appendStaticBubble(text) {
+   function appendStaticBubble(text) {
   const wrapper = document.createElement("div");
-  wrapper.className = "message"; // nie message-user ani message-ai
-  wrapper.style.justifyContent = "center"; // 🚨 ustawia środek
+  wrapper.style.display = "flex";
+  wrapper.style.justifyContent = "center";
+  wrapper.style.width = "100%"; // żeby zajmował pełną szerokość kontenera i wycentrował zawartość
 
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
@@ -255,7 +256,6 @@
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
-
 
   function showWelcomeMessage(prompts) {
   const welcomeText = `
