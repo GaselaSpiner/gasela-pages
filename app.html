@@ -545,8 +545,8 @@ async function confirmDeleteAccount() {
 }
 
   </script>
-
- <!-- 🔥 Sidebar -->
+      
+<!-- 🔥 Sidebar -->
 <div id="sidebar" style="
   height: 100%;
   width: 0;
@@ -571,8 +571,8 @@ async function confirmDeleteAccount() {
     box-sizing: border-box;
     margin-top: 60px;
   ">
-    <!-- Górna część (treść przewijalna) -->
-    <div style="overflow-y: auto;">
+    <!-- Górna część (przewijalna, bez poziomego paska) -->
+    <div style="overflow-y: auto; overflow-x: hidden;">
       <h3 style="text-align: center;">⚙️ Moje konto</h3>
 
       <label for="promptSelectorSidebar" style="margin-top: 10px;">🎯 Wybierz temat:</label>
@@ -594,7 +594,7 @@ async function confirmDeleteAccount() {
       <button onclick="logout()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
     </div>
 
-    <!-- Dolna część (przycisk Usuń konto) -->
+    <!-- Dolna część (Usuń konto) -->
     <div style="margin-top: 20px;">
       <button onclick="deleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Usuń konto</button>
       <div id="delete-status" style="margin-top: 10px; font-weight: bold;"></div>
@@ -612,8 +612,6 @@ async function confirmDeleteAccount() {
     </div>
   </div>
 </div>
-
-
 
 
 </body>
