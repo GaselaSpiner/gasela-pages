@@ -384,6 +384,13 @@ async function initApp() {
 
   // Teraz załaduj sidebar i info o planie
   await checkSessionAndPlan();
+  // 🔥 Pobierz prompty i pokaż powitanie
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${jwt}` }
+  });
+  const { prompts } = await res.json();
+  showWelcomeMessage(prompts);
 }
 
    async function checkSessionAndPlan() {
@@ -464,13 +471,6 @@ async function initApp() {
     sidebar.style.width = "300px";
     await checkSessionAndPlan();
 
-// 🔥 Pobierz prompty i pokaż powitalny komunikat
-const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-  method: 'GET',
-  headers: { Authorization: `Bearer ${jwt}` }
-});
-const { prompts } = await res.json();
-showWelcomeMessage(prompts);
 }
 }
 
