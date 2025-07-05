@@ -231,13 +231,14 @@
 }
     function appendStaticBubble(text) {
   const wrapper = document.createElement("div");
-  wrapper.className = "message message-user"; // styl użytkownika
+  wrapper.className = "message"; // nie message-user ani message-ai
+  wrapper.style.justifyContent = "center"; // 🚨 ustawia środek
 
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
   bubble.textContent = text;
 
-  // Styl bąbelka jak tematy
+  // Styl bąbelka
   bubble.style.backgroundColor = "#ffcc00";
   bubble.style.border = "none";
   bubble.style.borderRadius = "25px";
@@ -248,8 +249,6 @@
   bubble.style.fontSize = "0.95rem";
   bubble.style.textAlign = "center";
   bubble.style.display = "inline-block";
-  bubble.style.maxWidth = "90%"; // dodatkowo, żeby na mobile nie przekraczał, ale nie musi być — możesz całkiem usunąć
-
   bubble.style.margin = "5px auto";
 
   wrapper.appendChild(bubble);
