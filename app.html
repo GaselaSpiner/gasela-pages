@@ -550,43 +550,47 @@ async function confirmDeleteAccount() {
   <div id="sidebar" style="height: 100%; width: 0; position: fixed; top: 0; right: 0; background-color: #f9f9f9; overflow-x: hidden; transition: 0.5s; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.2);">
     <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
     <div style="padding: 20px; text-align: center;">
-      <div style="padding: 20px; text-align: center; display: flex; flex-direction: column; height: 100%;">
+     <div style="padding: 20px; display: flex; flex-direction: column; align-items: center; height: 100%;">
   <h3>⚙️ Moje konto</h3>
-  <label for="promptSelectorSidebar" style="display: block; margin-top: 10px;">🎯 Wybierz temat:</label>
-  <select id="promptSelectorSidebar" style="width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+  <label for="promptSelectorSidebar" style="display: block; margin-top: 10px; text-align: center;">🎯 Wybierz temat:</label>
+  <select id="promptSelectorSidebar" style="width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 20px;">
     <option value="">— wybierz temat —</option>
   </select>
 
-  <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Dane konta będą tutaj</div>
+  <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
 
   <!-- Zmień hasło -->
-  <button onclick="togglePasswordForm()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🔒 Zmień hasło</button>
-  <div id="password-form" style="display: none; margin-top: 10px;">
-    <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
-    <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 80%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
-    <button onclick="changePassword()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Potwierdź zmianę</button>
+  <button onclick="togglePasswordForm()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🔒 Zmień hasło</button>
+  
+  <div id="password-form" style="display: none; width: 100%; margin-top: 10px; text-align: center;">
+    <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 90%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+    <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 90%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+    <button onclick="changePassword()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Potwierdź zmianę</button>
     <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
   </div>
 
   <!-- Wyloguj -->
-  <button onclick="logout()" style="width: 80%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
+  <button onclick="logout()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
 
-  <!-- Rozciągnij resztę, żeby Usuń konto był na dole -->
+  <!-- Rozpychacz -->
   <div style="flex-grow: 1;"></div>
 
   <!-- Usuń konto -->
-  <button onclick="deleteAccount()" style="width: 80%; margin-top: 10px; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer;">Usuń konto</button>
+  <button onclick="deleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Usuń konto</button>
   <div id="delete-status" style="margin-top: 10px; font-weight: bold;"></div>
-  <div id="confirm-delete" style="margin-top: 10px; display: none;">
+
+  <div id="confirm-delete" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
     <p style="color: red;">⚠️ Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć!</p>
-    <button onclick="showPasswordConfirm()" style="width: 80%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">✅ Tak, usuń</button>
+    <button onclick="showPasswordConfirm()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">✅ Tak, usuń</button>
   </div>
-  <div id="password-confirm" style="margin-top: 10px; display: none;">
+
+  <div id="password-confirm" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
     <p>Wpisz swoje hasło, aby potwierdzić usunięcie konta:</p>
-    <input type="password" id="confirm-password" placeholder="Hasło" style="width: 80%; padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc;">
-    <button onclick="confirmDeleteAccount()" style="background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; margin-top: 5px; font-weight: bold; cursor: pointer;">Potwierdź</button>
+    <input type="password" id="confirm-password" placeholder="Hasło" style="width: 90%; padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc;">
+    <button onclick="confirmDeleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; margin-top: 5px; font-weight: bold; cursor: pointer;">Potwierdź</button>
   </div>
 </div>
+
 
 </body>
 </html>
