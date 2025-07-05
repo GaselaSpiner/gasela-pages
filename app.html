@@ -65,19 +65,10 @@
       justify-content: flex-end;
     }
     .message-user .message-bubble {
-  background-color: #f6b500;
-  color: #fff;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 25px;
-  padding: 12px 20px;
-  max-width: 80%;
-  word-break: break-word;
-  text-align: left;
-  margin-left: auto;
-}
-
+      background-color: #e5e5e5;
+      margin-left: auto;
+      text-align: right;
+    }
     .message-ai {
       justify-content: flex-start;
     }
@@ -238,33 +229,6 @@
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
-   function appendStaticBubble(text) {
-  const wrapper = document.createElement("div");
-  wrapper.style.display = "flex";
-  wrapper.style.justifyContent = "center";
-  wrapper.style.width = "100%"; // żeby zajmował pełną szerokość kontenera i wycentrował zawartość
-
-  const bubble = document.createElement("div");
-  bubble.className = "message-bubble";
-  bubble.textContent = text;
-
-  // Styl bąbelka
-  bubble.style.backgroundColor = "#ffcc00";
-  bubble.style.border = "none";
-  bubble.style.borderRadius = "25px";
-  bubble.style.padding = "12px 20px";
-  bubble.style.cursor = "default";
-  bubble.style.fontFamily = "'Montserrat', sans-serif";
-  bubble.style.fontWeight = "500";
-  bubble.style.fontSize = "0.95rem";
-  bubble.style.textAlign = "center";
-  bubble.style.display = "inline-block";
-  bubble.style.margin = "5px auto";
-
-  wrapper.appendChild(bubble);
-  messagesDiv.appendChild(wrapper);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
 
   function showWelcomeMessage(prompts) {
   const welcomeText = `
@@ -323,11 +287,7 @@ if (window.innerWidth >= 768) {
 
     button.onclick = async () => {
       selectedPromptKey = p.prompt_key;
-      wrapper.remove(); // usuń bąbelki wyboru
-      appendStaticBubble(p.description); // pokaż statyczny bąbelek z wybranym tematem
-      appendMessage("🚀 Świetnie! Możesz teraz zadać swoje pierwsze pytanie, a Gasela Spiner już czeka!", 'ai');
-
-
+      wrapper.remove();
 
       const sessionRes = await supabase.auth.getSession();
       const session = sessionRes.data.session;
@@ -337,7 +297,19 @@ if (window.innerWidth >= 768) {
       }
       const jwt = session.access_token;
 
-    
+      console.log("➡️ Wywołanie ask_openai (auto start po wyborze)...");
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`
+        },
+        body: JSON.stringify({ prompt_key: selectedPromptKey, user_input: "" })
+      });
+
+      const data = await res.json();
+      console.log("🟢 ask_openai response:", data);
+      appendMessage(data.reply, 'ai');
     };
 
     wrapper.appendChild(button);
