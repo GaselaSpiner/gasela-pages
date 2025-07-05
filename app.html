@@ -254,18 +254,26 @@
     const button = document.createElement("button");
     button.textContent = p.description;
     button.style = `
-      background-color: #ffcc00;
-      border: none;
-      border-radius: 25px;
-      padding: 12px 20px;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 500;
-      font-size: 0.95rem;
-      white-space: nowrap; /* 🚨 kluczowe: jeden wiersz, jeśli się mieści */
-      transition: background-color 0.3s, transform 0.1s;
-      max-width: 100%;
-    `;
+  background-color: #ffcc00;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.3s, transform 0.1s;
+  max-width: 100%;
+  text-align: center;
+`;
+
+// ⬇️ Warunek na szerokość ekranu
+if (window.innerWidth >= 768) {
+  button.style.whiteSpace = "nowrap"; // Desktop — jedna linia
+} else {
+  button.style.whiteSpace = "normal"; // Mobile — zawija się
+}
+
 
     // Hover efekt
     button.onmouseover = () => {
