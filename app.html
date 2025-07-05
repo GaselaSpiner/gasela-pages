@@ -590,63 +590,62 @@ async function confirmDeleteAccount() {
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
 
       <button onclick="togglePasswordForm()" style="
-        width: 90%;
-        background-color: #f6b500;
-        border: none;
-        border-radius: 6px;
-        padding: 12px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 10px;
-        margin: 0 auto;
-        display: block;
-      ">🔒 Zmień hasło</button>
+  width: 90%;
+  background-color: #f6b500;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  margin: 0 auto;
+  display: block;
+">🔒 Zmień hasło</button>
 
-      <div id="password-form" style="display: none; width: 100%; margin-top: 10px; text-align: center;">
-        <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="
-          width: 90%;
-          padding: 10px;
-          margin-bottom: 10px;
-          border-radius: 6px;
-          border: 1px solid #ccc;
-          display: block;
-          margin: 10px auto;
-        ">
-        <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="
-          width: 90%;
-          padding: 10px;
-          margin-bottom: 10px;
-          border-radius: 6px;
-          border: 1px solid #ccc;
-          display: block;
-          margin: 10px auto;
-        ">
-        <button onclick="changePassword()" style="
-          width: 90%;
-          background-color: #f6b500;
-          border: none;
-          border-radius: 6px;
-          padding: 12px;
-          font-weight: bold;
-          cursor: pointer;
-          margin: 0 auto;
-          display: block;
-        ">Potwierdź zmianę</button>
-        <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
-      </div>
+<div id="password-form" style="display: none; width: 100%; margin-top: 10px; text-align: center;">
+  <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    display: block;
+    margin: 10px auto;
+  ">
+  <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    display: block;
+    margin: 10px auto;
+  ">
+  <button onclick="changePassword()" style="
+    width: 90%;
+    background-color: #f6b500;
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 auto;
+    display: block;
+  ">Potwierdź zmianę</button>
+  <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+</div>
 
-      <button onclick="logout()" style="
-        width: 90%;
-        background-color: #f6b500;
-        border: none;
-        border-radius: 6px;
-        padding: 12px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 10px;
-        margin: 0 auto;
-        display: block;
-      ">Wyloguj się</button>
+<button onclick="logout()" style="
+  width: 90%;
+  background-color: #f6b500;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px auto 0 auto; /* <<< KLUCZOWA ZMIANA: większy odstęp u góry */
+  display: block;
+">Wyloguj się</button>
     </div>
 
     <div style="margin-top: 20px;">
