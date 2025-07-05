@@ -243,26 +243,28 @@
   const wrapper = document.createElement("div");
   wrapper.className = "message message-ai";
   wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "column";
+  wrapper.style.flexDirection = "row";
+  wrapper.style.flexWrap = "wrap";
+  wrapper.style.justifyContent = "center";
   wrapper.style.alignItems = "center";
+  wrapper.style.gap = "10px";
   wrapper.style.width = "100%";
 
   prompts.forEach(p => {
     const button = document.createElement("button");
     button.textContent = p.description;
     button.style = `
-      background-color: #ffcc00; /* Jaśniejszy żółty */
+      background-color: #ffcc00;
       border: none;
       border-radius: 25px;
       padding: 12px 20px;
-      margin: 8px 0;
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
       font-weight: 500;
       font-size: 0.95rem;
-      width: 90%;
-      max-width: 300px;
+      white-space: nowrap; /* 🚨 kluczowe: jeden wiersz, jeśli się mieści */
       transition: background-color 0.3s, transform 0.1s;
+      max-width: 100%;
     `;
 
     // Hover efekt
