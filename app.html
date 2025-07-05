@@ -546,7 +546,7 @@ async function confirmDeleteAccount() {
 
   </script>
 
-  <!-- 🔥 Sidebar -->
+ <!-- 🔥 Sidebar -->
 <div id="sidebar" style="
   height: 100%;
   width: 0;
@@ -563,24 +563,40 @@ async function confirmDeleteAccount() {
   <a href="javascript:void(0)" onclick="closeSidebar()" style="position: absolute; top: 20px; right: 25px; font-size: 36px; text-decoration: none; color: #000;">&times;</a>
 
   <div style="
-    padding: 20px; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; 
-    height: calc(100vh - 20px); 
-    overflow-y: auto; 
-    box-sizing: border-box; 
-    margin-top: 60px;">
-    
-    <div>
-      <!-- Główna zawartość sidebaru -->
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    box-sizing: border-box;
+    margin-top: 60px;
+  ">
+    <!-- Górna część (treść przewijalna) -->
+    <div style="overflow-y: auto;">
       <h3 style="text-align: center;">⚙️ Moje konto</h3>
-      <!-- ...reszta przycisków... -->
+
+      <label for="promptSelectorSidebar" style="margin-top: 10px;">🎯 Wybierz temat:</label>
+      <select id="promptSelectorSidebar" style="width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 20px;">
+        <option value="">— wybierz temat —</option>
+      </select>
+
+      <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
+
+      <button onclick="togglePasswordForm()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🔒 Zmień hasło</button>
+
+      <div id="password-form" style="display: none; width: 100%; margin-top: 10px; text-align: center;">
+        <input type="password" id="new-password" placeholder="Nowe hasło (min. 6 znaków)" style="width: 90%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input type="password" id="repeat-password" placeholder="Powtórz nowe hasło" style="width: 90%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <button onclick="changePassword()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Potwierdź zmianę</button>
+        <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
+      </div>
+
+      <button onclick="logout()" style="width: 90%; background-color: #f6b500; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Wyloguj się</button>
     </div>
 
-    <div>
-      <!-- Przyklejony przycisk Usuń konto -->
-      <button onclick="deleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; margin-top: 10px;">Usuń konto</button>
+    <!-- Dolna część (przycisk Usuń konto) -->
+    <div style="margin-top: 20px;">
+      <button onclick="deleteAccount()" style="width: 90%; background-color: #ff4d4d; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer;">Usuń konto</button>
       <div id="delete-status" style="margin-top: 10px; font-weight: bold;"></div>
 
       <div id="confirm-delete" style="margin-top: 10px; display: none; width: 100%; text-align: center;">
@@ -596,6 +612,8 @@ async function confirmDeleteAccount() {
     </div>
   </div>
 </div>
+
+
 
 
 </body>
