@@ -223,28 +223,6 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    async function fetchPrompts(jwt) {
-  const promptSelector = document.getElementById("promptSelectorSidebar");
-  if (!promptSelector) {
-    console.log("⚠️ promptSelectorSidebar not found (probably sidebar not yet open)");
-    return;
-  }
-
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${jwt}` }
-  });
-  const { prompts } = await res.json();
-  promptSelector.innerHTML = `<option value="">— wybierz temat —</option>`;
-  prompts.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.prompt_key;
-    opt.textContent = p.description;
-    promptSelector.appendChild(opt);
-  });
-}
-
-
    sendButton.addEventListener("click", async () => {
   const promptSelector = document.getElementById("promptSelectorSidebar");
   if (!promptSelector) {
@@ -252,12 +230,13 @@
     return;
   }
 
-  const message = userInput.value.trim();
-  const promptKey = promptSelector.value;
-  if (!message || !promptKey) {
-    alert("Wpisz wiadomość i wybierz temat!");
-    return;
-  }
+ const message = userInput.value.trim();
+if (!message) {
+  alert("Wpisz wiadomość!");
+  return;
+}
+
+const promptKey = ""; // tymczasowo pusty, później będzie podawany z przycisku
   
   appendMessage(message, 'user');
   userInput.value = "";
@@ -360,9 +339,6 @@ async function initApp() {
   const jwt = session.access_token;
   const userId = session.user.id;
   console.log("✅ user_id:", userId);
-
-  // Pobierz prompty
-  await fetchPrompts(jwt);
 
   // Pobierz subskrypcję
   const { data: subNow, error: subError } = await supabase
