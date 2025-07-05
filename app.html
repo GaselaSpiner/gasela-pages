@@ -47,10 +47,12 @@
 
    }
     .message {
-      display: flex;
-      margin: 6px 0;
-      width: 100%;
-    }
+  display: flex;
+  justify-content: flex-start; /* domyślnie bąbel AI z lewej */
+  align-items: flex-start; /* <<< DODAJ TO */
+  margin: 6px 0;
+  width: 100%;
+}
     .message-bubble {
   max-width: max-content;
   padding: 10px 14px;
