@@ -229,6 +229,32 @@
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+    function appendStaticBubble(text) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "message message-user"; // styl użytkownika
+
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+  bubble.textContent = text;
+
+  // Styl bąbelka jak tematy
+  bubble.style.backgroundColor = "#ffcc00";
+  bubble.style.border = "none";
+  bubble.style.borderRadius = "25px";
+  bubble.style.padding = "12px 20px";
+  bubble.style.cursor = "default";
+  bubble.style.fontFamily = "'Montserrat', sans-serif";
+  bubble.style.fontWeight = "500";
+  bubble.style.fontSize = "0.95rem";
+  bubble.style.textAlign = "center";
+  bubble.style.maxWidth = "100%";
+  bubble.style.margin = "5px auto";
+
+  wrapper.appendChild(bubble);
+  messagesDiv.appendChild(wrapper);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
 
   function showWelcomeMessage(prompts) {
   const welcomeText = `
