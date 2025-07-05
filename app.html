@@ -287,7 +287,9 @@ if (window.innerWidth >= 768) {
 
     button.onclick = async () => {
       selectedPromptKey = p.prompt_key;
-      wrapper.remove();
+      wrapper.remove(); // usuń bąbelki wyboru
+      appendStaticBubble(p.description); // pokaż statyczny bąbelek z wybranym tematem
+
 
       const sessionRes = await supabase.auth.getSession();
       const session = sessionRes.data.session;
