@@ -198,7 +198,8 @@
       'https://lmussgaiutaldicolyba.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
     );
-
+    let selectedPromptKey = "";
+    
     const welcome = document.getElementById("welcome");
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("userInput");
@@ -223,21 +224,80 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-   sendButton.addEventListener("click", async () => {
-  const promptSelector = document.getElementById("promptSelectorSidebar");
-  if (!promptSelector) {
-    alert("Sidebar nie jest jeszcze otwarty lub brak selektora!");
-    return;
-  }
+    function showWelcomeMessage(prompts) {
+  const welcomeText = `
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="Gaselas.png" alt="Gaselas" style="height: 40px;">
+      <strong>Witaj w czacie Gasela Spiner! Wybierz temat, który Cię interesuje:</strong>
+    </div>
+  `;
 
+  appendMessage(welcomeText, 'ai');
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message message-ai";
+
+  prompts.forEach(p => {
+    const button = document.createElement("button");
+    button.textContent = p.description;
+    button.style = `
+      background-color: #f6b500;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      margin: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    `;
+    button.onclick = async () => {
+      selectedPromptKey = p.prompt_key;
+      wrapper.remove(); // usuń bąbelki
+
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data.session;
+      if (!session) {
+        appendMessage("❌ Brak aktywnej sesji. Zaloguj się ponownie.", 'ai');
+        return;
+      }
+      const jwt = session.access_token;
+
+      console.log("➡️ Wywołanie ask_openai (auto start po wyborze)...");
+      const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`
+        },
+        body: JSON.stringify({ prompt_key: selectedPromptKey, user_input: "" })
+      });
+
+      const data = await res.json();
+      console.log("🟢 ask_openai response:", data);
+      appendMessage(data.reply, 'ai');
+    };
+    wrapper.appendChild(button);
+  });
+
+  messagesDiv.appendChild(wrapper);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+    
+   sendButton.addEventListener("click", async () => {
+  
  const message = userInput.value.trim();
+     
 if (!message) {
   alert("Wpisz wiadomość!");
   return;
 }
+const promptKey = selectedPromptKey;
+if (!promptKey) {
+  alert("Najpierw wybierz temat!");
+  return;
+}
 
-const promptKey = ""; // tymczasowo pusty, później będzie podawany z przycisku
-  
+     
   appendMessage(message, 'user');
   userInput.value = "";
 
@@ -325,6 +385,14 @@ async function initApp() {
   // Teraz załaduj sidebar i info o planie
   await checkSessionAndPlan();
 }
+// 🔥 Pobierz prompty i pokaż powitalny komunikat
+const jwt = session.access_token;
+const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
+  method: 'GET',
+  headers: { Authorization: `Bearer ${jwt}` }
+});
+const { prompts } = await res.json();
+showWelcomeMessage(prompts);
 
 
    async function checkSessionAndPlan() {
