@@ -283,17 +283,19 @@ function saveRecentTopic(topic) {
 
     const sendButton = document.getElementById("sendButton");
     
- function appendMessage(text, sender, isHtml = false) {
+function appendMessage(text, sender, isHtml = false) {
   const wrapper = document.createElement("div");
   wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
 
-  // 💥 Dodaj to
-  if (sender === 'ai' && text.includes("Hej! Ostatnio skończyliśmy")) {
-    wrapper.style.justifyContent = "center";
-  }
-
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
+
+  if (sender === 'ai' && text.includes("Hej! Ostatnio skończyliśmy")) {
+    wrapper.style.justifyContent = "center";
+    bubble.style.margin = "0 auto";
+    bubble.style.textAlign = "center";
+    bubble.style.width = "100%"; // 💥 opcjonalnie — w razie potrzeby
+  }
 
   if (isHtml) {
     bubble.innerHTML = text;
@@ -307,6 +309,7 @@ function saveRecentTopic(topic) {
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
 
     function appendStaticBubble(text) {
   const wrapper = document.createElement("div");
