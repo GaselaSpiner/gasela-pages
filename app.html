@@ -210,7 +210,11 @@ function saveRecentTopic(topic) {
   recent.unshift(topic);
   recent = recent.slice(0, 5);
   localStorage.setItem("recentTopics", JSON.stringify(recent));
+
+  // 💥 Zapamiętaj aktywny temat
+  localStorage.setItem("activeTopic", JSON.stringify(topic));
 }
+
   </script>
 </head>
 <body>
@@ -416,7 +420,6 @@ async function initApp() {
   const jwt = session.access_token;
   const userId = session.user.id;
 
-  // Sprawdź, czy użytkownik ma subskrypcję
   const { data: subNow } = await supabase
     .from('subscriptions')
     .select('plan_name')
@@ -436,18 +439,25 @@ async function initApp() {
     console.log("✅ aktywuj_plan zakończone");
   }
 
-  // Teraz załaduj sidebar i info o planie
   await checkSessionAndPlan();
-  // 🔥 Pobierz prompty i pokaż powitanie
+
   const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
     method: 'GET',
     headers: { Authorization: `Bearer ${jwt}` }
   });
   const { prompts } = await res.json();
   showWelcomeMessage(prompts);
-  const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
-renderTopics(prompts, recentTopics);
 
+  const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
+  renderTopics(prompts, recentTopics);
+
+  // 💥 Przywróć aktywny temat
+  const activeTopic = JSON.parse(localStorage.getItem("activeTopic"));
+  if (activeTopic) {
+    selectedPromptKey = activeTopic.prompt_key;
+    appendStaticBubble(activeTopic.description);
+    appendMessage("🚀 Super! Przywrócono ostatni wybrany temat. Możesz od razu pisać!", 'ai');
+  }
 }
 
    async function checkSessionAndPlan() {
