@@ -456,7 +456,7 @@ async function initApp() {
   if (activeTopic) {
     selectedPromptKey = activeTopic.prompt_key;
     appendStaticBubble(activeTopic.description);
-    appendMessage("🚀 Hej! Ostatnio skończyliśmy na tym temacie. Co dalej?", 'ai');
+    appendMessage('<div style="text-align:center;">Hej! Ostatnio skończyliśmy na tym temacie. Co dalej?</div>', 'ai', true);
   }
 }
 
