@@ -157,7 +157,8 @@
       margin: 10px 0;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+ <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
 function openTopicsSidebar() {
   document.getElementById("topics-sidebar").style.width = "300px";
 }
@@ -210,8 +211,6 @@ function saveRecentTopic(topic) {
   recent = recent.slice(0, 5);
   localStorage.setItem("recentTopics", JSON.stringify(recent));
 }
-
-    
   </script>
 </head>
 <body>
