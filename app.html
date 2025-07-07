@@ -456,7 +456,14 @@ async function initApp() {
   if (activeTopic) {
     selectedPromptKey = activeTopic.prompt_key;
     appendStaticBubble(activeTopic.description);
-    appendMessage('<div style="text-align:center;">Hej! Ostatnio skończyliśmy na tym temacie. Co dalej?</div>', 'ai', true);
+    appendMessage(`
+  <div style="display: flex; justify-content: center; width: 100%;">
+    <div style="max-width: 90%; text-align: center;">
+      Hej! Ostatnio skończyliśmy na tym temacie. Co dalej?
+    </div>
+  </div>
+`, 'ai', true);
+
   }
 }
 
