@@ -283,24 +283,31 @@ function saveRecentTopic(topic) {
 
     const sendButton = document.getElementById("sendButton");
     
-  function appendMessage(text, sender, isHtml = false) {
+ function appendMessage(text, sender, isHtml = false) {
   const wrapper = document.createElement("div");
   wrapper.className = `message ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+
+  // 💥 Dodaj to
+  if (sender === 'ai' && text.includes("Hej! Ostatnio skończyliśmy")) {
+    wrapper.style.justifyContent = "center";
+  }
+
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
 
   if (isHtml) {
-    bubble.innerHTML = text; // Wstawiamy surowy HTML
+    bubble.innerHTML = text;
   } else if (sender === 'ai') {
-    bubble.innerHTML = marked.parse(text); // Parsujemy markdown
+    bubble.innerHTML = marked.parse(text);
   } else {
-    bubble.textContent = text; // Zwykły tekst użytkownika
+    bubble.textContent = text;
   }
 
   wrapper.appendChild(bubble);
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
     function appendStaticBubble(text) {
   const wrapper = document.createElement("div");
   wrapper.style.display = "flex";
