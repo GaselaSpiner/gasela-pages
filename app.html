@@ -157,7 +157,62 @@
       margin: 10px 0;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+function openTopicsSidebar() {
+  document.getElementById("topics-sidebar").style.width = "300px";
+}
+
+function closeTopicsSidebar() {
+  document.getElementById("topics-sidebar").style.width = "0";
+}
+
+function renderTopics(topics, recentTopics) {
+  const listDiv = document.getElementById("topics-list");
+  listDiv.innerHTML = "";
+  topics.forEach(t => {
+    const btn = document.createElement("button");
+    btn.textContent = t.description;
+    btn.style = `
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+    `;
+    btn.onclick = () => {
+      selectedPromptKey = t.prompt_key;
+      appendStaticBubble(t.description);
+      appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
+      closeTopicsSidebar();
+      saveRecentTopic(t);
+    };
+    listDiv.appendChild(btn);
+  });
+
+  const recentDiv = document.getElementById("recent-topics-list");
+  recentDiv.innerHTML = "";
+  recentTopics.forEach(rt => {
+    const item = document.createElement("div");
+    item.textContent = rt.description;
+    item.style = "font-size: 0.9rem; color: #555; text-align: center;";
+    recentDiv.appendChild(item);
+  });
+}
+
+function saveRecentTopic(topic) {
+  let recent = JSON.parse(localStorage.getItem("recentTopics")) || [];
+  recent = recent.filter(t => t.prompt_key !== topic.prompt_key);
+  recent.unshift(topic);
+  recent = recent.slice(0, 5);
+  localStorage.setItem("recentTopics", JSON.stringify(recent));
+}
+
+    
+  </script>
 </head>
 <body>
   <div id="container">
@@ -180,7 +235,7 @@
 ">
 
   <!-- Logo Gaselas -->
-  <img src="Gaselas.png" alt="Gaselas" style="height: 40px;">
+  <img src="Gaselas.png" alt="Gaselas" style="height: 40px; cursor: pointer;" onclick="openTopicsSidebar()">
 
   <!-- Ikona trzech kropek -->
   <div id="menu-icon" onclick="toggleSidebar()" style="
@@ -275,75 +330,13 @@
   const welcomeText = `
     <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;">
       <img src="Gaselas.png" alt="Gaselas" style="height: 50px;">
-      <strong style="font-size: 1.1rem; font-weight: 600;">Witaj w czacie Gasela Spiner! Wybierz temat, który Cię interesuje:</strong>
+      <strong style="font-size: 1.1rem; font-weight: 600;">Witaj w czacie Gasela Spiner! Kliknij logo w lewym rogu i wybierz temat rozmowy</strong>
     </div>
   `;
 
   appendMessage(welcomeText, 'ai', true);
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "message message-ai";
-  wrapper.style.display = "flex";
-  wrapper.style.flexDirection = "row";
-  wrapper.style.flexWrap = "wrap";
-  wrapper.style.justifyContent = "center";
-  wrapper.style.alignItems = "center";
-  wrapper.style.gap = "10px";
-  wrapper.style.width = "100%";
-
-  prompts.forEach(p => {
-    const button = document.createElement("button");
-    button.textContent = p.description;
-    button.style = `
-  background-color: #ffcc00;
-  border: none;
-  border-radius: 25px;
-  padding: 12px 20px;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: background-color 0.3s, transform 0.1s;
-  max-width: 100%;
-  text-align: center;
-`;
-
-// ⬇️ Warunek na szerokość ekranu
-if (window.innerWidth >= 768) {
-  button.style.whiteSpace = "nowrap"; // Desktop — jedna linia
-} else {
-  button.style.whiteSpace = "normal"; // Mobile — zawija się
-}
-
-
-    // Hover efekt
-    button.onmouseover = () => {
-      button.style.backgroundColor = "#f6b500";
-      button.style.transform = "scale(1.05)";
-    };
-    button.onmouseout = () => {
-      button.style.backgroundColor = "#ffcc00";
-      button.style.transform = "scale(1)";
-    };
-
-   button.onclick = async () => {
-  selectedPromptKey = p.prompt_key;
-  wrapper.remove();
-
-  // Dodaj statyczny bąbelek z wybranym tematem
-  appendStaticBubble(p.description);
-
-  // Komunikat zachęcający
-  appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
-};
-
-    wrapper.appendChild(button);
-  });
-
-  messagesDiv.appendChild(wrapper);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
+ 
     
    sendButton.addEventListener("click", async () => {
   
@@ -453,6 +446,9 @@ async function initApp() {
   });
   const { prompts } = await res.json();
   showWelcomeMessage(prompts);
+  const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
+renderTopics(prompts, recentTopics);
+
 }
 
    async function checkSessionAndPlan() {
@@ -651,7 +647,7 @@ async function confirmDeleteAccount() {
 
   </script>
       
-<!-- 🔥 Sidebar -->
+<!-- 🔥 Sidebar prawy -->
 <div id="sidebar" style="
   height: 100%;
   width: 0;
@@ -797,6 +793,35 @@ async function confirmDeleteAccount() {
       </div>
     </div>
   </div>
+</div>
+
+<div id="topics-sidebar" style="
+  height: 100%;
+  width: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+  transition: 0.5s;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  padding-top: 60px;
+">
+  <a href="javascript:void(0)" onclick="closeTopicsSidebar()" style="
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 36px;
+    text-decoration: none;
+    color: #000;">&times;</a>
+
+  <h3 style="text-align: center; margin-top: 20px;">📄 Tematy</h3>
+  <div id="topics-list" style="padding: 20px; display: flex; flex-direction: column; gap: 10px;"></div>
+
+  <h4 style="text-align: center; margin-top: 20px;">🕑 Ostatnie</h4>
+  <div id="recent-topics-list" style="padding: 20px; display: flex; flex-direction: column; gap: 10px;"></div>
 </div>
 
 </body>
