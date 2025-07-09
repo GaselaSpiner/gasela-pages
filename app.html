@@ -270,6 +270,11 @@ function saveRecentTopic(topic) {
   <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
   <button id="sendButton">➤</button>
 </div>
+<div style="display: flex; gap: 8px; margin-top: 10px; max-width: 700px; width: 100%;">
+  <button onclick="prevStep()" style="flex:1; padding: 8px;">⬅️ Poprzedni krok</button>
+  <button onclick="stayStep()" style="flex:1; padding: 8px;">🔄 Zostań</button>
+  <button onclick="nextStep()" style="flex:1; padding: 8px;">➡️ Następny krok</button>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -278,6 +283,8 @@ function saveRecentTopic(topic) {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
     );
     let activeTopicId = null;
+    let currentStepNumber = 1;
+
 
     const welcome = document.getElementById("welcome");
     const messagesDiv = document.getElementById("messages");
@@ -583,6 +590,23 @@ renderTopics(topics, recentTopics);
     <strong>Email:</strong> ${session.user.email}<br>
     ${planInfo}
   `;
+}
+function nextStep() {
+  currentStepNumber++;
+  appendMessage(`➡️ Przechodzisz do kroku ${currentStepNumber}.`, 'ai');
+}
+
+function prevStep() {
+  if (currentStepNumber > 1) {
+    currentStepNumber--;
+    appendMessage(`⬅️ Cofasz się do kroku ${currentStepNumber}.`, 'ai');
+  } else {
+    appendMessage("❗ Jesteś już na pierwszym kroku.", 'ai');
+  }
+}
+
+function stayStep() {
+  appendMessage(`✅ Zostajesz na kroku ${currentStepNumber}.`, 'ai');
 }
 
 
