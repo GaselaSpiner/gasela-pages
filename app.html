@@ -464,6 +464,7 @@ const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/g
 });
 const { topics } = await res.json();
 
+console.log("🔥 Topics loaded:", topics);
 // 👇 zmień na topics zamiast prompts
 showWelcomeMessage(topics);
 
