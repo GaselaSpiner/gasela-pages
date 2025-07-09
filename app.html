@@ -188,13 +188,15 @@ function closeTopicsSidebar() {
       text-align: left;
       transition: background-color 0.3s, transform 0.1s;
     `;
-    btn.onclick = () => {
-      selectedPromptKey = t.prompt_key;
-      appendStaticBubble(t.name);
-      appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
-      closeTopicsSidebar();
-      saveRecentTopic(t);
-    };
+   btn.onclick = () => {
+  selectedPromptKey = t.prompt_key;
+  activeTopicId = t.id; // ✅ dodane
+  appendStaticBubble(t.name);
+  appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
+  closeTopicsSidebar();
+  saveRecentTopic(t);
+};
+
     listDiv.appendChild(btn);
   });
 
@@ -276,7 +278,8 @@ function saveRecentTopic(topic) {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
     );
     let selectedPromptKey = "";
-    
+    let activeTopicId = null;
+
     const welcome = document.getElementById("welcome");
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("userInput");
@@ -313,6 +316,35 @@ function appendMessage(text, sender, isHtml = false) {
   wrapper.appendChild(bubble);
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+async function saveHistory(topicId, message, sender) {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak sesji, nie zapisuję historii");
+    return;
+  }
+  const jwt = session.access_token;
+
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/save_history', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      topic_id: topicId,
+      message: message,
+      sender: sender
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    console.log("⚠️ save_history error:", data.error);
+  } else {
+    console.log("✅ Historia zapisana");
+  }
 }
 
 
@@ -369,9 +401,15 @@ if (!promptKey) {
   alert("Najpierw wybierz temat!");
   return;
 }
+if (!activeTopicId) {
+  alert("Najpierw wybierz temat!");
+  return;
+}
 
-     
-  appendMessage(message, 'user');
+
+  appendMessage(message, 'user');   
+  await saveHistory(activeTopicId, message, "user");
+
   userInput.value = "";
 
   const sessionRes = await supabase.auth.getSession();
@@ -419,6 +457,8 @@ if (!promptKey) {
   const data = await res.json();
   console.log("🟢 ask_openai response:", data);
   appendMessage(data.reply, 'ai');
+  await saveHistory(activeTopicId, data.reply, "ai");
+
 
   // ✅ Odśwież limit w sidebarze
   await checkSessionAndPlan();
