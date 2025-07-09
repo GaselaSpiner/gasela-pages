@@ -189,7 +189,7 @@ function closeTopicsSidebar() {
       transition: background-color 0.3s, transform 0.1s;
     `;
    btn.onclick = () => {
-  selectedPromptKey = t.prompt_key;
+  console.log("Wybrany temat:", t);
   activeTopicId = t.id; // ✅ dodane
   appendStaticBubble(t.name);
   appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
@@ -213,7 +213,7 @@ function closeTopicsSidebar() {
 
 function saveRecentTopic(topic) {
   let recent = JSON.parse(localStorage.getItem("recentTopics")) || [];
-  recent = recent.filter(t => t.prompt_key !== topic.prompt_key);
+  recent = recent.filter(t => t.id !== topic.id);
   recent.unshift(topic);
   recent = recent.slice(0, 5);
   localStorage.setItem("recentTopics", JSON.stringify(recent));
@@ -277,7 +277,6 @@ function saveRecentTopic(topic) {
       'https://lmussgaiutaldicolyba.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
     );
-    let selectedPromptKey = "";
     let activeTopicId = null;
 
     const welcome = document.getElementById("welcome");
@@ -396,11 +395,7 @@ if (!message) {
   alert("Wpisz wiadomość!");
   return;
 }
-const promptKey = selectedPromptKey;
-if (!promptKey) {
-  alert("Najpierw wybierz temat!");
-  return;
-}
+
 if (!activeTopicId) {
   alert("Najpierw wybierz temat!");
   return;
@@ -451,7 +446,7 @@ if (!activeTopicId) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${jwt}`
     },
-    body: JSON.stringify({ prompt_key: promptKey, user_input: message })
+    body: JSON.stringify({ topic_id: activeTopicId, user_input: message })
   });
 
   const data = await res.json();
