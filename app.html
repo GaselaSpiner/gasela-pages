@@ -451,15 +451,17 @@ async function initApp() {
 
   await checkSessionAndPlan();
 
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_prompts_by_plan', {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${jwt}` }
-  });
-  const { prompts } = await res.json();
-  showWelcomeMessage(prompts);
+ const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_topics_by_plan', {
+  method: 'GET',
+  headers: { Authorization: `Bearer ${jwt}` }
+});
+const { topics } = await res.json();
 
-  const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
-  renderTopics(prompts, recentTopics);
+showWelcomeMessage(topics);
+
+const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
+renderTopics(topics, recentTopics);
+
 
   // 💥 Przywróć aktywny temat
   const activeTopic = JSON.parse(localStorage.getItem("activeTopic"));
