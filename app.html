@@ -172,7 +172,7 @@ function renderTopics(topics, recentTopics) {
   listDiv.innerHTML = "";
   topics.forEach(t => {
     const btn = document.createElement("button");
-    btn.textContent = t.description;
+    btn.textContent = t.name;
     btn.style = `
       background-color: #ffcc00;
       border: none;
