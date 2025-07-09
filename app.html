@@ -167,26 +167,30 @@ function closeTopicsSidebar() {
   document.getElementById("topics-sidebar").style.width = "0";
 }
 
-function renderTopics(topics, recentTopics) {
+  function renderTopics(topics, recentTopics) {
   const listDiv = document.getElementById("topics-list");
   listDiv.innerHTML = "";
+
   topics.forEach(t => {
     const btn = document.createElement("button");
-    btn.textContent = t.name;
+    btn.innerHTML = `
+      <div style="font-weight: bold;">${t.name}</div>
+      <div style="font-size: 0.85rem; color: #444;">${t.description}</div>
+    `;
     btn.style = `
       background-color: #ffcc00;
       border: none;
-      border-radius: 25px;
+      border-radius: 20px;
       padding: 12px 20px;
       font-family: 'Montserrat', sans-serif;
-      font-weight: 500;
       font-size: 0.95rem;
       cursor: pointer;
+      text-align: left;
       transition: background-color 0.3s, transform 0.1s;
     `;
     btn.onclick = () => {
       selectedPromptKey = t.prompt_key;
-      appendStaticBubble(t.description);
+      appendStaticBubble(t.name);
       appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
       closeTopicsSidebar();
       saveRecentTopic(t);
@@ -198,11 +202,12 @@ function renderTopics(topics, recentTopics) {
   recentDiv.innerHTML = "";
   recentTopics.forEach(rt => {
     const item = document.createElement("div");
-    item.textContent = rt.description;
+    item.textContent = rt.name;
     item.style = "font-size: 0.9rem; color: #555; text-align: center;";
     recentDiv.appendChild(item);
   });
 }
+
 
 function saveRecentTopic(topic) {
   let recent = JSON.parse(localStorage.getItem("recentTopics")) || [];
