@@ -458,17 +458,18 @@ async function initApp() {
     localStorage.removeItem("activeTopic");
   }
 
-  // Pobierz tematy z nowej funkcji topics
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_topics_by_plan', {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${jwt}` }
-  });
-  const { topics } = await res.json();
+const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_topics_by_plan', {
+  method: 'GET',
+  headers: { Authorization: `Bearer ${jwt}` }
+});
+const { topics } = await res.json();
 
-  showWelcomeMessage(topics);
+// 👇 zmień na topics zamiast prompts
+showWelcomeMessage(topics);
 
-  const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
-  renderTopics(topics, recentTopics);
+const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
+renderTopics(topics, recentTopics);
+
 
   // Przywróć aktywny temat (jeśli istnieje)
   const activeTopic = JSON.parse(localStorage.getItem("activeTopic"));
