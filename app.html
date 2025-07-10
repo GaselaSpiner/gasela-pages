@@ -595,7 +595,8 @@ if (recentTopicIds.length > 0) {
 } else {
   showWelcomeMessage(topics);
 }
-
+}
+    initApp();
 async function getRecentTopics() {
   const sessionRes = await supabase.auth.getSession();
   const session = sessionRes.data.session;
