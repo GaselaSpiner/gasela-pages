@@ -290,6 +290,7 @@ function renderTopics(topics, recentTopics) {
   appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
   //closeTopicsSidebar();
   saveRecentTopic(t);
+  renderSteps(); // ⬅️ NOWE! Uruchamiamy od razu generowanie listy kroków
 };
 
     listDiv.appendChild(btn);
