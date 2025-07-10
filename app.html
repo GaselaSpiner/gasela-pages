@@ -166,7 +166,15 @@ function openTopicsSidebar() {
 function closeTopicsSidebar() {
   document.getElementById("topics-sidebar").style.width = "0";
 }
- 
+  function toggleTopicsSidebar() {
+  const sidebar = document.getElementById("topics-sidebar");
+  if (sidebar.style.width === "300px") {
+    closeTopicsSidebar();
+  } else {
+    openTopicsSidebar();
+  }
+}
+
  function renderTopics(topics, recentTopics) {
   const listDiv = document.getElementById("topics-list");
   listDiv.innerHTML = "";
@@ -270,8 +278,7 @@ function saveRecentTopic(topic) {
 ">
 
   <!-- Logo Gaselas -->
-  <img src="Gaselas.png" alt="Gaselas" style="height: 40px; cursor: pointer;" onclick="openTopicsSidebar()">
-
+  <img src="Gaselas.png" alt="Gaselas" style="height: 40px; cursor: pointer;" onclick="toggleTopicsSidebar()">
   <!-- Ikona trzech kropek -->
   <div id="menu-icon" onclick="toggleSidebar()" style="
     display: flex;
