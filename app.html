@@ -599,6 +599,7 @@ if (recentTopicIds.length > 0) {
  
 }
 async function saveTopicHistory(topicId) {
+  console.log("🌟 Próba zapisu historii dla topicId:", topicId);
   const sessionRes = await supabase.auth.getSession();
   const session = sessionRes.data.session;
   if (!session) {
