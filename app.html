@@ -170,6 +170,101 @@ function closeTopicsSidebar() {
   function renderTopics(topics, recentTopics) {
   const listDiv = document.getElementById("topics-list");
   listDiv.innerHTML = "";
+function renderTopics(topics, recentTopics) {
+  const listDiv = document.getElementById("topics-list");
+  listDiv.innerHTML = "";
+
+  topics.forEach(t => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `
+      <div style="font-weight: bold;">${t.name}</div>
+      <div style="font-size: 0.85rem; color: #444;">${t.description}</div>
+    `;
+    btn.style = `
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 20px;
+      padding: 12px 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.3s, transform 0.1s;
+    `;
+
+    // 🔥 Container na kroki
+    const stepsContainer = document.createElement("div");
+    stepsContainer.style = "margin-top: 8px; display: none; flex-direction: column; gap: 5px;";
+    listDiv.appendChild(stepsContainer);
+
+    btn.onclick = () => {
+      console.log("Wybrany temat:", t);
+      activeTopicId = t.id;
+
+      // Reset kroku
+      currentStepNumber = null;
+
+      // 🔥 Przykładowe kroki (możesz pobrać dynamicznie z bazy)
+      const steps = [
+        { number: 1, content: "Rozgrzewka i przygotowanie" },
+        { number: 2, content: "Technika forehandu" },
+        { number: 3, content: "Technika backhandu" },
+        { number: 4, content: "Gra przy siatce" },
+        { number: 5, content: "Podsumowanie i pytania" }
+      ];
+
+      stepsContainer.innerHTML = "";
+      steps.forEach(step => {
+        const stepBtn = document.createElement("button");
+        stepBtn.textContent = `Krok ${step.number}: ${step.content}`;
+        stepBtn.style = `
+          padding: 6px 10px;
+          text-align: left;
+          border-radius: 6px;
+          border: none;
+          background-color: #f0f0f0;
+          cursor: pointer;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 0.85rem;
+        `;
+        stepBtn.onclick = () => {
+          currentStepNumber = step.number;
+
+          // Podświetl
+          Array.from(stepsContainer.children).forEach(child => {
+            child.style.backgroundColor = "#f0f0f0";
+          });
+          stepBtn.style.backgroundColor = "#a5d6a7";
+
+          console.log(`✅ Wybrano krok ${step.number}`);
+        };
+
+        stepsContainer.appendChild(stepBtn);
+      });
+
+      // Pokaż kroki
+      stepsContainer.style.display = "flex";
+
+      appendStaticBubble(t.name);
+      appendMessage("🚀 Super wybór! Teraz wybierz krok i wpisz pytanie, a Gasela Spiner odpowie!", 'ai');
+      closeTopicsSidebar();
+      saveRecentTopic(t);
+    };
+
+    listDiv.appendChild(btn);
+    listDiv.appendChild(stepsContainer);
+  });
+
+  // Sekcja ostatnich tematów
+  const recentDiv = document.getElementById("recent-topics-list");
+  recentDiv.innerHTML = "";
+  recentTopics.forEach(rt => {
+    const item = document.createElement("div");
+    item.textContent = rt.name;
+    item.style = "font-size: 0.9rem; color: #555; text-align: center;";
+    recentDiv.appendChild(item);
+  });
+}
 
   topics.forEach(t => {
     const btn = document.createElement("button");
@@ -721,49 +816,6 @@ async function confirmDeleteAccount() {
     window.location.href = 'logowanie.html';
   }, 5000);
 }
-// 🟢 🔥 START steps -----------------------------
-
-const steps = [ 
-  { number: 1, content: "Rozgrzewka i przygotowanie" },
-  { number: 2, content: "Technika forehandu" },
-  { number: 3, content: "Technika backhandu" },
-  { number: 4, content: "Gra przy siatce" },
-  { number: 5, content: "Podsumowanie i pytania" }
-];
-
-let currentStepNumber = 1;
-let completedSteps = [];
-
-function renderSteps() {
-  const stepsDiv = document.getElementById("steps-list");
-  stepsDiv.innerHTML = "";
-
-  steps.forEach(step => {
-    const btn = document.createElement("button");
-    btn.textContent = `Krok ${step.number}: ${step.content}`;
-    btn.style = `
-      padding: 8px;
-      text-align: left;
-      border-radius: 6px;
-      border: none;
-      background-color: ${completedSteps.includes(step.number) ? '#a5d6a7' : (step.number === currentStepNumber ? '#ffcc00' : '#f0f0f0')};
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.9rem;
-    `;
-    btn.onclick = () => {
-      currentStepNumber = step.number;
-      if (!completedSteps.includes(step.number)) {
-        completedSteps.push(step.number);
-      }
-      appendMessage(`🔄 Wybrałeś krok ${step.number}: ${step.content}`, 'ai');
-      renderSteps();
-    };
-    stepsDiv.appendChild(btn);
-  });
-}
-
-// 🟢 🔥 KONIEC steps -----------------------------
 
 initApp();
 
@@ -797,11 +849,6 @@ initApp();
     
     <div>
       <h3 style="text-align: center;">⚙️ Moje konto</h3>
-       <h4 style="text-align: center; margin-top: 20px;">✅ Kroki</h4>
-      <div id="steps-list" style="padding: 10px; display: flex; flex-direction: column; gap: 5px;">
-      <!-- Kroki zostaną wygenerowane automatycznie -->
-    </div>
-
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
 
       <button onclick="togglePasswordForm()" style="
