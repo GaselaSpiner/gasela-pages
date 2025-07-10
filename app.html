@@ -572,14 +572,16 @@ const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/g
 const { topics } = await res.json();
 
 console.log("🔥 Topics loaded:", topics);
-// 👇 zmień na topics zamiast prompts
-showWelcomeMessage(topics);
+const recentTopicIds = await getRecentTopics();
+console.log("🟢 recentTopicIds:", recentTopicIds);
 
+const recentTopics = topics.filter(t => recentTopicIds.includes(t.id));
 
 renderTopics(topics, recentTopics);
 
-
-const recentTopicIds = await getRecentTopics();
+  
+// 👇 zmień na topics zamiast prompts
+showWelcomeMessage(topics);
 
 if (recentTopicIds.length > 0) {
   const firstTopicId = recentTopicIds[0];
