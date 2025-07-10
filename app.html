@@ -207,6 +207,12 @@ function closeTopicsSidebar() {
     stepsContainer.style = "margin-top: 8px; display: none; flex-direction: column; gap: 5px;";
     stepsContainer.classList.add("steps-container");
 
+    // Nagłówek "✅ Kroki" (na razie ukryty)
+    const stepsHeader = document.createElement("h4");
+    stepsHeader.textContent = "✅ Kroki";
+    stepsHeader.style = "text-align: center; margin: 10px 0 5px 0;";
+    stepsContainer.appendChild(stepsHeader);
+
     btn.onclick = () => {
       console.log("Wybrany temat:", t);
       activeTopicId = t.id;
@@ -219,7 +225,7 @@ function closeTopicsSidebar() {
         div.style.display = "none";
       });
 
-      // Pokaż kroki tylko dla tego tematu
+      // Pokaż kroki (wraz z nagłówkiem) tylko dla tego tematu
       stepsContainer.style.display = "flex";
 
       // Renderuj kroki w tym kontenerze
@@ -242,6 +248,7 @@ function closeTopicsSidebar() {
     recentDiv.appendChild(item);
   });
 }
+
 
 
 function saveRecentTopic(topic) {
