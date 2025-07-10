@@ -167,12 +167,12 @@ function closeTopicsSidebar() {
   document.getElementById("topics-sidebar").style.width = "0";
 }
  
-  function renderTopics(topics, recentTopics) {
+ function renderTopics(topics, recentTopics) {
   const listDiv = document.getElementById("topics-list");
   listDiv.innerHTML = "";
 
   topics.forEach(t => {
-    // Kontener na temat
+    // Kontener całego elementu tematu
     const topicContainer = document.createElement("div");
     topicContainer.style = "display: flex; flex-direction: column; gap: 5px;";
 
@@ -194,9 +194,10 @@ function closeTopicsSidebar() {
       transition: background-color 0.3s, transform 0.1s;
     `;
 
-    // Kontener na kroki (na początku ukryty)
+    // Kontener na kroki (indywidualny dla tego tematu)
     const stepsContainer = document.createElement("div");
     stepsContainer.style = "margin-top: 8px; display: none; flex-direction: column; gap: 5px;";
+    stepsContainer.classList.add("steps-container");
 
     btn.onclick = () => {
       console.log("Wybrany temat:", t);
@@ -206,25 +207,24 @@ function closeTopicsSidebar() {
       saveRecentTopic(t);
 
       // Ukryj wszystkie inne kontenery kroków
-      document.querySelectorAll("#topics-list div.steps-container").forEach(div => {
+      document.querySelectorAll(".steps-container").forEach(div => {
         div.style.display = "none";
       });
 
-      // Pokaż kontener dla tego tematu
+      // Pokaż kroki tylko dla tego tematu
       stepsContainer.style.display = "flex";
 
-      // Wygeneruj kroki
+      // Renderuj kroki w tym kontenerze
       renderSteps(stepsContainer);
     };
 
     topicContainer.appendChild(btn);
     topicContainer.appendChild(stepsContainer);
-    stepsContainer.classList.add("steps-container");
 
     listDiv.appendChild(topicContainer);
   });
 
-  // Ostatnie tematy
+  // Sekcja ostatnich tematów
   const recentDiv = document.getElementById("recent-topics-list");
   recentDiv.innerHTML = "";
   recentTopics.forEach(rt => {
@@ -234,7 +234,6 @@ function closeTopicsSidebar() {
     recentDiv.appendChild(item);
   });
 }
-
 
 
 function saveRecentTopic(topic) {
@@ -319,9 +318,8 @@ const steps = [
 let currentStepNumber = 1;
 let completedSteps = [];
 
-function renderSteps() {
-  const stepsDiv = document.getElementById("steps-list");
-  stepsDiv.innerHTML = "";
+function renderSteps(container) {
+  container.innerHTML = "";
 
   steps.forEach(step => {
     const btn = document.createElement("button");
@@ -341,11 +339,12 @@ function renderSteps() {
       if (!completedSteps.includes(step.number)) {
         completedSteps.push(step.number);
       }
-      renderSteps();
+      renderSteps(container);
     };
-    stepsDiv.appendChild(btn);
+    container.appendChild(btn);
   });
 }
+
 
 // 🟢 🔥 KONIEC steps -----------------------------
 
