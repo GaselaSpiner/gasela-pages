@@ -579,9 +579,6 @@ const recentTopics = topics.filter(t => recentTopicIds.includes(t.id));
 
 renderTopics(topics, recentTopics);
 
-  
-// 👇 zmień na topics zamiast prompts
-showWelcomeMessage(topics);
 
 if (recentTopicIds.length > 0) {
   const firstTopicId = recentTopicIds[0];
