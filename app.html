@@ -325,18 +325,19 @@ async function saveHistory(topicId, message, sender) {
   }
   const jwt = session.access_token;
 
-  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/save_history', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      topic_id: topicId,
-      message: message,
-      sender: sender
-    })
-  });
+const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/ask_openai', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${jwt}`
+  },
+  body: JSON.stringify({ 
+    topic_id: activeTopicId, 
+    user_input: message,
+    step_number: currentStepNumber // 💥 DODAJEMY numer kroku!
+  })
+});
+
 
   const data = await res.json();
   if (!res.ok) {
