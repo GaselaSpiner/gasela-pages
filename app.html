@@ -170,9 +170,6 @@ function closeTopicsSidebar() {
   function renderTopics(topics, recentTopics) {
   const listDiv = document.getElementById("topics-list");
   listDiv.innerHTML = "";
-function renderTopics(topics, recentTopics) {
-  const listDiv = document.getElementById("topics-list");
-  listDiv.innerHTML = "";
 
   topics.forEach(t => {
     const btn = document.createElement("button");
@@ -192,19 +189,18 @@ function renderTopics(topics, recentTopics) {
       transition: background-color 0.3s, transform 0.1s;
     `;
 
-    // 🔥 Container na kroki
-    const stepsContainer = document.createElement("div");
-    stepsContainer.style = "margin-top: 8px; display: none; flex-direction: column; gap: 5px;";
-    listDiv.appendChild(stepsContainer);
-
     btn.onclick = () => {
       console.log("Wybrany temat:", t);
       activeTopicId = t.id;
+      appendStaticBubble(t.name);
+      appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
+      saveRecentTopic(t);
+      renderSteps();
+    };
 
-      // Reset kroku
-      currentStepNumber = null;
+    listDiv.appendChild(btn);
+  });
 
-  // Sekcja ostatnich tematów
   const recentDiv = document.getElementById("recent-topics-list");
   recentDiv.innerHTML = "";
   recentTopics.forEach(rt => {
@@ -323,8 +319,7 @@ function saveRecentTopic(topic) {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtdXNzZ2FpdXRhbGRpY29seWJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTUwMDQsImV4cCI6MjA2NDM5MTAwNH0.M_qFSGw-pXNZCX8tQuCFjZ2x1So3eVlweoGgXoUAca0' // Wstaw tutaj swój anon key
     );
     let activeTopicId = null;
-    const supabase = window.supabase.createClient(...);
-let activeTopicId = null;
+  
 
 // 🟢 🔥 START steps -----------------------------
 
