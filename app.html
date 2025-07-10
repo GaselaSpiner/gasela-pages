@@ -270,11 +270,6 @@ function saveRecentTopic(topic) {
   <textarea id="userInput" placeholder="Napisz wiadomość..."></textarea>
   <button id="sendButton">➤</button>
 </div>
-<div style="display: flex; gap: 8px; margin-top: 10px; max-width: 700px; width: 100%;">
-  <button onclick="prevStep()" style="flex:1; padding: 8px;">⬅️ Poprzedni krok</button>
-  <button onclick="stayStep()" style="flex:1; padding: 8px;">🔄 Zostań</button>
-  <button onclick="nextStep()" style="flex:1; padding: 8px;">➡️ Następny krok</button>
-</div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -532,6 +527,7 @@ renderTopics(topics, recentTopics);
 
 
   }
+  renderSteps();
 }
 
    async function checkSessionAndPlan() {
@@ -591,24 +587,6 @@ renderTopics(topics, recentTopics);
     ${planInfo}
   `;
 }
-function nextStep() {
-  currentStepNumber++;
-  appendMessage(`➡️ Przechodzisz do kroku ${currentStepNumber}.`, 'ai');
-}
-
-function prevStep() {
-  if (currentStepNumber > 1) {
-    currentStepNumber--;
-    appendMessage(`⬅️ Cofasz się do kroku ${currentStepNumber}.`, 'ai');
-  } else {
-    appendMessage("❗ Jesteś już na pierwszym kroku.", 'ai');
-  }
-}
-
-function stayStep() {
-  appendMessage(`✅ Zostajesz na kroku ${currentStepNumber}.`, 'ai');
-}
-
 
     initApp();
   async function openSidebar() {
@@ -744,6 +722,51 @@ async function confirmDeleteAccount() {
     window.location.href = 'logowanie.html';
   }, 5000);
 }
+// 🟢 🔥 START steps -----------------------------
+
+const steps = [ 
+  { number: 1, content: "Rozgrzewka i przygotowanie" },
+  { number: 2, content: "Technika forehandu" },
+  { number: 3, content: "Technika backhandu" },
+  { number: 4, content: "Gra przy siatce" },
+  { number: 5, content: "Podsumowanie i pytania" }
+];
+
+let currentStepNumber = 1;
+let completedSteps = [];
+
+function renderSteps() {
+  const stepsDiv = document.getElementById("steps-list");
+  stepsDiv.innerHTML = "";
+
+  steps.forEach(step => {
+    const btn = document.createElement("button");
+    btn.textContent = `Krok ${step.number}: ${step.content}`;
+    btn.style = `
+      padding: 8px;
+      text-align: left;
+      border-radius: 6px;
+      border: none;
+      background-color: ${completedSteps.includes(step.number) ? '#a5d6a7' : (step.number === currentStepNumber ? '#ffcc00' : '#f0f0f0')};
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+    `;
+    btn.onclick = () => {
+      currentStepNumber = step.number;
+      if (!completedSteps.includes(step.number)) {
+        completedSteps.push(step.number);
+      }
+      appendMessage(`🔄 Wybrałeś krok ${step.number}: ${step.content}`, 'ai');
+      renderSteps();
+    };
+    stepsDiv.appendChild(btn);
+  });
+}
+
+// 🟢 🔥 KONIEC steps -----------------------------
+
+initApp();
 
   </script>
       
@@ -775,6 +798,10 @@ async function confirmDeleteAccount() {
     
     <div>
       <h3 style="text-align: center;">⚙️ Moje konto</h3>
+       <h4 style="text-align: center; margin-top: 20px;">✅ Kroki</h4>
+      <div id="steps-list" style="padding: 10px; display: flex; flex-direction: column; gap: 5px;">
+      <!-- Kroki zostaną wygenerowane automatycznie -->
+    </div>
 
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
 
