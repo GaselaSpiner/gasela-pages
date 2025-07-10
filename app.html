@@ -213,24 +213,25 @@ function closeTopicsSidebar() {
     stepsHeader.style = "text-align: center; margin: 10px 0 5px 0;";
     stepsContainer.appendChild(stepsHeader);
 
-    btn.onclick = () => {
-      console.log("Wybrany temat:", t);
-      activeTopicId = t.id;
-      appendStaticBubble(t.name);
-      appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
-      saveRecentTopic(t);
+   btn.onclick = async () => {
+  console.log("Wybrany temat:", t);
+  activeTopicId = t.id;
+  appendStaticBubble(t.name);
+  appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
+  await saveTopicHistory(t.id); // teraz działa!
 
-      // Ukryj wszystkie inne kontenery kroków
-      document.querySelectorAll(".steps-container").forEach(div => {
-        div.style.display = "none";
-      });
+  // Ukryj wszystkie inne kontenery kroków
+  document.querySelectorAll(".steps-container").forEach(div => {
+    div.style.display = "none";
+  });
 
-      // Pokaż kroki (wraz z nagłówkiem) tylko dla tego tematu
-      stepsContainer.style.display = "flex";
+  // Pokaż kroki (wraz z nagłówkiem) tylko dla tego tematu
+  stepsContainer.style.display = "flex";
 
-      // Renderuj kroki w tym kontenerze
-      renderSteps(stepsContainer);
-    };
+  // Renderuj kroki w tym kontenerze
+  renderSteps(stepsContainer);
+};
+
 
     topicContainer.appendChild(btn);
     topicContainer.appendChild(stepsContainer);
@@ -248,20 +249,6 @@ function closeTopicsSidebar() {
     recentDiv.appendChild(item);
   });
 }
-
-
-
-function saveRecentTopic(topic) {
-  let recent = JSON.parse(localStorage.getItem("recentTopics")) || [];
-  recent = recent.filter(t => t.id !== topic.id);
-  recent.unshift(topic);
-  recent = recent.slice(0, 5);
-  localStorage.setItem("recentTopics", JSON.stringify(recent));
-
-  // 💥 Zapamiętaj aktywny temat
-  localStorage.setItem("activeTopic", JSON.stringify(topic));
-}
-
   </script>
 </head>
 <body>
@@ -576,12 +563,7 @@ async function initApp() {
 
   await checkSessionAndPlan();
 
-  // 🔥 Sprawdź, czy to nowy user (brak recentTopics)
-  if (!localStorage.getItem("recentTopics")) {
-    console.log("🟢 Nowy user — czyszczenie pamięci lokalnej");
-    localStorage.removeItem("recentTopics");
-    localStorage.removeItem("activeTopic");
-  }
+  
 
 const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_topics_by_plan', {
   method: 'GET',
@@ -593,23 +575,77 @@ console.log("🔥 Topics loaded:", topics);
 // 👇 zmień na topics zamiast prompts
 showWelcomeMessage(topics);
 
-const recentTopics = JSON.parse(localStorage.getItem("recentTopics")) || [];
+
 renderTopics(topics, recentTopics);
 
 
-  // Przywróć aktywny temat (jeśli istnieje)
-  const activeTopic = JSON.parse(localStorage.getItem("activeTopic"));
-  if (activeTopic) {
-    selectedPromptKey = activeTopic.prompt_key;
-    appendStaticBubble(activeTopic.name);
+const recentTopicIds = await getRecentTopics();
+
+if (recentTopicIds.length > 0) {
+  const firstTopicId = recentTopicIds[0];
+  const lastTopic = topics.find(t => t.id === firstTopicId);
+
+  if (lastTopic) {
+    appendStaticBubble(lastTopic.name);
     appendMessage(`
       <div style="text-align: center;">
         Hej! Ostatnio skończyliśmy na tym temacie. Co dalej?
       </div>
     `, 'ai', true);
-
-
+    activeTopicId = lastTopic.id;
   }
+}
+
+ 
+}
+async function saveTopicHistory(topicId) {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak aktywnej sesji");
+    return;
+  }
+  const userId = session.user.id;
+  const jwt = session.access_token;
+
+  const res = await fetch("https://lmussgaiutaldicolyba.supabase.co/functions/v1/save_topic_history", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ user_id: userId, topic_id: topicId })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    console.log("❌ Błąd zapisu historii:", data.error);
+  } else {
+    console.log("✅ Historia zapisana");
+  }
+}
+async function getRecentTopics() {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak aktywnej sesji");
+    return [];
+  }
+  const userId = session.user.id;
+
+  const { data, error } = await supabase
+    .from("user_topic_history")
+    .select("topic_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.log("❌ Błąd pobierania historii:", error);
+    return [];
+  }
+
+  return data.map(row => row.topic_id);
 }
 
    async function checkSessionAndPlan() {
