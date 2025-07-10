@@ -218,7 +218,6 @@ function closeTopicsSidebar() {
   activeTopicId = t.id;
   appendStaticBubble(t.name);
   appendMessage("🚀 Super wybór! Teraz wpisz swoje pytanie, a Gasela Spiner rusza do odpowiedzi!", 'ai');
-  await saveTopicHistory(t.id); // teraz działa!
 
   // Ukryj wszystkie inne kontenery kroków
   document.querySelectorAll(".steps-container").forEach(div => {
@@ -593,37 +592,10 @@ if (recentTopicIds.length > 0) {
     `, 'ai', true);
     activeTopicId = lastTopic.id;
   }
+} else {
+  showWelcomeMessage(topics);
 }
 
- 
-}
-async function saveTopicHistory(topicId) {
-  console.log("🌟 Próba zapisu historii dla topicId:", topicId);
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
-  if (!session) {
-    console.log("❌ Brak aktywnej sesji");
-    return;
-  }
-  const userId = session.user.id;
-  const jwt = session.access_token;
-
-  const res = await fetch("https://lmussgaiutaldicolyba.supabase.co/functions/v1/save_topic_history", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ user_id: userId, topic_id: topicId })
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    console.log("❌ Błąd zapisu historii:", data.error);
-  } else {
-    console.log("✅ Historia zapisana");
-  }
-}
 async function getRecentTopics() {
   const sessionRes = await supabase.auth.getSession();
   const session = sessionRes.data.session;
@@ -634,11 +606,12 @@ async function getRecentTopics() {
   const userId = session.user.id;
 
   const { data, error } = await supabase
-    .from("user_topic_history")
-    .select("topic_id")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  .from("user_histories")
+  .select("topic_id")
+  .eq("user_id", userId)
+  .order("created_at", { ascending: false })
+  .limit(5);
+
 
   if (error) {
     console.log("❌ Błąd pobierania historii:", error);
