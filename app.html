@@ -757,15 +757,14 @@ showWelcomeMessage(topics);
     function closeSidebar() {
       document.getElementById("sidebar").style.width = "0";
     }
-    async function toggleSidebar() {
+   async function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   if (sidebar.style.width === "300px") {
     closeSidebar();
   } else {
     sidebar.style.width = "300px";
     await checkSessionAndPlan();
-
-}
+  }
 }
 
     
