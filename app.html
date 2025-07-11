@@ -890,6 +890,8 @@ async function confirmDeleteAccount() {
   }, 5000);
 }
 }
+    document.getElementById("confirm-delete-button").addEventListener("click", confirmDeleteAccount);
+
 initApp();
 
   </script>
@@ -1024,7 +1026,7 @@ initApp();
           display: block;
           margin: 10px auto;
         ">
-        <button onclick="confirmDeleteAccount()" style="
+        <button id="confirm-delete-button" style="
           width: 90%;
           background-color: #ff4d4d;
           color: #fff;
