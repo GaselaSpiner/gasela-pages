@@ -277,7 +277,7 @@ btn.onclick = async () => {
   <!-- Logo Gaselas -->
   <img src="Gaselas.png" alt="Gaselas" style="height: 40px; cursor: pointer;" onclick="toggleTopicsSidebar()">
   <!-- Ikona trzech kropek -->
-  <div id="menu-icon" onclick="toggleSidebar()" style="
+  <div id="menu-icon" " style="
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -766,6 +766,7 @@ showWelcomeMessage(topics);
     await checkSessionAndPlan();
   }
 }
+document.getElementById("menu-icon").addEventListener("click", toggleSidebar);
 
     
     function togglePasswordForm() {
