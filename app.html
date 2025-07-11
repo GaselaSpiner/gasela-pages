@@ -430,7 +430,8 @@ function appendMessage(text, sender, isHtml = false) {
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
 
-  if (sender === 'ai' && text.includes("Hej! Ostatnio skończyliśmy")) {
+ if (sender === 'ai' && text && text.includes("Hej! Ostatnio skończyliśmy"))
+ {
     wrapper.style.justifyContent = "center";
     bubble.style.margin = "0 auto";
     bubble.style.textAlign = "center";
@@ -582,10 +583,18 @@ if (!activeTopicId) {
     body: JSON.stringify({ topic_id: activeTopicId, user_input: message })
   });
 
-  const data = await res.json();
-  console.log("🟢 ask_openai response:", data);
-  appendMessage(data.reply, 'ai');
-  await saveHistory(activeTopicId, data.reply, "ai");
+ const data = await res.json();
+console.log("🟢 ask_openai response:", data);
+
+if (!res.ok || data.error) {
+  appendMessage(`❌ Błąd: ${data.error || "Nie udało się uzyskać odpowiedzi od AI."}`, 'ai');
+  console.log("⚠️ OpenAI error:", data.details || data.error);
+  return; // Zakończ, żeby nie wchodzić w dalsze instrukcje
+}
+
+appendMessage(data.reply, 'ai');
+await saveHistory(activeTopicId, data.reply, "ai");
+
 
 
   // ✅ Odśwież limit w sidebarze
