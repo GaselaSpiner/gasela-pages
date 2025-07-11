@@ -799,10 +799,13 @@ document.getElementById("menu-icon").addEventListener("click", toggleSidebar);
         document.getElementById('repeat-password').value = "";
       }
     }
+    document.getElementById("confirm-password-button").addEventListener("click", changePassword);
+  
     async function logout() {
       await supabase.auth.signOut();
       window.location.href = 'logowanie.html';
     }
+ 
   document.getElementById("change-password-button").addEventListener("click", togglePasswordForm);
 document.getElementById("logout-button").addEventListener("click", logout);
 
@@ -950,7 +953,7 @@ initApp();
     display: block;
     margin: 10px auto;
   ">
-  <button onclick="changePassword()" style="
+  <button id="confirm-password-button" style="
     width: 90%;
     background-color: #f6b500;
     border: none;
