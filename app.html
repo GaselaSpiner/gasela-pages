@@ -803,6 +803,9 @@ document.getElementById("menu-icon").addEventListener("click", toggleSidebar);
       await supabase.auth.signOut();
       window.location.href = 'logowanie.html';
     }
+  document.getElementById("change-password-button").addEventListener("click", togglePasswordForm);
+document.getElementById("logout-button").addEventListener("click", logout);
+
   function deleteAccount() {
   const confirmDiv = document.getElementById('confirm-delete');
   confirmDiv.style.display = 'block';
@@ -915,7 +918,7 @@ initApp();
       <h3 style="text-align: center;">⚙️ Moje konto</h3>
       <div id="user-info" style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; text-align: center;">Dane konta będą tutaj</div>
 
-      <button onclick="togglePasswordForm()" style="
+      <button id="change-password-button" style="
   width: 90%;
   background-color: #f6b500;
   border: none;
@@ -961,7 +964,7 @@ initApp();
   <div id="change-status" style="margin-top: 10px; font-weight: bold;"></div>
 </div>
 
-<button onclick="logout()" style="
+<button id="logout-button" style="
   width: 90%;
   background-color: #f6b500;
   border: none;
