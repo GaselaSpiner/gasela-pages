@@ -889,8 +889,9 @@ async function confirmDeleteAccount() {
     window.location.href = 'logowanie.html';
   }, 5000);
 }
+  document.getElementById("confirm-delete-button").addEventListener("click", confirmDeleteAccount);
 }
-    document.getElementById("confirm-delete-button").addEventListener("click", confirmDeleteAccount);
+    
 
 initApp();
 
