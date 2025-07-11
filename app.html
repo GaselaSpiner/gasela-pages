@@ -815,6 +815,8 @@ document.getElementById("logout-button").addEventListener("click", logout);
   const statusDiv = document.getElementById('delete-status');
   statusDiv.innerHTML = ""; // wyczyść poprzedni status
 }
+  document.getElementById("delete-account-button").addEventListener("click", deleteAccount);
+
     function showPasswordConfirm() {
   document.getElementById('confirm-delete').style.display = 'none';
   document.getElementById('password-confirm').style.display = 'block';
