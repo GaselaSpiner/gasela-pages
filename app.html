@@ -213,7 +213,7 @@ function closeTopicsSidebar() {
     stepsHeader.style = "text-align: center; margin: 10px 0 5px 0;";
     stepsContainer.appendChild(stepsHeader);
 
-  btn.onclick = async () => {
+btn.onclick = async () => {
   console.log("Wybrany temat:", t);
   activeTopicId = t.id;
   appendStaticBubble(t.name);
@@ -224,18 +224,16 @@ function closeTopicsSidebar() {
     div.style.display = "none";
   });
 
-  // Pokaż kroki (wraz z nagłówkiem) tylko dla tego tematu
+  // Pokaż kontener na kroki dla tego tematu
   stepsContainer.style.display = "flex";
 
-  // Pobierz kroki dynamicznie
-  const steps = await fetchSteps(activeTopicId);
+  // 🟢 Pobierz kroki dynamicznie
+  const fetchedSteps = await fetchSteps(t.id);
 
-  // Początkowy numer kroku
-  let currentStepNumber = steps.length > 0 ? steps[0].step_number : 1;
-  let completedSteps = [];
-
-  renderSteps(stepsContainer, steps, currentStepNumber, completedSteps);
+  // 🟢 Wywołaj renderSteps z pobranymi krokami
+  renderSteps(stepsContainer, fetchedSteps);
 };
+
 
 
     topicContainer.appendChild(btn);
@@ -317,10 +315,10 @@ function closeTopicsSidebar() {
 let currentStepNumber = 1;
 let completedSteps = [];
 
-function renderSteps(container, steps, currentStepNumber, completedSteps) {
+function renderSteps(container, stepsList) {
   container.innerHTML = "";
 
-  steps.forEach(step => {
+  stepsList.forEach(step => {
     const btn = document.createElement("button");
     btn.textContent = `Krok ${step.step_number}: ${step.content}`;
     btn.style = `
@@ -328,21 +326,45 @@ function renderSteps(container, steps, currentStepNumber, completedSteps) {
       text-align: left;
       border-radius: 6px;
       border: none;
-      background-color: ${completedSteps.includes(step.step_number) ? '#a5d6a7' : (step.step_number === currentStepNumber ? '#ffcc00' : '#f0f0f0')};
+      background-color: ${step.step_number === currentStepNumber ? '#ffcc00' : '#f0f0f0'};
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
       font-size: 0.9rem;
     `;
     btn.onclick = () => {
       currentStepNumber = step.step_number;
-      if (!completedSteps.includes(step.step_number)) {
-        completedSteps.push(step.step_number);
-      }
-      renderSteps(container, steps, currentStepNumber, completedSteps);
+      renderSteps(container, stepsList);
     };
     container.appendChild(btn);
   });
 }
+async function fetchSteps(topicId) {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak aktywnej sesji");
+    return [];
+  }
+  const jwt = session.access_token;
+
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_steps_by_topic', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwt}`
+    },
+    body: JSON.stringify({ topic_id: topicId })
+  });
+
+  if (!res.ok) {
+    console.log("❌ Błąd pobierania kroków:", await res.text());
+    return [];
+  }
+
+  const { steps } = await res.json();
+  return steps;
+}
+
 // 🟢 🔥 KONIEC steps -----------------------------
 
    
