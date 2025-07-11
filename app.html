@@ -691,17 +691,37 @@ showWelcomeMessage(topics);
 }
 
 
-  
-  async function checkSessionAndPlan() {
+  async function openSidebar() {
+  document.getElementById("sidebar").style.width = "300px";
+
+ 
+  await checkSessionAndPlan();
+}
+
+    function closeSidebar() {
+      document.getElementById("sidebar").style.width = "0";
+    }
+   async function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar.style.width === "300px") {
+    closeSidebar();
+  } else {
+    sidebar.style.width = "300px";
+    await checkSessionAndPlan();
+  }
+}  // ← tutaj kończy się funkcja initApp()
+
+// ⬇️ Wklej poniższą funkcję dokładnie tutaj
+
+async function checkSessionAndPlan() {
   const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
-  if (!session) {
+  if (!sessionRes.data.session) {
     console.log("❌ Brak aktywnej sesji");
     return;
   }
 
-  const jwt = session.access_token;
-  const userId = session.user.id;
+  const jwt = sessionRes.data.session.access_token;
+  const userId = sessionRes.data.session.user.id;
   console.log("✅ user_id:", userId);
 
   const { data: subNow, error: subError } = await supabase
@@ -742,30 +762,13 @@ showWelcomeMessage(topics);
   }
 
   document.getElementById("user-info").innerHTML = `
-    <strong>Email:</strong> ${session.user.email}<br>
+    <strong>Email:</strong> ${sessionRes.data.session.user.email}<br>
     ${planInfo}
   `;
 }
 
-  async function openSidebar() {
-  document.getElementById("sidebar").style.width = "300px";
 
- 
-  await checkSessionAndPlan();
-}
-
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
-   async function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar.style.width === "300px") {
-    closeSidebar();
-  } else {
-    sidebar.style.width = "300px";
-    await checkSessionAndPlan();
-  }
-}
+  
 document.getElementById("menu-icon").addEventListener("click", toggleSidebar);
 
     
