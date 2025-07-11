@@ -307,13 +307,6 @@ function closeTopicsSidebar() {
 
 // 🟢 🔥 START steps -----------------------------
 
-const steps = [ 
-  { number: 1, content: "Rozgrzewka i przygotowanie" },
-  { number: 2, content: "Technika forehandu" },
-  { number: 3, content: "Technika backhandu" },
-  { number: 4, content: "Gra przy siatce" },
-  { number: 5, content: "Podsumowanie i pytania" }
-];
 
 let currentStepNumber = 1;
 let completedSteps = [];
@@ -444,7 +437,32 @@ const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/a
   messagesDiv.appendChild(wrapper);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+async function fetchSteps(topicId) {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak aktywnej sesji");
+    return [];
+  }
+  const jwt = session.access_token;
 
+  const res = await fetch('https://lmussgaiutaldicolyba.supabase.co/functions/v1/get_steps_by_topic', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${jwt}`
+    },
+    body: JSON.stringify({ topic_id: topicId })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    console.log("⚠️ Błąd pobierania kroków:", data.error);
+    return [];
+  }
+
+  return data.steps;
+}
 
   function showWelcomeMessage(prompts) {
   const welcomeText = `
