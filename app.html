@@ -313,6 +313,7 @@ btn.onclick = async () => {
 
 
 let currentStepNumber = 1;
+    
 
 function renderSteps(container, stepsList) {
   container.innerHTML = "";
@@ -415,6 +416,62 @@ async function fetchSteps(topicId) {
     const welcome = document.getElementById("welcome");
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("userInput");
+
+async function checkSessionAndPlan() {
+  const sessionRes = await supabase.auth.getSession();
+  if (!sessionRes.data.session) {
+    console.log("❌ Brak aktywnej sesji");
+    return;
+  }
+
+  const jwt = sessionRes.data.session.access_token;
+  const userId = sessionRes.data.session.user.id;
+  console.log("✅ user_id:", userId);
+
+  const { data: subNow, error: subError } = await supabase
+    .from('subscriptions')
+    .select('plan_name, end_date')
+    .eq('user_id', userId)
+    .order('end_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  console.log("📦 subNow:", subNow);
+  console.log("⚠️ subError:", subError);
+
+  const { data: limitData, error: limitError } = await supabase
+    .from('message_limits')
+    .select('total_limit, used_messages')
+    .eq('user_id', userId)
+    .single();
+
+  console.log("💬 limitData:", limitData);
+  console.log("⚠️ limitError:", limitError);
+
+  let planInfo = "";
+
+  if (subNow) {
+    const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
+    planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
+    planInfo += `<strong>Do:</strong> ${endDate}<br>`;
+  } else {
+    planInfo += `<strong>Plan:</strong> brak aktywnego planu<br>`;
+  }
+
+  if (limitData) {
+    const remaining = limitData.total_limit - limitData.used_messages;
+    planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
+  } else {
+    planInfo += `<br><strong>Limit wiadomości:</strong> brak danych`;
+  }
+
+  document.getElementById("user-info").innerHTML = `
+    <strong>Email:</strong> ${sessionRes.data.session.user.email}<br>
+    ${planInfo}
+  `;
+}
+
+    
    userInput.addEventListener('input', function () {
   this.style.height = 'auto';
   this.style.height = (this.scrollHeight) + 'px';
@@ -710,63 +767,6 @@ showWelcomeMessage(topics);
     await checkSessionAndPlan();
   }
 }  // ← tutaj kończy się funkcja initApp()
-
-// ⬇️ Wklej poniższą funkcję dokładnie tutaj
-
-async function checkSessionAndPlan() {
-  const sessionRes = await supabase.auth.getSession();
-  if (!sessionRes.data.session) {
-    console.log("❌ Brak aktywnej sesji");
-    return;
-  }
-
-  const jwt = sessionRes.data.session.access_token;
-  const userId = sessionRes.data.session.user.id;
-  console.log("✅ user_id:", userId);
-
-  const { data: subNow, error: subError } = await supabase
-    .from('subscriptions')
-    .select('plan_name, end_date')
-    .eq('user_id', userId)
-    .order('end_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  console.log("📦 subNow:", subNow);
-  console.log("⚠️ subError:", subError);
-
-  const { data: limitData, error: limitError } = await supabase
-    .from('message_limits')
-    .select('total_limit, used_messages')
-    .eq('user_id', userId)
-    .single();
-
-  console.log("💬 limitData:", limitData);
-  console.log("⚠️ limitError:", limitError);
-
-  let planInfo = "";
-
-  if (subNow) {
-    const endDate = subNow.end_date ? new Date(subNow.end_date).toISOString().split('T')[0] : "brak daty";
-    planInfo += `<strong>Plan:</strong> ${subNow.plan_name}<br>`;
-    planInfo += `<strong>Do:</strong> ${endDate}<br>`;
-  } else {
-    planInfo += `<strong>Plan:</strong> brak aktywnego planu<br>`;
-  }
-
-  if (limitData) {
-    const remaining = limitData.total_limit - limitData.used_messages;
-    planInfo += `<strong>Pozostałe wiadomości:</strong> ${remaining}`;
-  } else {
-    planInfo += `<br><strong>Limit wiadomości:</strong> brak danych`;
-  }
-
-  document.getElementById("user-info").innerHTML = `
-    <strong>Email:</strong> ${sessionRes.data.session.user.email}<br>
-    ${planInfo}
-  `;
-}
-
 
   
 document.getElementById("menu-icon").addEventListener("click", toggleSidebar);
