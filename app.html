@@ -650,24 +650,8 @@ const recentTopics = topics.filter(t => recentTopicIds.includes(t.id));
 
 renderTopics(topics, recentTopics);
 
+showWelcomeMessage(topics);
 
-if (recentTopicIds.length > 0) {
-  const firstTopicId = recentTopicIds[0];
-  const lastTopic = topics.find(t => t.id === firstTopicId);
-
-  if (lastTopic) {
-    appendStaticBubble(lastTopic.name);
-    appendMessage(`
-      <div style="text-align: center;">
-        Hej! Ostatnio skończyliśmy na tym temacie. Co dalej?
-      </div>
-    `, 'ai', true);
-    activeTopicId = lastTopic.id;
-  }
-} else {
-  showWelcomeMessage(topics);
-}
-}
     initApp();
 
   async function getRecentTopics() {
