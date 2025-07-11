@@ -213,7 +213,7 @@ function closeTopicsSidebar() {
     stepsHeader.style = "text-align: center; margin: 10px 0 5px 0;";
     stepsContainer.appendChild(stepsHeader);
 
-   btn.onclick = async () => {
+  btn.onclick = async () => {
   console.log("Wybrany temat:", t);
   activeTopicId = t.id;
   appendStaticBubble(t.name);
@@ -227,8 +227,14 @@ function closeTopicsSidebar() {
   // Pokaż kroki (wraz z nagłówkiem) tylko dla tego tematu
   stepsContainer.style.display = "flex";
 
-  // Renderuj kroki w tym kontenerze
-  renderSteps(stepsContainer);
+  // Pobierz kroki dynamicznie
+  const steps = await fetchSteps(activeTopicId);
+
+  // Początkowy numer kroku
+  let currentStepNumber = steps.length > 0 ? steps[0].step_number : 1;
+  let completedSteps = [];
+
+  renderSteps(stepsContainer, steps, currentStepNumber, completedSteps);
 };
 
 
@@ -311,34 +317,32 @@ function closeTopicsSidebar() {
 let currentStepNumber = 1;
 let completedSteps = [];
 
-function renderSteps(container) {
+function renderSteps(container, steps, currentStepNumber, completedSteps) {
   container.innerHTML = "";
 
   steps.forEach(step => {
     const btn = document.createElement("button");
-    btn.textContent = `Krok ${step.number}: ${step.content}`;
+    btn.textContent = `Krok ${step.step_number}: ${step.content}`;
     btn.style = `
       padding: 8px;
       text-align: left;
       border-radius: 6px;
       border: none;
-      background-color: ${completedSteps.includes(step.number) ? '#a5d6a7' : (step.number === currentStepNumber ? '#ffcc00' : '#f0f0f0')};
+      background-color: ${completedSteps.includes(step.step_number) ? '#a5d6a7' : (step.step_number === currentStepNumber ? '#ffcc00' : '#f0f0f0')};
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
       font-size: 0.9rem;
     `;
     btn.onclick = () => {
-      currentStepNumber = step.number;
-      if (!completedSteps.includes(step.number)) {
-        completedSteps.push(step.number);
+      currentStepNumber = step.step_number;
+      if (!completedSteps.includes(step.step_number)) {
+        completedSteps.push(step.step_number);
       }
-      renderSteps(container);
+      renderSteps(container, steps, currentStepNumber, completedSteps);
     };
     container.appendChild(btn);
   });
 }
-
-
 // 🟢 🔥 KONIEC steps -----------------------------
 
    
