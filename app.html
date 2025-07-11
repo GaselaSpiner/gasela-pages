@@ -313,7 +313,6 @@ btn.onclick = async () => {
 
 
 let currentStepNumber = 1;
-let completedSteps = [];
 
 function renderSteps(container, stepsList) {
   container.innerHTML = "";
@@ -326,18 +325,63 @@ function renderSteps(container, stepsList) {
       text-align: left;
       border-radius: 6px;
       border: none;
-      background-color: ${step.step_number === currentStepNumber ? '#ffcc00' : '#f0f0f0'};
+      background-color: ${step.step_number === currentStepNumber ? '#a5d6a7' : '#f0f0f0'};
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
       font-size: 0.9rem;
     `;
-    btn.onclick = () => {
+    btn.onclick = async () => {
       currentStepNumber = step.step_number;
+
+      // 🔥 Po kliknięciu od razu pobierz i wyświetl historię dla tego kroku
+      await loadMessagesForStep(activeTopicId, currentStepNumber);
+
+      // 🔥 Przerysuj przyciski, żeby podświetlić aktywny
       renderSteps(container, stepsList);
     };
     container.appendChild(btn);
   });
 }
+
+    async function loadMessagesForStep(topicId, stepNumber) {
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+  if (!session) {
+    console.log("❌ Brak aktywnej sesji");
+    return;
+  }
+  const userId = session.user.id;
+
+  // Wyczyść okno czatu
+  messagesDiv.innerHTML = "";
+
+  // Pobierz historię usera dla tego tematu i kroku
+  const { data, error } = await supabase
+    .from("user_histories")
+    .select("message, sender")
+    .eq("user_id", userId)
+    .eq("topic_id", topicId)
+    .eq("step_number", stepNumber)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.log("❌ Błąd pobierania historii:", error);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    data.forEach(msg => {
+      appendMessage(msg.message, msg.sender);
+    });
+    appendMessage(`<div style="text-align: center;">Kontynuuj rozmowę w tym kroku! 😊</div>`, 'ai', true);
+  } else {
+    appendMessage(`<div style="text-align: center;">To Twój pierwszy raz w tym kroku! 🚀 Zadaj pytanie lub zacznij rozmowę.</div>`, 'ai', true);
+  }
+
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+    
 async function fetchSteps(topicId) {
   const sessionRes = await supabase.auth.getSession();
   const session = sessionRes.data.session;
